@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
+import { ref, watch } from "vue";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 
@@ -11,7 +11,7 @@ defineOptions({
 
 const props = defineProps<{
   modelValue: string | object | null;
-  options: Array<string | { key: any; value: string }>;
+  options: Array<string | object>;
   placeholder?: string;
   loading: boolean;
 }>();
@@ -20,17 +20,6 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: string | object | null): void;
   (e: "search", query: string): void;
 }>();
-
-// Detect if options are objects or strings
-const isObjectOptions = computed(
-  () => props.options.length > 0 && typeof props.options[0] === "object"
-);
-
-// Set label and track-by dynamically
-const labelKey = computed(() => (isObjectOptions.value ? "value" : ""));
-const trackByKey = computed(() => (isObjectOptions.value ? "key" : ""));
-
-const internalValue = ref(props.modelValue);
 
 const onChange = (query: string) => {
   searchValue.value = query;
@@ -44,8 +33,9 @@ const onSearch = (query: string) => {
     emit("search", query);
   }
 };
+const internalValue = ref(props.modelValue);
 
-// Sync external modelValue
+// Watch for external modelValue updates
 watch(
   () => props.modelValue,
   (newVal) => {
@@ -56,7 +46,6 @@ watch(internalValue, (val) => {
   emit("update:modelValue", val);
 });
 </script>
-
 <style>
 /* Remove green selection and white text */
 .multiselect {
@@ -107,8 +96,6 @@ watch(internalValue, (val) => {
     :internal-search="false"
     :clear-on-select="true"
     :preserve-search="true"
-    :label="labelKey"
-    :track-by="trackByKey"
     @search-change="onChange"
     class="w-full"
   />

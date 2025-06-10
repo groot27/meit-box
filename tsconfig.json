@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["vue3-toastify/global"],
     "baseUrl": "./src",
     "paths": {
       "@/components/*": ["./components/*"],

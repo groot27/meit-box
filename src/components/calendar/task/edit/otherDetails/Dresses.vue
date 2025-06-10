@@ -2,11 +2,15 @@
 import { ref, computed, watch, onMounted } from "vue";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import { taskApi } from "@/api/taskApi";
+import { useI18n } from "vue-i18n";
+import { useCalendarStore } from "@/stores/CalendarStore";
 
-// const props = defineProps<{
-//   dress: string;
-//   dresss: any;
-// }>();
+const { t } = useI18n();
+const calendarStore = useCalendarStore();
+const props = defineProps<{
+  dress: string;
+}>();
+
 const emit = defineEmits<{
   (e: "update", selectedDress);
 }>();
@@ -29,18 +33,16 @@ watch(selectedDress, () => {
   }
 });
 onMounted(() => {
-  fetchDressOptions();
-  // if (props.dresss) {
-  //   selectedDress.value = props.dress;
-  //   dressOptions.value = props.dresss.map((dress) => dress.dress_number);
-  // }
+  dressOptions.value = calendarStore.defaultData.dresses.map(
+    (dress) => dress.dress_number
+  );
 });
 </script>
 <template>
   <async-select
     v-model="selectedDress"
     :options="dressOptions"
-    placeholder="Dress"
+    :placeholder="t('common.placeholder.dress')"
     :loading="dressLoading"
     @search="fetchDressOptions"
   />

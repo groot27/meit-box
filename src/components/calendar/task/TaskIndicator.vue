@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from "vue";
+import { computed, watch } from "vue";
 import { format } from "date-fns";
 import { Task } from "@/types/TaskTypes";
 import { useTaskStore } from "@/stores/TaskStore";
@@ -75,7 +75,7 @@ const taskTitle = computed(() => {
 
       <!-- Time -->
       <span class="font-medium" v-show="indicatorDisplay.time">{{
-        format(new Date(task.date), "h:mm a")
+        task.startTime
       }}</span>
     </div>
   </div>

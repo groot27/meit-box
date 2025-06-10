@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, watch, ref } from "vue";
 import {
   startOfWeek,
   endOfWeek,
@@ -33,21 +33,22 @@ const emit = defineEmits<{
 
 const currentDate = computed(() => calendarStore.currentDate);
 const tasks = computed(() => taskStore.tasks);
+const loading = ref(true);
 
 const weekDays = computed(() => {
-  const weekStart = startOfWeek(currentDate.value, { weekStartsOn: 0 });
-  const weekEnd = endOfWeek(currentDate.value, { weekStartsOn: 0 });
+  const weekStart = startOfWeek(currentDate.value, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(currentDate.value, { weekStartsOn: 1 });
   return eachDayOfInterval({ start: weekStart, end: weekEnd });
 });
 
 const weekdayNames = computed(() => [
-  t("calendar.weekdays.short.sun"),
   t("calendar.weekdays.short.mon"),
   t("calendar.weekdays.short.tue"),
   t("calendar.weekdays.short.wed"),
   t("calendar.weekdays.short.thu"),
   t("calendar.weekdays.short.fri"),
   t("calendar.weekdays.short.sat"),
+  t("calendar.weekdays.short.sun"),
 ]);
 
 const hours = computed(() => {
@@ -64,7 +65,7 @@ const getTasksForHourAndDay = (hour: Date, day: Date) => {
   hourEnd.setHours(hour.getHours(), 59, 59, 999);
 
   const tasksInHour = tasks.value.filter((task) => {
-    const taskDate = parseISO(task.date);
+    const taskDate = parseISO(task.date + " " + task.startTime);
     return isWithinInterval(taskDate, { start: hourStart, end: hourEnd });
   });
 
@@ -72,8 +73,8 @@ const getTasksForHourAndDay = (hour: Date, day: Date) => {
   const groups: Task[][] = [];
   tasksInHour.forEach((task) => {
     const taskInterval = {
-      start: parseISO(task.date),
-      end: addHours(parseISO(task.date), 1),
+      start: parseISO(task.date + " " + task.startTime),
+      end: addHours(parseISO(task.date + " " + task.startTime), 1),
     };
 
     let added = false;
@@ -133,13 +134,18 @@ const handleDateClick = (date: Date, event: MouseEvent) => {
 const handleTaskClick = (task: Task, event: MouseEvent) => {
   emit("taskClick", task, event);
 };
+watch(tasks, (newTasks, oldTasks) => {
+  if (newTasks.length) {
+    loading.value = false;
+  }
+});
 </script>
 
 <template>
   <div class="overflow-x-auto calendar-container">
     <div class="min-w-[800px]">
       <!-- Days header -->
-      <div class="grid grid-cols-8 border-b bg-white sticky top-0 z-10">
+      <div class="grid grid-cols-8 border-b bg-gray-100 sticky top-0 z-10">
         <div class="py-2 pl-16 text-sm font-medium text-gray-500"></div>
         <button
           v-for="(day, index) in weekDays"
@@ -209,8 +215,8 @@ const handleTaskClick = (task: Task, event: MouseEvent) => {
               'bg-blue-50': isCurrentTime(hour) && isToday(day),
             }"
           >
-            <div class="absolute inset-0 flex items-start p-1">
-              <div class="flex-1">
+            <div class="absolute inset-0 flex items-start p-1" v-if="!loading">
+              <div class="flex-1 max-w-full">
                 <template
                   v-for="(group, groupIndex) in getTasksForHourAndDay(
                     hour,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import {
   format,
   isToday,
@@ -12,6 +12,7 @@ import {
   isWithinInterval,
   parseISO,
   areIntervalsOverlapping,
+  addMinutes,
 } from "date-fns";
 import { useCalendarStore } from "@/stores/CalendarStore";
 import { useTaskStore } from "@/stores/TaskStore";
@@ -22,6 +23,7 @@ import { Task } from "@/types/TaskTypes";
 const { t } = useI18n();
 const calendarStore = useCalendarStore();
 const taskStore = useTaskStore();
+const loading = ref(true);
 
 const emit = defineEmits<{
   (e: "dateClick", date: Date, event: MouseEvent): void;
@@ -49,10 +51,9 @@ const formattedDate = computed(() => {
 
 const getTasksForHour = (hour: Date) => {
   const hourStart = hour;
-  const hourEnd = addHours(hour, 1);
-
+  const hourEnd = addMinutes(hour, 59);
   const tasksInHour = tasks.value.filter((task) => {
-    const taskDate = new Date(task.date);
+    const taskDate = new Date(task.date + " " + task.startTime);
     return (
       isSameDay(currentDate.value, taskDate) &&
       isWithinInterval(taskDate, { start: hourStart, end: hourEnd })
@@ -63,8 +64,8 @@ const getTasksForHour = (hour: Date) => {
   const groups: Task[][] = [];
   tasksInHour.forEach((task) => {
     const taskInterval = {
-      start: parseISO(task.date),
-      end: addHours(parseISO(task.date), 1),
+      start: parseISO(task.date + " " + task.startTime),
+      end: addHours(parseISO(task.date + " " + task.startTime), 1),
     };
 
     let added = false;
@@ -124,13 +125,19 @@ const handleDateClick = (date: Date, event: MouseEvent) => {
 const handleTaskClick = (task: Task, event: MouseEvent) => {
   emit("taskClick", task, event);
 };
+watch(tasks, (newTasks, oldTasks) => {
+  if (newTasks.length && loading.value) {
+    loading.value = false;
+    console.log("🚀 ~ watch ~ loading.value:", loading.value);
+  }
+});
 </script>
 
 <template>
   <div class="calendar-container">
     <div class="grid grid-cols-1 border-b">
       <button
-        class="px-4 py-3 hover:bg-gray-50 flex items-center justify-center space-x-2"
+        class="px-4 py-3 hover:bg-gray-50 flex items-center justify-center space-x-2 bg-gray-100"
         @click="(event) => handleDateClick(currentDate, event)"
       >
         <span
@@ -187,8 +194,8 @@ const handleTaskClick = (task: Task, event: MouseEvent) => {
             isCurrentTime(hour) && isToday(currentDate) ? 'bg-blue-50' : ''
           "
         >
-          <div class="absolute inset-0 flex items-start p-2">
-            <div class="flex-1">
+          <div class="absolute inset-0 flex items-start p-2" v-if="!loading">
+            <div class="flex-1 max-w-full">
               <template
                 v-for="(group, groupIndex) in getTasksForHour(hour)"
                 :key="groupIndex"

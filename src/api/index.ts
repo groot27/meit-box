@@ -1,9 +1,10 @@
 // src/api/index.ts
 import axios, { AxiosRequestConfig } from "axios";
 import { useGlobalStore } from "@/stores";
+import { getEnvVar } from "@/utils/env";
 const instance = axios.create({
-  baseURL: "http://localhost:8000",
-  timeout: 10000,
+  baseURL: getEnvVar("VITE_API_URL"),
+  timeout: 20000,
   headers: {
     accept: "application/json, text/plain, */*",
   },

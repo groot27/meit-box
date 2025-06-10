@@ -5,6 +5,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import { useI18n } from "vue-i18n";
 import { stripHtml } from "@/utils/utils";
+import { useCalendarStore } from "@/stores/CalendarStore";
 
 const { t } = useI18n();
 
@@ -22,6 +23,7 @@ const emit = defineEmits<{
 
 const description = ref("");
 const orderId = ref("");
+const calendarStore = useCalendarStore();
 
 const selectedOrder = ref("");
 const selectedTask = ref("");
@@ -111,8 +113,19 @@ const fillDescription = () => {
   });
 };
 onMounted(() => {
-  fetchTaskOptions();
-  fetchOrderOptions();
+  taskOptions.value = calendarStore.defaultData.taskTemplates.map(
+    (template) => {
+      return template.task_title;
+    }
+  );
+  taskTemplates.value = calendarStore.defaultData.taskTemplates;
+
+  orderOptions.value = calendarStore.defaultData.orders.map((order) => {
+    return `${order.order_number} | ${
+      order.order_location || "No Location Set"
+    } | ${order.customer_name || "No Customer"}`;
+  });
+  taskOrders.value = calendarStore.defaultData.orders;
 });
 
 watch(selectedTask, () => {

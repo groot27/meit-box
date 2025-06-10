@@ -2,11 +2,15 @@
 import { ref, computed, watch, onMounted } from "vue";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import { taskApi } from "@/api/taskApi";
+import { useI18n } from "vue-i18n";
+import { useCalendarStore } from "@/stores/CalendarStore";
 
-// const props = defineProps<{
-//   contactpersons: string;
-//   contactpersonss: any;
-// }>();
+const { t } = useI18n();
+const calendarStore = useCalendarStore();
+const props = defineProps<{
+  person: string;
+}>();
+
 const emit = defineEmits<{
   (e: "update", selectedContactPersons);
 }>();
@@ -32,14 +36,28 @@ watch(selectedContactPersons, () => {
   }
 });
 onMounted(() => {
-  fetchContactPersonsOptions();
+  contactpersonsOptions.value = calendarStore.defaultData.contactPerson.map(
+    (contactpersons) =>
+      `${contactpersons.id} | ${contactpersons.name} | ${contactpersons.phone}`
+  );
 });
+// watch(
+//   () => props.person,
+//   (newPerson) => {
+//     if (newPerson !== selectedContactPersons.value) {
+//       debugger;
+//       selectedContactPersons.value = newPerson;
+//       fetchContactPersonsOptions();
+//     }
+//   },
+//   { immediate: true } // Fire once on component mount
+// );
 </script>
 <template>
   <async-select
     v-model="selectedContactPersons"
     :options="contactpersonsOptions"
-    placeholder="ContactPersons"
+    :placeholder="t('common.placeholder.contactPerson')"
     :loading="contactpersonsLoading"
     @search="fetchContactPersonsOptions"
   />

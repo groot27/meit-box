@@ -98,6 +98,9 @@ interface taskTemplateType {
   devices_count: string;
   devices: string;
   notification_template_id: string;
+  employeesIds: string[];
+  vehicleIds: string[];
+  devicesIds: string[];
 }
 interface OrderDetailsType {
   customer_name: string;
@@ -139,6 +142,10 @@ export interface Task {
   appointmentDetails: AppointmentDetails;
   activity?: TaskActivity;
   documents?: TaskDocument[];
+  users: any;
+  latitude: string;
+  longitude: string;
+  orderId: string;
 }
 export interface TaskIndicatorType {
   tittle: boolean;
@@ -148,3 +155,23 @@ export interface TaskIndicatorType {
   vehicle: boolean;
   devices: boolean;
 }
+
+type EmployeeStatus =
+  | "confirmed"
+  | "checked_out"
+  | "no_show"
+  | "prechecked"
+  | "open"
+  | "planned"
+  | "reject"
+  | "checked_in";
+export const statusColorClasses: Record<EmployeeStatus, string> = {
+  confirmed: "text-white bg-[#4FB938] p-2 rounded",
+  no_show: "text-white bg-[#B12525] p-2 rounded",
+  checked_in: "text-white bg-[#52A1F8] p-2 rounded",
+  planned: "text-white bg-[#52A1F8] p-2 rounded",
+  checked_out: "text-white bg-[#0E4E94] p-2 rounded",
+  prechecked: "text-white bg-[#3F7834] p-2 rounded",
+  open: "text-white bg-[#676767] p-2 rounded",
+  reject: "text-white bg-[#FF0000] p-2 rounded",
+};

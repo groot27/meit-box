@@ -2,11 +2,14 @@
 import { ref, computed, watch, onMounted } from "vue";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import { taskApi } from "@/api/taskApi";
+import { useI18n } from "vue-i18n";
+import { useCalendarStore } from "@/stores/CalendarStore";
 
-// const props = defineProps<{
-//   requiredskill: string;
-//   requiredskills: any;
-// }>();
+const { t } = useI18n();
+const calendarStore = useCalendarStore();
+const props = defineProps<{
+  skill: string;
+}>();
 const emit = defineEmits<{
   (e: "update", selectedRequiredSkill);
 }>();
@@ -28,21 +31,26 @@ watch(selectedRequiredSkill, () => {
     emit("update", selectedRequiredSkill);
   }
 });
+watch(
+  () => props.skill,
+  async (newSkill) => {
+    if (newSkill !== selectedRequiredSkill.value) {
+      selectedRequiredSkill.value = newSkill;
+    }
+  },
+  { immediate: true } // Fire once on component mount
+);
 onMounted(() => {
-  fetchRequiredSkillOptions();
-  // if (props.requiredskills) {
-  //   selectedRequiredSkill.value = props.requiredskill;
-  //   requiredskillOptions.value = props.requiredskills.map(
-  //     (user) => user.username
-  //   );
-  // }
+  requiredskillOptions.value = calendarStore.defaultData.skills.map(
+    (skill) => skill.name
+  );
 });
 </script>
 <template>
   <async-select
     v-model="selectedRequiredSkill"
     :options="requiredskillOptions"
-    placeholder="RequiredSkill"
+    :placeholder="t('common.placeholder.requiredSkill')"
     :loading="requiredskillLoading"
     @search="fetchRequiredSkillOptions"
   />

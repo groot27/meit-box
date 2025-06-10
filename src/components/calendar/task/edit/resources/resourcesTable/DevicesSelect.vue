@@ -2,6 +2,9 @@
 import { ref, computed, watch, onMounted } from "vue";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import { taskApi } from "@/api/taskApi";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   device: string;
@@ -39,7 +42,7 @@ onMounted(() => {
   <async-select
     v-model="selectedDevice"
     :options="deviceOptions"
-    placeholder="Device"
+    :placeholder="t('common.placeholder.device')"
     :loading="deviceLoading"
     @search="fetchDeviceOptions"
   />

@@ -50,41 +50,6 @@ const teamLeadContactPerson = ref("");
 const notificationTemplate = ref("");
 const comments = ref([]);
 const histories = ref([]);
-// Mock data for activity
-const mockComments = [
-  {
-    id: "1",
-    author: "John Doe",
-    content: "Added new resource requirements",
-    timestamp: "2025-03-15T10:30:00Z",
-    avatarUrl: "https://i.pravatar.cc/40?img=1",
-  },
-  {
-    id: "2",
-    author: "Jane Smith",
-    content: "Updated location details",
-    timestamp: "2025-03-15T11:15:00Z",
-    avatarUrl: "https://i.pravatar.cc/40?img=2",
-  },
-];
-
-const mockHistory = [
-  {
-    id: "1",
-    user: "System",
-    action: "created",
-    timestamp: "2025-03-15T09:00:00Z",
-  },
-  {
-    id: "2",
-    user: "John Doe",
-    action: "updated",
-    field: "title",
-    oldValue: "Old Title",
-    newValue: "New Title",
-    timestamp: "2025-03-15T10:00:00Z",
-  },
-];
 
 watch(
   () => props.task,
@@ -92,7 +57,6 @@ watch(
     if (newTask) {
       activeTab.value = "project";
       Object.assign(singleTask, newTask);
-
       comments.value = singleTask.activities.comments;
       histories.value = singleTask.activities.logs;
       // Initialize other details
@@ -112,17 +76,14 @@ watch(
 
 const handleSubmit = () => {
   if (!singleTask) return;
-
   if (route.params.taskId) {
     console.log("🚀 ~ handleSubmit ~ update");
     emit("update", singleTask);
   } else {
     console.log("🚀 ~ handleSubmit ~ create");
-
     emit("create", singleTask);
   }
 };
-
 const handleClose = () => {
   emit("close");
 };
@@ -154,6 +115,47 @@ const handleRemoveDocument = (docId: string) => {
 const handleArchiveClick = () => {
   taskStore.setArchiveModalDispay(true);
 };
+
+const updateResourcesIdsTask = (id, type) => {
+  switch (type) {
+    case "Employee":
+      if (singleTask.taskTemplate.employeesIds) {
+        singleTask.taskTemplate.employeesIds.push(id);
+      } else {
+        singleTask.taskTemplate.employeesIds = [id];
+      }
+      singleTask.taskTemplate.employee_count =
+        singleTask.taskTemplate.employeesIds.length;
+      break;
+    case "Vehicle":
+      if (singleTask.taskTemplate.vehiclesIds) {
+        singleTask.taskTemplate.vehicelesIds.push(id);
+      } else {
+        singleTask.taskTemplate.vehicelesIds = [id];
+      }
+      singleTask.taskTemplate.vehicle_count =
+        singleTask.taskTemplate.vehicelesIds.length;
+      break;
+    default:
+      if (singleTask.taskTemplate.devicesIds) {
+        singleTask.taskTemplate.devicesIds.push(id);
+      } else {
+        singleTask.taskTemplate.devicesIds = [id];
+      }
+      break;
+  }
+  // emit("update", singleTask);
+};
+const updateLocation = (place) => {
+  singleTask.latitude = place.geometry.location.lat();
+  singleTask.longitude = place.geometry.location.lng();
+};
+const updateRepeatTask = (time) => {
+  singleTask.updatedDate = [singleTask.date, time.startDate];
+  singleTask.startTimes = [singleTask.startTime, time.startTime || "00:00"];
+  singleTask.endTimes = [singleTask.endTime, time.endTime || "00:00"];
+  emit("update", singleTask);
+};
 </script>
 
 <template>
@@ -182,14 +184,14 @@ const handleArchiveClick = () => {
       <div class="pt-2 flex gap-x-2">
         <button
           @click="handleClose"
-          class="w-full px-6 py-3 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-500"
+          class="w-full px-2 py-3 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-500"
         >
           {{ t("task.editSidebar.discard") }}
         </button>
         <button
           @click="handleSubmit"
           type="submit"
-          class="w-full px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          class="w-full px-2 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
         >
           {{ t("task.editSidebar.saveChanges") }}
         </button>
@@ -222,23 +224,26 @@ const handleArchiveClick = () => {
     </div>
 
     <!-- Content -->
-    <div class="p-6 space-y-4 overflow-y-auto h-full">
+    <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-128px)] h-full">
       <!-- Project Tab -->
       <ProjectTab
         v-if="activeTab === 'project'"
-        v-model:order="singleTask.orderDetails.id"
+        v-model:order="singleTask.orderDetails.orderNumber"
         v-model:customer="singleTask.orderDetails.customerName"
         v-model:taskTitle="singleTask.title"
         v-model:status="singleTask.status"
         v-model:permission="singleTask.taskTemplate.permission"
-        v-model:locationCategory="singleTask.location"
-        v-model:location="singleTask.address"
+        v-model:locationCategory="
+          singleTask.taskTemplate.resource_location_category
+        "
+        v-model:location="singleTask.taskTemplate.location"
         v-model:updateTasks="singleTask.updateTasks"
-        v-model:startDate="singleTask.startDate"
+        v-model:startDate="singleTask.date"
         v-model:endDate="singleTask.endDate"
         v-model:startTime="singleTask.startTime"
         v-model:endTime="singleTask.endTime"
         v-model:description="singleTask.description"
+        @update:location="updateLocation"
       />
 
       <!-- Resources Tab -->
@@ -248,17 +253,29 @@ const handleArchiveClick = () => {
         v-model:vehicle="singleTask.taskTemplate.vehicle"
         v-model:employees="singleTask.taskTemplate.employees"
         v-model:resourcesValues="singleTask.resources"
+        v-model:date="singleTask.date"
+        v-model:startTime="singleTask.startTime"
+        v-model:endTime="singleTask.endTime"
+        v-model:relatedTasks="singleTask.relatedTasks"
+        v-model:taskId="singleTask.taskTemplate.id"
+        @update:resourcesIds="updateResourcesIdsTask"
+        @update:repeatTask="updateRepeatTask"
       />
-
       <!-- Other Details Tab -->
       <OtherDetailsTab
         v-if="activeTab === 'otherDetails'"
-        v-model:requiredSkills="requiredSkills"
-        v-model:dress="dress"
-        v-model:language="language"
-        v-model:teamLeadDescription="teamLeadDescription"
-        v-model:teamLeadContactPerson="teamLeadContactPerson"
-        v-model:notificationTemplate="notificationTemplate"
+        v-model:requiredSkills="singleTask.otherDetails.requiredSkills"
+        v-model:dress="singleTask.otherDetails.dress"
+        v-model:language="singleTask.otherDetails.language"
+        v-model:teamLeadDescription="
+          singleTask.otherDetails.teamLeadDescription
+        "
+        v-model:teamLeadContactPerson="
+          singleTask.otherDetails.teamLeadContactPerson
+        "
+        v-model:notificationTemplate="
+          singleTask.otherDetails.notificationTemplate
+        "
       />
 
       <!-- Activity Tab -->

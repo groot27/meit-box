@@ -1,7 +1,17 @@
 const path = require("path");
+const webpack = require("webpack");
 const { VueLoaderPlugin } = require("vue-loader");
+const dotenv = require("dotenv");
 const { ModuleFederationPlugin } = require("webpack").container;
 
+const env = dotenv.config({
+  path: path.resolve(__dirname, ".env.stage"),
+}).parsed;
+
+const envKeys = Object.keys(env).reduce((prev, next) => {
+  prev[`process.env.${next}`] = JSON.stringify(env[next]);
+  return prev;
+}, {});
 module.exports = {
   entry: { remote: "./src/main.ts" },
   mode: "development",
@@ -49,6 +59,7 @@ module.exports = {
   },
   plugins: [
     new VueLoaderPlugin(),
+    new webpack.DefinePlugin(envKeys),
     new ModuleFederationPlugin({
       name: "remote",
       filename: "remoteEntry.js",

@@ -7,6 +7,7 @@ import { taskApi } from "@/api/taskApi";
 import { useCalendarStore } from "./CalendarStore";
 import { useGlobalStore } from "./index";
 import { useRouter } from "vue-router";
+import ResourcesTab from "@/components/calendar/task/edit/ResourcesTab.vue";
 
 type TaskIndicatorKey = keyof TaskIndicatorType;
 
@@ -15,6 +16,7 @@ export const useTaskStore = defineStore("task", () => {
   const calendarStore = useCalendarStore();
   const globalStore = useGlobalStore();
   const archiveModalDispay = ref(false);
+  const selectedTask = ref<Task>(null);
   function setArchiveModalDispay(display: boolean) {
     archiveModalDispay.value = display;
   }
@@ -32,7 +34,90 @@ export const useTaskStore = defineStore("task", () => {
   ) {
     taskIndicatorDisplay[displayName] = value;
   }
+  function addResource(taskId: number, type: string) {
+    const updatedTask = tasks.value.find((task) => {
+      if (task.id == taskId) {
+        return task;
+      }
+    });
+    if (!updatedTask) {
+      return;
+    }
+    debugger;
+    const task = selectedTask.value.relatedTasks.find(
+      (task) => task.taskTemplate.id == taskId
+    );
+    switch (type) {
+      case "Employee":
+        updatedTask.allEmployeeCount += 1;
+        task.taskTemplate.employees = updatedTask.allEmployeeCount;
+        break;
+      case "Vehicle":
+        updatedTask.allVehicleCount += 1;
+        task.taskTemplate.vehicle = updatedTask.allVehicleCount;
+        break;
 
+      default:
+        updatedTask.allDeviceCount += 1;
+        task.taskTemplate.devices = updatedTask.allDeviceCount;
+        break;
+    }
+  }
+  function addAssignedResource(taskId: number, type: string) {
+    const updatedTask = tasks.value.find((task) => {
+      if (task.id == taskId) {
+        return task;
+      }
+    });
+    if (!updatedTask) {
+      return;
+    }
+    switch (type) {
+      case "Employee":
+        updatedTask.employeeCount += 1;
+        break;
+      case "Vehicle":
+        updatedTask.vehicleCount += 1;
+        break;
+
+      default:
+        updatedTask.deviceCout += 1;
+        break;
+    }
+  }
+  function addResourcesId(taskId: number, resourceId: number, type: string) {
+    const task = selectedTask.value.relatedTasks.find(
+      (task) => task.taskTemplate.id == taskId
+    );
+    if (task) {
+      switch (type) {
+        case "Employee":
+          if (task.taskTemplate.employeesIds) {
+            task.taskTemplate.employeesIds.push(resourceId);
+          } else {
+            task.taskTemplate.employeesIds = [resourceId];
+          }
+          break;
+        case "Vehicle":
+          if (task.taskTemplate.vehiclesIds) {
+            task.taskTemplate.vehicelesIds.push(resourceId);
+          } else {
+            task.taskTemplate.vehicelesIds = [resourceId];
+          }
+          task.taskTemplate.vehicle_count =
+            task.taskTemplate.vehicelesIds.length;
+          break;
+
+        default:
+          if (task.taskTemplate.devicesIds) {
+            task.taskTemplate.devicesIds.push(resourceId);
+          } else {
+            task.taskTemplate.devicesIds = [resourceId];
+          }
+          break;
+      }
+    }
+  }
   function addTask(taskData: Omit<Task, "id">) {
     globalStore.setLoadingApi(true);
     const mockTask = {
@@ -70,8 +155,8 @@ export const useTaskStore = defineStore("task", () => {
       successor: [],
       predecessor_hour: null,
       successor_hour: null,
-      start_date: "2025-05-19",
-      end_date: "2025-06-01",
+      start_date: format(taskData.date, "yyyy-MM-dd"),
+      end_date: null,
       input_start_date: format(taskData.date, "yyyy-MM-dd"),
       input_end_date: null,
       rates: [0],
@@ -111,59 +196,80 @@ export const useTaskStore = defineStore("task", () => {
 
   function updateTask(id: string, taskData: Partial<Task>) {
     globalStore.setLoadingApi(true);
+    debugger;
     const mockTask = {
       extra_emp: [],
       id: taskData.taskTemplate.id,
       task_template_value: null,
       order_id: taskData.orderDetails.id,
-      rep_task_ids: [],
+      rep_task_ids: selectedTask.value.relatedTasks.map((task) => {
+        return task.taskTemplate.id || null;
+      }),
       task_title: taskData.title,
       permission: taskData.taskTemplate.permission,
       date_type: "duration",
       duration: "3",
-      start_time: "00:00",
-      end_time: "00:00",
-      resource_location_category_value: "Office",
+      start_time: taskData.startTime,
+      end_time: taskData.endTime,
+      resource_location_category_value: taskData.location,
       task_description: taskData.description,
       invoice_text: null,
-      required_skills: "Developer",
+      required_skills: taskData.otherDetails.requiredSkills,
       dress: null,
       color: taskData.taskTemplate.color,
       date: taskData.date,
       previous_date: "2025-05-29",
       is_edit: true,
-      location: null,
-      latitude: null,
-      longitude: null,
+      location: taskData.location,
+      latitude: taskData.latitude || null,
+      longitude: taskData.longitude || null,
       repetitions: "1",
       teamlead_description: null,
       teamlead_contact_person: null,
-      emp_rep: [[]],
-      e_count_rep: [1],
-      veh_rep: [[]],
-      v_count_rep: ["0"],
-      dev_rep: [[]],
-      d_count_rep: ["0"],
+      emp_rep: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.employeesIds || []
+      ),
+      e_count_rep: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.employees || 0
+      ),
+      veh_rep: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.vehiclesIds || []
+      ),
+      v_count_rep: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.vehicle || 0
+      ),
+      dev_rep: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.devicesIds || []
+      ),
+      d_count_rep: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.devices || 0
+      ),
       language: [],
       predecessor: [],
       successor: [],
       predecessor_hour: null,
       successor_hour: null,
-      start_date: "2025-05-26",
+      start_date: taskData.startDate,
       end_date: "2025-06-01",
       repetition_value: 0,
-      rates_rep: ["0.00"],
-      base_wage_rep: ["12.00"],
-      plan_start_time_rep: ["00:00"],
-      plan_end_time_rep: ["00:00"],
-      plan_pause_time_rep: ["00:00"],
-      travel_charges_rep: ["0"],
+      rates_rep: selectedTask.value.relatedTasks.map((task) => "0.00"),
+      base_wage_rep: selectedTask.value.relatedTasks.map((task) => "0.00"),
+      plan_start_time_rep: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.startTime || "00:00"
+      ),
+      plan_end_time_rep: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.endTime || "00:00"
+      ),
+      plan_pause_time_rep: selectedTask.value.relatedTasks.map(
+        (task) => "00:00"
+      ),
+      travel_charges_rep: selectedTask.value.relatedTasks.map((task) => 0),
       is_add_date: true,
-      updated_date: ["2025-05-29"],
+      updated_date: selectedTask.value.relatedTasks.map((task) => task.date),
       location_description: null,
-      custom_count_rep: [0],
-      custom_emp_rep: [[]],
-      custom_open_rep: [[]],
+      custom_count_rep: selectedTask.value.relatedTasks.map((task) => 0),
+      custom_emp_rep: selectedTask.value.relatedTasks.map((task) => []),
+      custom_open_rep: selectedTask.value.relatedTasks.map((task) => []),
       primary_color: "task_template",
       notification_template_id: null,
       task_status: null,
@@ -171,25 +277,53 @@ export const useTaskStore = defineStore("task", () => {
       end_series: false,
     };
     const onSuccess = () => {
-      globalStore.setLoadingApi(true);
+      globalStore.setLoadingApi(false);
+      const updatedTasks = [];
       tasks.value = tasks.value.map((task) => {
+        // ADD repeated task to task store for display in calendar
+        if (taskData.updatedDate && taskData.updatedDate.length) {
+          taskData.updatedDate.forEach((date, index) => {
+            if (index > 0) {
+              const updatedTask: Task = {
+                id,
+                title: taskData.title,
+                description: taskData.description,
+                date: date,
+                deviceCout: Number(taskData.taskTemplate.devices_count),
+                allDeviceCount: Number(taskData.taskTemplate.devices),
+                employeeCount: Number(taskData.taskTemplate.employees_count),
+                allEmployeeCount: Number(taskData.taskTemplate.employees),
+                vehicleCount: Number(taskData.taskTemplate.vehicle_count),
+                allVehicleCount: Number(taskData.taskTemplate.vehicle),
+                startTime: taskData.startTimes[index],
+                endTime: taskData.endTimes[index],
+                orderId: taskData.orderDetails.id,
+              };
+              updatedTasks.push(updatedTask);
+            }
+          });
+        }
+
         if (task.id == id) {
           const updatedTask: Task = {
             id,
             title: taskData.title,
             description: taskData.description,
             date: taskData.date,
-            color: taskData.color || "#e5e7eb",
             deviceCout: Number(taskData.taskTemplate.devices_count),
             allDeviceCount: Number(taskData.taskTemplate.devices),
             employeeCount: Number(taskData.taskTemplate.employees_count),
             allEmployeeCount: Number(taskData.taskTemplate.employees),
             vehicleCount: Number(taskData.taskTemplate.vehicle_count),
             allVehicleCount: Number(taskData.taskTemplate.vehicle),
+            startTime: taskData.startTime,
+            endTime: taskData.endTime,
+            orderId: taskData.orderDetails.id,
           };
+          updatedTasks.push(updatedTask);
           return {
             ...task,
-            ...updatedTask,
+            ...updatedTasks,
           };
         }
         return task;
@@ -216,16 +350,46 @@ export const useTaskStore = defineStore("task", () => {
   async function getTask(id: string) {
     globalStore.setLoadingApi(true);
     const res = await taskApi.getOne(id);
+
+    let relatedTasks = res.data.loop_tasks.map((task) => {
+      return {
+        date: task.task.date,
+        startTime: task.task.start_time,
+        endTime: task.task.end_time,
+        taskTemplate: {
+          id: task.task.id,
+          employees_count: task.task.employee_occupied_count,
+          employees: task.task.employee_available_count,
+          vehicle_count: task.task.vehicle_occupied_count,
+          vehicle: task.task.vehicle_available_count,
+          devices_count: task.task.device_occupied_count,
+          devices: task.task.device_available_count,
+        },
+        resources: task.resource,
+      };
+    });
+
     globalStore.setLoadingApi(false);
-    return {
+    selectedTask.value = {
       title: res.data.project.task_title,
       description: res.data.project.description,
       date: res.data.project.date,
+      startTime: res.data.project.start_time,
+      endTime: res.data.project.end_time,
       orderDetails: {
         latitude: "",
         longitude: "",
         id: res.data.project.order_id,
+        orderNumber: res.data.project.order_number,
         customerName: res.data.project.customer_name || "No Customer",
+      },
+      otherDetails: {
+        requiredSkills: res.data.task.required_skills,
+        dress: res.data.task.dress,
+        language: res.data.task.language,
+        teamLeadDescription: res.data.task.teamlead_description,
+        teamLeadContactPerson: res.data.task.contact_person,
+        notificationTemplate: res.data.task.notification_template_id,
       },
       taskTemplate: {
         color: res.data.project.color || "#e5e7eb",
@@ -238,11 +402,16 @@ export const useTaskStore = defineStore("task", () => {
         devices_count: res.data.task.device_occupied_count,
         devices: res.data.task.device_available_count,
         permission: res.data.project.permission,
+        resource_location_category:
+          res.data.project.resource_location_category_value,
+        location: res.data.project.location,
       },
       activities: res.data.activities,
       resources: res.data.resource,
       attachments: res.data.attachments,
+      relatedTasks,
     };
+    return selectedTask.value;
   }
 
   function loadTasks(props: any = null) {
@@ -269,6 +438,8 @@ export const useTaskStore = defineStore("task", () => {
             tasksData.push({
               id: task.id,
               title: task.task_title,
+              startTime: task.start_time,
+              endTime: task.end_time,
               description: task.description,
               date: task.date,
               color: task.color || "#e5e7eb",
@@ -278,7 +449,12 @@ export const useTaskStore = defineStore("task", () => {
               allEmployeeCount: task.employee_available_count,
               vehicleCount: task.vehicle_occupied_count,
               allVehicleCount: task.vehicle_available_count,
-              customer: task.customer.customer_name || "No Customer",
+              orderId: task.order_id,
+              users: task.users,
+              address: task.resource_location_category_value,
+              customer: task.customer
+                ? task.customer.customer_name || "No Customer"
+                : "No Customer",
             } as Task);
           }
         });
@@ -322,6 +498,9 @@ export const useTaskStore = defineStore("task", () => {
     setTaskIndicatorDisplay,
     addTask,
     updateTask,
+    addResource,
+    addResourcesId,
+    addAssignedResource,
     deleteTask,
     loadTasks,
     getTask,

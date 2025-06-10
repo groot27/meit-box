@@ -16,6 +16,7 @@ import TaskModal from "./task/TaskModal.vue";
 import TaskInfoModal from "./task/TaskInfoModal.vue";
 import TaskEditSidebar from "./task/TaskEditSidebar.vue";
 import LeftSidebar from "./leftSide/LeftSidebar.vue";
+import RightSidebar from "./rightSide/RightSidebar.vue";
 import { useCalendarStore } from "@/stores/CalendarStore";
 import { useTaskStore } from "@/stores/TaskStore";
 import { Task } from "@/types/TaskTypes";
@@ -23,7 +24,6 @@ import { useRouter, useRoute } from "vue-router";
 import { useGlobalStore } from "@/stores";
 import TopBarLoading from "@/components/widgets/TopBarLoading.vue";
 import ArchiveTaskModal from "./task/ArchiveTaskModal.vue";
-
 const globalStore = useGlobalStore();
 const calendarStore = useCalendarStore();
 const taskStore = useTaskStore();
@@ -45,6 +45,12 @@ const searchTaskLabel = computed(() => calendarStore.searchTasksLabel);
 const searchTaskValue = computed(() => calendarStore.searchTasksValue);
 const multiFilter = computed(() => calendarStore.multifilterTasks);
 
+const isSidebarCollapsed = ref(false);
+
+const toggleSidebar = () => {
+  isSidebarCollapsed.value = !isSidebarCollapsed.value;
+};
+
 const handleTaksEditDisplay = async (taskId) => {
   if (taskId) {
     const task = await taskStore.getTask(taskId);
@@ -63,12 +69,12 @@ const setDateByView = () => {
   let end: Date;
   switch (currentView.value) {
     case "month":
-      start = startOfWeek(startOfMonth(currentDate.value));
-      end = endOfWeek(endOfMonth(currentDate.value));
+      start = startOfWeek(startOfMonth(currentDate.value), { weekStartsOn: 1 });
+      end = endOfWeek(endOfMonth(currentDate.value), { weekStartsOn: 1 });
       break;
     case "week":
-      start = startOfWeek(currentDate.value);
-      end = endOfWeek(currentDate.value);
+      start = startOfWeek(currentDate.value, { weekStartsOn: 1 });
+      end = endOfWeek(currentDate.value, { weekStartsOn: 1 });
       break;
     case "day":
       start = startOfDay(currentDate.value);
@@ -224,13 +230,13 @@ watch(
   }
 );
 
-onMounted(() => {
+onMounted(async () => {
   let { start, end } = setDateByView();
-
   calendarStore.setDateRange(start, end);
   taskStore.loadTasks({
     date_between: `${calendarStore.startDate},${calendarStore.endDate}`,
   });
+  calendarStore.getDefaultData();
 
   if (route.params.taskId) {
     handleTaksEditDisplay(route.params.taskId);
@@ -255,8 +261,21 @@ onMounted(() => {
     <top-bar-loading />
     <div class="flex-1 flex h-full">
       <!-- Mini Calendar -->
-      <div class="p-4 border-r bg-gray-50">
-        <LeftSidebar />
+      <div class="relative">
+        <button
+          class="absolute z-50 top-4 -right-6 bg-gray-200 px-2 py-1 rounded-full hover:bg-gray-300"
+          @click="toggleSidebar"
+        >
+          {{ isSidebarCollapsed ? "▶" : "◀" }}
+        </button>
+        <div
+          :class="[
+            'transition-all duration-300 ease-in-out bg-gray-50 border-r overflow-hidden',
+            isSidebarCollapsed ? 'w-0 p-0' : 'w-[400px] p-4',
+          ]"
+        >
+          <LeftSidebar v-if="!isSidebarCollapsed" />
+        </div>
       </div>
 
       <!-- Main Calendar -->
@@ -274,6 +293,18 @@ onMounted(() => {
             @task-click="handleTaskClick"
           />
         </KeepAlive>
+      </div>
+      <div class="relative max-h-full overflow-y-auto">
+        <div
+          :class="[
+            'transition-all duration-300 ease-in-out  border-r overflow-hidden',
+            !calendarStore.upCommingTaskDisplay
+              ? 'w-0 p-0'
+              : 'w-[400px] px-1 py-2',
+          ]"
+        >
+          <RightSidebar v-if="calendarStore.upCommingTaskDisplay" />
+        </div>
       </div>
     </div>
 

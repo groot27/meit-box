@@ -90,6 +90,9 @@ const navigateToNext = () => {
       break;
   }
 };
+const handleRightSideBar = () => {
+  calendarStore.setUpCommingTaskDisplay(!calendarStore.upCommingTaskDisplay);
+};
 
 const goToToday = () => {
   calendarStore.setCurrentDate(new Date());
@@ -97,12 +100,12 @@ const goToToday = () => {
 </script>
 
 <template>
-  <header class="bg-white border-b">
+  <header class="bg-[#1c3f52] text-white border-b">
     <div class="flex items-center justify-between px-6 py-3">
       <div class="flex items-center space-x-4">
         <button
           @click="goToToday"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          class="px-4 py-2 text-sm font-medium text-gray-200 border border-gray-300 rounded-md hover:bg-gray-50"
         >
           {{ t("calendar.today") }}
         </button>
@@ -110,7 +113,7 @@ const goToToday = () => {
         <div class="flex items-center space-x-2">
           <button
             @click="navigateToPrevious"
-            class="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
+            class="p-2 text-gray-200 hover:bg-gray-100 rounded-full"
           >
             <svg
               class="w-5 h-5"
@@ -129,7 +132,7 @@ const goToToday = () => {
 
           <button
             @click="navigateToNext"
-            class="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
+            class="p-2 text-gray-200 hover:bg-gray-100 rounded-full"
           >
             <svg
               class="w-5 h-5"
@@ -146,7 +149,7 @@ const goToToday = () => {
             </svg>
           </button>
 
-          <h2 class="text-xl font-normal text-gray-900 ml-2">
+          <h2 class="text-xl font-normal text-gray-100 ml-2">
             {{ formattedTitle }}
           </h2>
         </div>
@@ -161,15 +164,21 @@ const goToToday = () => {
             class="px-4 py-1 text-sm font-medium rounded"
             :class="
               currentView === view
-                ? 'bg-blue-100 text-blue-600'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'bg-[#00ffd924] text-white'
+                : 'text-gray-500 hover:text-white'
             "
           >
             {{ t(`calendar.views.${view}`) }}
           </button>
         </div>
+        <button
+          class="py-1 px-2 rounded-lg border border-gray-300"
+          @click="handleRightSideBar"
+        >
+          <font-awesome-icon :icon="['fas', 'rectangle-list']" />
+        </button>
 
-        <LanguageSelector />
+        <!-- <LanguageSelector /> -->
       </div>
     </div>
   </header>

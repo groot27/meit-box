@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { PermissionType } from "@/types/TaskTypes";
+import AddressInput from "@/components/widgets/AddressInput.vue";
+import "jodit/build/jodit.min.css";
+import { JoditEditor } from "jodit-vue";
 
 const { t } = useI18n();
 
@@ -13,6 +16,7 @@ const props = defineProps<{
   permission: string;
   locationCategory: string;
   location: string;
+  locationDescription: string;
   updateTasks: string;
   startDate: string;
   endDate: string;
@@ -27,7 +31,9 @@ const emit = defineEmits<{
   (e: "update:status", value: string): void;
   (e: "update:permission", value: string): void;
   (e: "update:locationCategory", value: string): void;
-  (e: "update:location", value: string): void;
+  (e: "update:location", value: any): void;
+  (e: "update:locationDescription", value: any): void;
+  (e: "update:address", value: any): void;
   (e: "update:updateTasks", value: string): void;
   (e: "update:startDate", value: string): void;
   (e: "update:endDate", value: string): void;
@@ -37,7 +43,8 @@ const emit = defineEmits<{
 }>();
 
 const selectedPermission = ref("");
-
+const address = ref("");
+const showLocaltionDescription = ref(false);
 const allPermissions = ref<PermissionType>({
   admin: 0,
   employee: 0,
@@ -45,6 +52,15 @@ const allPermissions = ref<PermissionType>({
   all: 0,
 });
 
+const content = computed(() => props.description);
+const modules = {
+  toolbar: ["bold", "italic", "underline", "ol", "ul"],
+  config: {
+    showCharsCounter: false,
+    showWordsCounter: false,
+    showXPathInStatusbar: false,
+  },
+};
 const updatePermission = (event) => {
   const value = event.target.value;
   selectedPermission.value = value;
@@ -60,10 +76,21 @@ const formatLabel = (key) => {
   };
   return labels[key] || key;
 };
+const GOOGLE_API_KEY = "AIzaSyD7fBBrfAmRTdLCO549jxZP3ofuw763zuQ";
 
+const onPlaceChanged = (place: any) => {
+  console.log("Selected place:", place);
+  emit("update:location", place);
+};
+const handleShowDescription = () => {
+  showLocaltionDescription.value = !showLocaltionDescription.value;
+};
 watch(props, () => {
   selectedPermission.value = props.permission;
   allPermissions[selectedPermission.value] = 1;
+  if (props.location) {
+    address.value = props.location;
+  }
 });
 </script>
 
@@ -155,6 +182,9 @@ watch(props, () => {
           "
           class="input-field"
         >
+          <option :value="locationCategory">
+            {{ locationCategory }}
+          </option>
           <option value="berlin">
             {{ t("task.editSidebar.tabs.project.locations.berlin") }}
           </option>
@@ -168,11 +198,29 @@ watch(props, () => {
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.project.location")
         }}</label>
+
+        <AddressInput
+          :apiKey="GOOGLE_API_KEY"
+          :address="props.location"
+          @placeChanged="onPlaceChanged"
+        />
+        <button class="text-blue-500 text-sm" @click="handleShowDescription">
+          {{ t("task.editSidebar.tabs.project.showDesc") }}
+        </button>
+      </div>
+      <div class="form-group" v-show="showLocaltionDescription">
+        <label class="block text-sm font-medium text-gray-700"
+          >Location Description</label
+        >
+
         <input
           type="text"
-          :value="location"
+          :value="locationDescription"
           @input="
-            emit('update:location', ($event.target as HTMLInputElement).value)
+            emit(
+              'update:locationDescription',
+              ($event.target as HTMLInputElement).value
+            )
           "
           class="input-field"
           :placeholder="t('task.editSidebar.tabs.project.location')"
@@ -239,6 +287,7 @@ watch(props, () => {
         <div class="grid grid-cols-2 gap-4">
           <input
             type="time"
+            lang="en-GB"
             :value="startTime"
             @input="
               emit(
@@ -250,6 +299,7 @@ watch(props, () => {
           />
           <input
             type="time"
+            lang="en-GB"
             :value="endTime"
             @input="
               emit('update:endTime', ($event.target as HTMLInputElement).value)
@@ -266,18 +316,11 @@ watch(props, () => {
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.project.taskDescription")
         }}</label>
-        <textarea
-          :value="description"
-          @input="
-            emit(
-              'update:description',
-              ($event.target as HTMLTextAreaElement).value
-            )
-          "
-          rows="4"
-          class="input-field"
-          :placeholder="t('task.editSidebar.tabs.project.taskDescription')"
-        ></textarea>
+        <jodit-editor
+          v-model="content"
+          :buttons="modules.toolbar"
+          :config="modules.config"
+        />
       </div>
     </div>
   </div>
