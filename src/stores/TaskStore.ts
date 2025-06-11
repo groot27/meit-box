@@ -1,7 +1,11 @@
 import { defineStore } from "pinia";
 import { reactive, ref, watch } from "vue";
 import { Task, TaskActivity, TaskIndicatorType } from "@/types/TaskTypes";
-import { createQueryString, v4 as uuidv4 } from "@/utils/utils";
+import {
+  createQueryString,
+  generateDefaultResources,
+  v4 as uuidv4,
+} from "@/utils/utils";
 import { format, parseISO, setHours, setMinutes } from "date-fns";
 import { taskApi } from "@/api/taskApi";
 import { useCalendarStore } from "./CalendarStore";
@@ -43,10 +47,21 @@ export const useTaskStore = defineStore("task", () => {
     if (!updatedTask) {
       return;
     }
-    debugger;
     const task = selectedTask.value.relatedTasks.find(
       (task) => task.taskTemplate.id == taskId
     );
+    if (!task) {
+      return;
+    }
+    task.mappedResources.push({
+      id: task.mappedResources.length + 1,
+      resourcesId: null,
+      name: type,
+      number: null,
+      type: type,
+      count: 0,
+      status: "open",
+    });
     switch (type) {
       case "Employee":
         updatedTask.allEmployeeCount += 1;
@@ -118,7 +133,51 @@ export const useTaskStore = defineStore("task", () => {
       }
     }
   }
-  function addTask(taskData: Omit<Task, "id">) {
+  async function addRelatedDate(id, singleTask, dateTime) {
+    selectedTask.value.relatedTasks.push({
+      date: dateTime.startDate,
+      startTime: dateTime.startTime,
+      endTime: dateTime.endTime,
+      taskTemplate: {
+        id: -1,
+        employees_count:
+          selectedTask.value.taskTemplate.employee_occupied_count,
+        employees: selectedTask.value.taskTemplate.employee_available_count,
+        vehicle_count: selectedTask.value.taskTemplate.vehicle_occupied_count,
+        vehicle: selectedTask.value.taskTemplate.vehicle_available_count,
+        devices_count: selectedTask.value.taskTemplate.device_occupied_count,
+        devices: selectedTask.value.taskTemplate.device_available_count,
+        startTime: dateTime.startTime,
+        endTime: dateTime.endTime,
+      },
+      resources: [],
+      mappedResources: [],
+    });
+    const savedTaskId = await updateTask(id, singleTask);
+    const newTask = {
+      id: savedTaskId,
+      title: singleTask.taskTemplate.title,
+      startTime: dateTime.startTime,
+      endTime: dateTime.endTime,
+      description: singleTask.taskTemplate.description,
+      date: dateTime.startDate,
+      color: singleTask.color,
+      deviceCout: singleTask.taskTemplate.devices_count,
+      allDeviceCount: singleTask.taskTemplate.devices,
+      employeeCount: singleTask.taskTemplate.employees_count,
+      allEmployeeCount: singleTask.taskTemplate.employees,
+      vehicleCount: singleTask.taskTemplate.vehicle_count,
+      allVehicleCount: singleTask.taskTemplate.vehicle,
+      orderId: singleTask.orderDetails.id,
+      users: singleTask.users,
+      address: singleTask.address,
+      customer: singleTask.customer
+        ? singleTask.customer.customer_name || "No Customer"
+        : "No Customer",
+    };
+    addTask(newTask);
+  }
+  function createTask(taskData: Omit<Task, "id">) {
     globalStore.setLoadingApi(true);
     const mockTask = {
       task_template_value: taskData.title,
@@ -187,16 +246,17 @@ export const useTaskStore = defineStore("task", () => {
         vehicleCount: Number(taskData.taskTemplate.vehicle_count),
         allVehicleCount: Number(taskData.taskTemplate.vehicle),
       };
-      tasks.value = [...tasks.value, newTask];
-      saveTasks();
+      addTask(newTask);
       globalStore.setLoadingApi(false);
     };
     taskApi.create(mockTask, { onSuccess });
   }
+  function addTask(newTask: Task) {
+    tasks.value.push(newTask);
+  }
 
-  function updateTask(id: string, taskData: Partial<Task>) {
+  async function updateTask(id: string, taskData: Partial<Task>) {
     globalStore.setLoadingApi(true);
-    debugger;
     const mockTask = {
       extra_emp: [],
       id: taskData.taskTemplate.id,
@@ -278,32 +338,7 @@ export const useTaskStore = defineStore("task", () => {
     };
     const onSuccess = () => {
       globalStore.setLoadingApi(false);
-      const updatedTasks = [];
       tasks.value = tasks.value.map((task) => {
-        // ADD repeated task to task store for display in calendar
-        if (taskData.updatedDate && taskData.updatedDate.length) {
-          taskData.updatedDate.forEach((date, index) => {
-            if (index > 0) {
-              const updatedTask: Task = {
-                id,
-                title: taskData.title,
-                description: taskData.description,
-                date: date,
-                deviceCout: Number(taskData.taskTemplate.devices_count),
-                allDeviceCount: Number(taskData.taskTemplate.devices),
-                employeeCount: Number(taskData.taskTemplate.employees_count),
-                allEmployeeCount: Number(taskData.taskTemplate.employees),
-                vehicleCount: Number(taskData.taskTemplate.vehicle_count),
-                allVehicleCount: Number(taskData.taskTemplate.vehicle),
-                startTime: taskData.startTimes[index],
-                endTime: taskData.endTimes[index],
-                orderId: taskData.orderDetails.id,
-              };
-              updatedTasks.push(updatedTask);
-            }
-          });
-        }
-
         if (task.id == id) {
           const updatedTask: Task = {
             id,
@@ -320,17 +355,17 @@ export const useTaskStore = defineStore("task", () => {
             endTime: taskData.endTime,
             orderId: taskData.orderDetails.id,
           };
-          updatedTasks.push(updatedTask);
           return {
             ...task,
-            ...updatedTasks,
+            ...updatedTask,
           };
         }
         return task;
       });
       saveTasks();
     };
-    taskApi.updateOne(mockTask, { onSuccess });
+    const res = await taskApi.updateOne(mockTask, { onSuccess });
+    return res.task_ids[0];
   }
 
   function deleteTask(id: string, type: string) {
@@ -366,6 +401,11 @@ export const useTaskStore = defineStore("task", () => {
           devices: task.task.device_available_count,
         },
         resources: task.resource,
+        mappedResources: generateDefaultResources(task.resource, {
+          employees: task.task.employee_available_count,
+          vehicle: task.task.vehicle_available_count,
+          devices: task.task.device_occupied_count,
+        }),
       };
     });
 
@@ -487,7 +527,7 @@ export const useTaskStore = defineStore("task", () => {
     () => {
       saveTasks();
     },
-    { deep: true }
+    { deep: true, immediate: true }
   );
 
   return {
@@ -497,7 +537,9 @@ export const useTaskStore = defineStore("task", () => {
     setArchiveModalDispay,
     setTaskIndicatorDisplay,
     addTask,
+    createTask,
     updateTask,
+    addRelatedDate,
     addResource,
     addResourcesId,
     addAssignedResource,

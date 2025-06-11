@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import EmployeeSelect from "./EmployeeSelect.vue";
 import VehicleSelect from "./VehicleSelect.vue";
@@ -24,41 +24,21 @@ const props = defineProps<{
   startTime: string;
   endTime: string;
   taskId: number;
+  resources: any;
 }>();
 const emit = defineEmits<{
   (e: "update:resourcesIds", id, type: string): void;
   (e: "update:repeatTask", time: any): void;
+  (e: "showIcons", taskId: number, selected: boolean): void;
 }>();
 const globalStore = useGlobalStore();
 const employeeData = ref(null);
 const deviceData = ref(null);
 const vehicleData = ref(null);
-const showIcons = ref(false);
+const selected = ref(false);
 const showHiddens = ref(false);
 const calendarStore = useCalendarStore();
 
-const resources = ref([
-  {
-    id: 1,
-    name: "",
-    number: null,
-    resourcesId: null,
-    type: "Employee",
-    count: 0,
-    status: "Open",
-  },
-]);
-const hiddenResources = ref([
-  {
-    id: 1,
-    name: "",
-    number: null,
-    resourcesId: null,
-    type: "Employee",
-    count: 0,
-    status: "Open",
-  },
-]);
 const status = {
   Employee: [
     "open",
@@ -72,35 +52,29 @@ const status = {
   Vehicle: ["open", "planned"],
   Device: ["open", "planned"],
 };
+
+const hiddenResources = ref([
+  {
+    id: 1,
+    name: "",
+    number: null,
+    resourcesId: null,
+    type: "Employee",
+    count: 0,
+    status: "Open",
+  },
+]);
 const activeDropdown = ref(null);
 const dropdownRefs = ref([]);
 const toggleDropdown = (index) => {
   activeDropdown.value = activeDropdown.value === index ? null : index;
 };
-
+const handleSelected = () => {
+  selected.value = !selected.value;
+  emit("showIcons", props.taskId, selected.value);
+};
 const setDropdownRef = (el, index) => {
   if (el) dropdownRefs.value[index] = el;
-};
-
-const handleClickOutside = (event) => {
-  const isClickInsideAnyDropdown = dropdownRefs.value.some(
-    (el) => el && el.contains(event.target)
-  );
-  if (!isClickInsideAnyDropdown) {
-    activeDropdown.value = null;
-  }
-};
-const addResources = (type: string) => {
-  resources.value.push({
-    id: resources.value.length + 1,
-    resourcesId: null,
-    name: type,
-    number: null,
-    type: type,
-    count: 0,
-    status: "open",
-  });
-  taskStore.addResource(props.taskId, type);
 };
 const updateStatus = (id, status, type) => {
   if (type == "Employee") {
@@ -193,20 +167,7 @@ const updateVehicleStatus = async (id, status) => {
 const updateIdsOfTask = (id, type) => {
   taskStore.addResourcesId(props.taskId, id, type);
 };
-const getUserStatus = (status) => {
-  let newStatus;
-  switch (status) {
-    case "assigned":
-      newStatus = "confirmed";
-      break;
-    case "":
-      newStatus = "no_show";
-      break;
-    default:
-      newStatus = status;
-  }
-  return newStatus;
-};
+
 const newStatus = (index, type) => {
   taskStore.addAssignedResource(props.taskId, type);
   resources.value.forEach((resource) => {
@@ -215,228 +176,24 @@ const newStatus = (index, type) => {
     }
   });
 };
-const sendNotification = async (res) => {
-  if (res.message == "fail") {
-    toast.error("please set task template");
-    globalStore.setLoadingApi(false);
-    return;
-  }
-  if (res.data == null) {
-    globalStore.setLoadingApi(false);
-    return;
-  }
-  if (res.data.email) {
-    if (!res.data.data.notification_template) {
-      toast.error("please set Notification Template");
-      globalStore.setLoadingApi(false);
-      return;
-    }
-    if (!res.data.data.notification_template.template_content) {
-      toast.error(
-        "please set Content for selected Notification Template Time Sheet"
-      );
-      globalStore.setLoadingApi(false);
-      return;
-    }
-    await taskApi.sendOrderNotification({
-      orderId: res.data.order_id,
-      emails: [res.data.email_address],
-      subject: res.data.notification_template.template_name,
-      email: true,
-      message: res.data.notification_template.template_content,
-      notification_template: res.data.notification_template.id,
-      documentFiles: [],
-      uploadedDocs: [res.data.order_document_id],
-      task_id: props.taskId,
-    });
-    toast[res.data.status === "true" ? "success" : "error"](res.data.msg);
-    globalStore.setLoadingApi(false);
-  } else {
-    toast.error("Order Not Found");
-  }
-};
-const handleTimeSheet = () => {
-  const onSuccess = (res) => {
-    sendNotification(res);
-  };
-  globalStore.setLoadingApi(true);
-  taskApi.sendTimeSheet(
-    {
-      task_id: props.taskId,
-      "selected_task_id[0]": props.taskId,
-    },
-    { onSuccess }
-  );
-};
-const handleHiddenResources = async () => {
-  globalStore.setLoadingApi(true);
-  const res = await taskApi.getHiddenRscorces(props.taskId);
-  if (res.data.rejected_user && res.data.rejected_user.length) {
-    hiddenResources.value = [];
-    res.data.rejected_user.forEach((resource, index) => {
-      hiddenResources.value.push({
-        id: index,
-        resourcesId: resource.id,
-        number: resource.mobile_number,
-        name: resource.username,
-        type: "Employee",
-        count: 0,
-        status: "reject",
-      });
-    });
-  }
-  globalStore.setLoadingApi(false);
-  showHiddens.value = true;
-};
-const handdleShowResources = () => {
-  showHiddens.value = false;
-};
-
 onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
+  // document.addEventListener("click", handleClickOutside);
   if (props) {
     employeeData.value = calendarStore.defaultData.employees;
     vehicleData.value = calendarStore.defaultData.vehicles;
     deviceData.value = calendarStore.defaultData.devices;
-    let count = 1;
-    resources.value = [];
-    for (let i = 1; i <= Number(props.employees); i++) {
-      if (
-        !props.resourcesValues.users[i - 1] ||
-        props.resourcesValues.users[i - 1].status !== "rejected"
-      ) {
-        resources.value.push({
-          id: count,
-          resourcesId: props.resourcesValues.users[i - 1]
-            ? props.resourcesValues.users[i - 1].id
-            : null,
-          number: props.resourcesValues.users[i - 1]
-            ? props.resourcesValues.users[i - 1].mobile_number
-            : null,
-          name:
-            props.resourcesValues && props.resourcesValues.users[i - 1]
-              ? props.resourcesValues.users[i - 1].username
-              : "Employee",
-          type: "Employee",
-          count: 0,
-          status:
-            props.resourcesValues && props.resourcesValues.users[i - 1]
-              ? getUserStatus(props.resourcesValues.users[i - 1].user_status)
-              : "open",
-        });
-        count++;
-      }
-    }
-    for (let i = 1; i <= Number(props.vehicle); i++) {
-      resources.value.push({
-        id: count,
-        resourcesId: props.resourcesValues.vehicles[i - 1]
-          ? props.resourcesValues.vehicles[i - 1].id
-          : null,
-        name:
-          props.resourcesValues && props.resourcesValues.vehicles[i - 1]
-            ? props.resourcesValues.vehicles[i - 1].number_plate
-            : "Vehicle",
-        type: "Vehicle",
-        count: 0,
-        number: 0,
-        status:
-          props.resourcesValues && props.resourcesValues.vehicles[i - 1]
-            ? props.resourcesValues.vehicles[i - 1].status
-            : "open",
-      });
-      count++;
-    }
-    for (let i = 1; i <= Number(props.devices); i++) {
-      resources.value.push({
-        id: count,
-        resourcesId: null,
-        name: "Device",
-        type: "Device",
-        count: 0,
-        number: 0,
-        status: "open",
-      });
-      count++;
-    }
   }
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 <template>
-  <div
-    class="flex items-center justify-between bg-blue-300 p-2 rounded-tl rounded-tr h-full"
-  >
-    <div class="flex items-center space-x-2 p-2">
-      <input type="checkbox" class="rounded border-gray-300" />
-      <span class="text-sm font-medium">{{
-        t("task.editSidebar.tabs.resources.upcoming")
-      }}</span>
-    </div>
-    <div class="flex items-center space-x-8" v-show="showIcons">
-      <div class="flex space-x-2 items-center">
-        <button
-          class="p-1 hover:bg-gray-100 rounded-full"
-          @click="handleTimeSheet"
-        >
-          <font-awesome-icon
-            icon="fa-solid fa-file-pdf"
-            class="text-gray-900"
-          />
-        </button>
-        <button
-          class="p-1 hover:bg-gray-100 rounded-full"
-          @click="handdleShowResources"
-        >
-          <font-awesome-icon icon="fa-solid fa-user" class="text-gray-900" />
-        </button>
-        <button
-          class="p-1 hover:bg-gray-100 rounded-full"
-          @click="handleHiddenResources"
-        >
-          <font-awesome-icon
-            icon="fa-solid fa-user-alt-slash"
-            class="text-gray-500"
-          />
-        </button>
-      </div>
-      <div class="flex space-x-2 items-center">
-        <button
-          class="p-1 hover:bg-gray-100 rounded-full"
-          @click="addResources('Device')"
-        >
-          <font-awesome-icon icon="fa-solid fa-tools" class="text-gray-900" />
-        </button>
-        <button
-          class="p-1 hover:bg-gray-100 rounded-full"
-          @click="addResources('Vehicle')"
-        >
-          <font-awesome-icon icon="fa-solid fa-truck" class="text-gray-900" />
-        </button>
-        <button
-          class="p-1 hover:bg-gray-100 rounded-full"
-          @click="addResources('Employee')"
-        >
-          <font-awesome-icon
-            icon="fa-solid fa-user-plus"
-            class="text-gray-900"
-          />
-        </button>
-      </div>
-    </div>
-  </div>
-
   <div
     class="flex items-center space-x-2 text-sm text-gray-600 bg-gray-100 p-2"
   >
     <input
       type="checkbox"
       class="rounded border-gray-300"
-      :checked="showIcons"
-      @change="() => (showIcons = !showIcons)"
+      :checked="selected"
+      @change="handleSelected"
     />
     <div class="flex justify-between w-full">
       <span>{{ date }}</span>

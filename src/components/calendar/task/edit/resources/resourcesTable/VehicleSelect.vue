@@ -44,6 +44,8 @@ const confirmedVehicle = async (
   oldVehicle: vehicleType
 ) => {
   if (!route.params.taskId) {
+    emit("update:Ids", newVehicle.key, "Vehicle");
+    emit("addNewStatus", props.row, "Vehicle");
     return;
   }
   globalStore.setLoadingApi(true);

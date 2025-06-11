@@ -151,7 +151,7 @@ const closeTaskEditSidebar = () => {
 
 const handleTaskCreate = (taskData: any) => {
   if (selectedDate.value) {
-    taskStore.addTask({
+    taskStore.createTask({
       ...taskData,
       date: selectedDate.value,
     });
@@ -233,10 +233,10 @@ watch(
 onMounted(async () => {
   let { start, end } = setDateByView();
   calendarStore.setDateRange(start, end);
+  await calendarStore.getDefaultData();
   taskStore.loadTasks({
     date_between: `${calendarStore.startDate},${calendarStore.endDate}`,
   });
-  calendarStore.getDefaultData();
 
   if (route.params.taskId) {
     handleTaksEditDisplay(route.params.taskId);

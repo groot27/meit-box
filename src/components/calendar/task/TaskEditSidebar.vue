@@ -10,7 +10,7 @@ import DocumentsTab from "./edit/DocumentsTab.vue";
 import { useTaskStore } from "@/stores/TaskStore";
 import { useCalendarStore } from "@/stores/CalendarStore";
 import { reactive } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { taskApi } from "@/api/taskApi";
 import { useGlobalStore } from "@/stores/index";
 const taskStore = useTaskStore();
@@ -41,6 +41,7 @@ const singleTask = reactive<any>({
   activities: {},
 });
 const route = useRoute();
+const router = useRouter();
 // Other Details tab state
 const requiredSkills = ref("");
 const dress = ref("");
@@ -150,11 +151,10 @@ const updateLocation = (place) => {
   singleTask.latitude = place.geometry.location.lat();
   singleTask.longitude = place.geometry.location.lng();
 };
-const updateRepeatTask = (time) => {
-  singleTask.updatedDate = [singleTask.date, time.startDate];
-  singleTask.startTimes = [singleTask.startTime, time.startTime || "00:00"];
-  singleTask.endTimes = [singleTask.endTime, time.endTime || "00:00"];
-  emit("update", singleTask);
+const updateRepeatTask = async (dateTime) => {
+  await taskStore.addRelatedDate(route.params.taskId, singleTask, dateTime);
+  // window.location = "/monthly-view2";
+  router.push("/monthly-view2");
 };
 </script>
 
