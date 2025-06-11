@@ -6,9 +6,12 @@ import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import { useI18n } from "vue-i18n";
 import { stripHtml } from "@/utils/utils";
 import { useCalendarStore } from "@/stores/CalendarStore";
+import { format } from "date-fns";
 
 const { t } = useI18n();
-
+const porps = defineProps<{
+  date: any;
+}>();
 const emit = defineEmits<{
   (
     e: "continueToEdit",
@@ -45,6 +48,7 @@ const handleContinue = () => {
       description: description.value,
       taskTemplate: taskDetails.value,
       orderDetails: orderDetails.value,
+      date: format(porps.date, "yyyy-MM-dd"),
     });
   }
 };
@@ -147,6 +151,7 @@ watch(selectedOrder, () => {
           longitude: taskOrders.value[order].longitude,
           id: taskOrders.value[order].id,
           customerName: taskOrders.value[order].customer_name || "No Customer",
+          orderNumber: taskOrders.value[order].order_number || "No Order",
         };
       }
     });

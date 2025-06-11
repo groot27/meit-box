@@ -7,6 +7,7 @@ import { taskApi } from "@/api/taskApi";
 import { useGlobalStore } from ".";
 
 type CalendarView = "month" | "week" | "day";
+type exportDataType = "daily" | "weekly" | "monthly";
 interface defaultDataType {
   skills: any;
   orders: any;
@@ -40,12 +41,20 @@ export const useCalendarStore = defineStore("calendar", () => {
   const searchTasksLabel = ref<SearchTasksType>("");
   const searchTasksValue = ref<string | null>("");
   const upCommingTaskDisplay = ref(false);
+  const exportTaskDisplay = ref(false);
+  const exportTaskType = ref<exportDataType>("daily");
   const globalStore = useGlobalStore();
   function setCurrentDate(date: Date) {
     currentDate.value = date;
   }
   function setUpCommingTaskDisplay(value: boolean) {
     upCommingTaskDisplay.value = value;
+  }
+  function setExportTaskDisplay(value: boolean) {
+    exportTaskDisplay.value = value;
+  }
+  function setExportTaskType(value: exportDataType) {
+    exportTaskType.value = value;
   }
 
   function setView(view: CalendarView) {
@@ -131,6 +140,8 @@ export const useCalendarStore = defineStore("calendar", () => {
     multifilterTasks,
     defaultData,
     upCommingTaskDisplay,
+    exportTaskType,
+    exportTaskDisplay,
     setUpCommingTaskDisplay,
     setDefaultData,
     setCurrentDate,
@@ -141,5 +152,7 @@ export const useCalendarStore = defineStore("calendar", () => {
     setMulltiFilterValue,
     setMulltiFilterKeys,
     getDefaultData,
+    setExportTaskType,
+    setExportTaskDisplay,
   };
 });

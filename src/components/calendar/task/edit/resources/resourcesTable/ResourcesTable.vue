@@ -114,9 +114,10 @@ const updateEmployeeStatus = async (id, status) => {
       type: "emp",
       user_id: id,
     });
-    resources.value = resources.value.filter(
-      (resource) => resource.resourcesId !== id
-    );
+    taskStore.selectedTask.value.mappedResources =
+      taskStore.selectedTask.value.mappedResources.filter(
+        (resource) => resource.resourcesId !== id
+      );
   } else {
     await taskApi.updateEmployeeStatus({
       status: status === "confirmed" ? "assigned" : status,
@@ -125,7 +126,7 @@ const updateEmployeeStatus = async (id, status) => {
       task_id: props.taskId,
       type: "emp",
     });
-    resources.value.forEach((resource) => {
+    taskStore.selectedTask.value.mappedResources.forEach((resource) => {
       if (resource.resourcesId == id) {
         resource.status = status;
       }
@@ -144,9 +145,10 @@ const updateVehicleStatus = async (id, status) => {
       type: "emp",
       user_id: id,
     });
-    resources.value = resources.value.filter(
-      (resource) => resource.resourcesId !== id
-    );
+    taskStore.selectedTask.value.mappedResources =
+      taskStore.selectedTask.value.mappedResources.filter(
+        (resource) => resource.resourcesId !== id
+      );
   } else {
     await taskApi.updateEmployeeStatus({
       status: status === "confirmed" ? "assigned" : status,
@@ -155,7 +157,7 @@ const updateVehicleStatus = async (id, status) => {
       task_id: props.taskId,
       type: "emp",
     });
-    resources.value.forEach((resource) => {
+    taskStore.selectedTask.value.mappedResources.forEach((resource) => {
       if (resource.resourcesId == id) {
         resource.status = status;
       }
@@ -170,7 +172,7 @@ const updateIdsOfTask = (id, type) => {
 
 const newStatus = (index, type) => {
   taskStore.addAssignedResource(props.taskId, type);
-  resources.value.forEach((resource) => {
+  taskStore.selectedTask.value.mappedResources.forEach((resource) => {
     if (resource.id === index) {
       resource.status = type === "Employee" ? "confirmed" : "planned";
     }

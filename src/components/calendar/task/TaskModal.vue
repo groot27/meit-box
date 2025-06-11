@@ -111,12 +111,7 @@ const handleContinueToEdit = (taskData: any) => {
 
   // Close the modal
   handleClose();
-  emit("continueToCreate", {
-    title: taskData.taskTitle,
-    description: taskData.description,
-    taskTemplate: taskData.taskTemplate,
-    orderDetails: taskData.orderDetails,
-  });
+  emit("continueToCreate", taskData);
 };
 
 const handleKeyDown = (e: KeyboardEvent) => {
@@ -128,7 +123,6 @@ const handleKeyDown = (e: KeyboardEvent) => {
 onMounted(() => {
   document.addEventListener("keydown", handleKeyDown);
 });
-
 
 onBeforeUnmount(() => {
   document.removeEventListener("keydown", handleKeyDown);
@@ -203,6 +197,7 @@ onBeforeUnmount(() => {
               v-if="activeTab === 'task'"
               @continue-to-edit="handleContinueToEdit"
               @save-task="handleSubmit"
+              :date="props.date"
             />
 
             <DetailedTaskTab

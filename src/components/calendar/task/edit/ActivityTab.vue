@@ -1,4 +1,3 @@
-```vue
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -20,22 +19,39 @@ const filteredActivity = computed(() => {
   let items: (ActivityComment | ActivityHistory)[] = [];
   switch (activityFilter.value) {
     case "comments":
-      items = props.comments.map((comment) => ({
-        ...comment,
-        status: "comment",
-      }));
+      if (props.comments && props.comments.length) {
+        items = props.comments.map((comment) => ({
+          ...comment,
+          status: "comment",
+        }));
+      }
       break;
     case "history":
-      items = props.history.map((history) => ({
-        ...history,
-        status: "history",
-      }));
+      if (props.history && props.history.length) {
+        items = props.history.map((history) => ({
+          ...history,
+          status: "history",
+        }));
+      }
       break;
     default:
-      items = [
-        ...props.comments.map((comment) => ({ ...comment, status: "comment" })),
-        ...props.history.map((history) => ({ ...history, status: "history" })),
-      ];
+      if (
+        props.history &&
+        props.history.length &&
+        props.comments &&
+        props.comments.length
+      ) {
+        items = [
+          ...props.comments.map((comment) => ({
+            ...comment,
+            status: "comment",
+          })),
+          ...props.history.map((history) => ({
+            ...history,
+            status: "history",
+          })),
+        ];
+      }
     // .sort(
     //   (a, b) =>
     //     new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -90,7 +106,7 @@ const formatDate = (timestamp: string) => {
     </div>
 
     <!-- Activity List -->
-    <div class="space-y-4">
+    <div class="space-y-4" v-if="paginatedActivity">
       <template v-for="item in paginatedActivity" :key="item.id">
         <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
           <div

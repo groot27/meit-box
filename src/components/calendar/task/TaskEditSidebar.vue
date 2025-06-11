@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { Task } from "@/types/TaskTypes";
 import ProjectTab from "./edit/ProjectTab.vue";
@@ -19,6 +19,7 @@ const calendarStore = useCalendarStore();
 
 const { t } = useI18n();
 
+const selectedTask = computed(() => taskStore.selectedTask);
 const props = defineProps<{
   task: Task | null;
   show: boolean;
@@ -53,7 +54,7 @@ const comments = ref([]);
 const histories = ref([]);
 
 watch(
-  () => props.task,
+  () => taskStore.selectedTask,
   (newTask) => {
     if (newTask) {
       activeTab.value = "project";

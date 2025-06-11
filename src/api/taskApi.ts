@@ -113,15 +113,6 @@ export const taskApi = {
     }
   },
   deleteVehicleTask: async (data: any, callbacks?: Callbacks) => {
-    //     open_vehicle
-    // :
-    // false
-    // resource_id
-    // :
-    // "4"
-    // task_id
-    // :
-    // 801
     try {
       const res = await api.post(`/delete-vehicle-task`, data);
       callbacks?.onSuccess?.(res);
@@ -294,6 +285,16 @@ export const taskApi = {
   sendOrderNotification: async (data: any, callbacks?: Callbacks) => {
     try {
       const res = await api.post(`/send-order-notification`, data);
+      callbacks?.onSuccess?.(res);
+      return res;
+    } catch (err) {
+      callbacks?.onError?.(err);
+      throw err;
+    }
+  },
+  exportPdfTasks: async (data: any, callbacks?: Callbacks) => {
+    try {
+      const res = await api.post(`/task-pdf-export`, data);
       callbacks?.onSuccess?.(res);
       return res;
     } catch (err) {

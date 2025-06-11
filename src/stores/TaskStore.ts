@@ -32,6 +32,9 @@ export const useTaskStore = defineStore("task", () => {
     vehicle: true,
     devices: true,
   });
+  function setSelectedTask(task: Task | null) {
+    selectedTask.value = task;
+  }
   function setTaskIndicatorDisplay(
     displayName: TaskIndicatorKey,
     value: boolean
@@ -453,6 +456,36 @@ export const useTaskStore = defineStore("task", () => {
     };
     return selectedTask.value;
   }
+  function continueToCreate(taskData) {
+    const newTask = {
+      title: taskData.taskTitle,
+      description: taskData.description,
+      date: taskData.date,
+      startTime: "00:00",
+      endTime: "00:00",
+      orderDetails: {
+        latitude: "",
+        longitude: "",
+        id: taskData.orderDetails.id,
+        orderNumber: taskData.orderDetails.orderNumber,
+        customerName: taskData.orderDetails.customerName || "No Customer",
+      },
+      otherDetails: {
+        requiredSkills: "",
+        dress: "",
+        language: "",
+        teamLeadDescription: "",
+        teamLeadContactPerson: "",
+        notificationTemplate: "",
+      },
+      taskTemplate: taskData.taskTemplate,
+      activities: [],
+      resources: [],
+      attachments: [],
+      relatedTasks: [],
+    };
+    setSelectedTask(newTask);
+  }
 
   function loadTasks(props: any = null) {
     try {
@@ -534,6 +567,8 @@ export const useTaskStore = defineStore("task", () => {
     tasks,
     taskIndicatorDisplay,
     archiveModalDispay,
+    selectedTask,
+    setSelectedTask,
     setArchiveModalDispay,
     setTaskIndicatorDisplay,
     addTask,
@@ -546,5 +581,6 @@ export const useTaskStore = defineStore("task", () => {
     deleteTask,
     loadTasks,
     getTask,
+    continueToCreate,
   };
 });

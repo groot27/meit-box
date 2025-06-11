@@ -24,6 +24,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useGlobalStore } from "@/stores";
 import TopBarLoading from "@/components/widgets/TopBarLoading.vue";
 import ArchiveTaskModal from "./task/ArchiveTaskModal.vue";
+import ExportDataCalendar from "./leftSide/ExportDataCalendar.vue";
 const globalStore = useGlobalStore();
 const calendarStore = useCalendarStore();
 const taskStore = useTaskStore();
@@ -132,6 +133,7 @@ const handleTaskClick = (task: Task, event: MouseEvent) => {
 };
 
 const closeTaskModal = () => {
+  taskStore.setSelectedTask(null);
   isTaskModalOpen.value = false;
   // selectedDate.value = null;
   modalPosition.value = null;
@@ -179,6 +181,8 @@ const handleTaskEdit = (task: Task) => {
   // Add taskId to URL
   if (task.id) {
     router.push(`/monthly-view2/${task.id}`);
+  } else {
+    taskStore.continueToCreate(task);
   }
 };
 
@@ -328,6 +332,7 @@ onMounted(async () => {
     />
 
     <TaskEditSidebar
+      v-if="selectedTask"
       :task="selectedTask"
       :show="isTaskEditSidebarOpen"
       @close="closeTaskEditSidebar"
@@ -335,5 +340,6 @@ onMounted(async () => {
       @create="handleTaskCreate"
     />
     <ArchiveTaskModal />
+    <ExportDataCalendar />
   </div>
 </template>
