@@ -24,6 +24,7 @@ import {
   faClock,
   faRectangleList,
   faClose,
+  faPencil,
 } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
@@ -51,5 +52,6 @@ library.add(
   faClock,
   faWhatsapp,
   faRectangleList,
-  faClose
+  faClose,
+  faPencil
 );

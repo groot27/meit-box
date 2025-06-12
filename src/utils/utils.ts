@@ -5,6 +5,9 @@ export const v4 = (): string => {
     return v.toString(16);
   });
 };
+export const generateMinusId = (): number => {
+  return Math.ceil(Math.random() * 10000) * -1;
+};
 
 export const truncateWords = (str: string, words: number) => {
   return str.split(" ").slice(0, words).join(" ");

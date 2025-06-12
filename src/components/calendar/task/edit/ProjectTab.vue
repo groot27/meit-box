@@ -5,6 +5,7 @@ import { PermissionType } from "@/types/TaskTypes";
 import AddressInput from "@/components/widgets/AddressInput.vue";
 import "jodit/build/jodit.min.css";
 import { JoditEditor } from "jodit-vue";
+import { useRoute } from "vue-router";
 
 const { t } = useI18n();
 
@@ -51,7 +52,8 @@ const allPermissions = ref<PermissionType>({
   manager: 0,
   all: 0,
 });
-
+const route = useRoute();
+const displayGoogleInput = ref(false);
 const content = computed(() => props.description);
 const modules = {
   toolbar: ["bold", "italic", "underline", "ol", "ul"],
@@ -198,10 +200,31 @@ watch(props, () => {
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.project.location")
         }}</label>
-
+        <div class="w-full h-auto relative" v-show="!displayGoogleInput">
+          <input
+            type="text"
+            :value="location"
+            @input="
+              emit('update:location', ($event.target as HTMLInputElement).value)
+            "
+            class="input-field"
+            :placeholder="t('task.editSidebar.tabs.project.location')"
+          />
+          <button
+            class="text-lg h-full absolute right-0"
+            @click="
+              () => {
+                displayGoogleInput = !displayGoogleInput;
+              }
+            "
+          >
+            <font-awesome-icon :icon="['fas', 'pencil']" class="mr-2" />
+          </button>
+        </div>
         <AddressInput
+          v-show="displayGoogleInput"
           :apiKey="GOOGLE_API_KEY"
-          :address="props.location"
+          :address="location"
           @placeChanged="onPlaceChanged"
         />
         <button class="text-blue-500 text-sm" @click="handleShowDescription">
@@ -261,7 +284,7 @@ watch(props, () => {
           <input
             type="date"
             :value="startDate"
-            @input="
+            @change="
               emit(
                 'update:startDate',
                 ($event.target as HTMLInputElement).value
@@ -270,9 +293,11 @@ watch(props, () => {
             class="input-field"
           />
           <input
+            v-show="!route.params.taskId"
             type="date"
             :value="endDate"
-            @input="
+            :min="startDate"
+            @change="
               emit('update:endDate', ($event.target as HTMLInputElement).value)
             "
             class="input-field"
@@ -301,6 +326,7 @@ watch(props, () => {
             type="time"
             lang="en-GB"
             :value="endTime"
+            :min="startTime"
             @input="
               emit('update:endTime', ($event.target as HTMLInputElement).value)
             "

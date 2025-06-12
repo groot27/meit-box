@@ -13,6 +13,7 @@ import { reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { taskApi } from "@/api/taskApi";
 import { useGlobalStore } from "@/stores/index";
+import { addDays, format } from "date-fns";
 const taskStore = useTaskStore();
 const globalStore = useGlobalStore();
 const calendarStore = useCalendarStore();
@@ -61,6 +62,7 @@ watch(
       Object.assign(singleTask, newTask);
       comments.value = singleTask.activities.comments;
       histories.value = singleTask.activities.logs;
+      singleTask.endDate = "";
       // Initialize other details
       requiredSkills.value = newTask.otherDetails?.requiredSkills || "";
       dress.value = newTask.otherDetails?.dress || "";
@@ -86,6 +88,21 @@ const handleSubmit = () => {
     emit("create", singleTask);
   }
 };
+const addRelatedTasks = () => {
+  taskStore.removeRelatedTasks();
+  let currentDate = new Date(singleTask.date);
+  const endDate = new Date(singleTask.endDate);
+  currentDate = addDays(currentDate, 1);
+  while (currentDate <= endDate) {
+    taskStore.addRelatedDate({
+      startDate: format(currentDate, "yyyy-MM-dd"),
+      startTime: singleTask.startTime,
+      endTime: singleTask.endTime,
+    });
+    currentDate = addDays(currentDate, 1);
+  }
+};
+
 const handleClose = () => {
   emit("close");
 };
@@ -153,7 +170,11 @@ const updateLocation = (place) => {
   singleTask.longitude = place.geometry.location.lng();
 };
 const updateRepeatTask = async (dateTime) => {
-  await taskStore.addRelatedDate(route.params.taskId, singleTask, dateTime);
+  await taskStore.addRelatedResources(
+    route.params.taskId,
+    singleTask,
+    dateTime
+  );
   // window.location = "/monthly-view2";
   router.push("/monthly-view2");
 };
@@ -238,6 +259,9 @@ const updateRepeatTask = async (dateTime) => {
           singleTask.taskTemplate.resource_location_category
         "
         v-model:location="singleTask.taskTemplate.location"
+        v-model:locationDescription="
+          singleTask.taskTemplate.locationDescription
+        "
         v-model:updateTasks="singleTask.updateTasks"
         v-model:startDate="singleTask.date"
         v-model:endDate="singleTask.endDate"
@@ -245,6 +269,7 @@ const updateRepeatTask = async (dateTime) => {
         v-model:endTime="singleTask.endTime"
         v-model:description="singleTask.description"
         @update:location="updateLocation"
+        @update:endDate="addRelatedTasks"
       />
 
       <!-- Resources Tab -->

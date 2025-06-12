@@ -4,7 +4,7 @@ import { Task, TaskActivity, TaskIndicatorType } from "@/types/TaskTypes";
 import {
   createQueryString,
   generateDefaultResources,
-  v4 as uuidv4,
+  generateMinusId,
 } from "@/utils/utils";
 import { format, parseISO, setHours, setMinutes } from "date-fns";
 import { taskApi } from "@/api/taskApi";
@@ -33,6 +33,13 @@ export const useTaskStore = defineStore("task", () => {
     devices: true,
   });
   function setSelectedTask(task: Task | null) {
+    if (!task) {
+      selectedTask.value.relatedTasks.forEach((relatedTask) => {
+        if (relatedTask.id && relatedTask.id < 0) {
+          tasks.value = tasks.value.filter((task) => task.id != relatedTask.id);
+        }
+      });
+    }
     selectedTask.value = task;
   }
   function setTaskIndicatorDisplay(
@@ -42,7 +49,7 @@ export const useTaskStore = defineStore("task", () => {
     taskIndicatorDisplay[displayName] = value;
   }
   function addResource(taskId: number, type: string) {
-    const updatedTask = tasks.value.find((task) => {
+    let updatedTask = tasks.value.find((task) => {
       if (task.id == taskId) {
         return task;
       }
@@ -67,22 +74,22 @@ export const useTaskStore = defineStore("task", () => {
     });
     switch (type) {
       case "Employee":
-        updatedTask.allEmployeeCount += 1;
+        updatedTask.allEmployeeCount = Number(updatedTask.allEmployeeCount) + 1;
         task.taskTemplate.employees = updatedTask.allEmployeeCount;
         break;
       case "Vehicle":
-        updatedTask.allVehicleCount += 1;
+        updatedTask.allVehicleCount = Number(updatedTask.allVehicleCount) + 1;
         task.taskTemplate.vehicle = updatedTask.allVehicleCount;
         break;
 
       default:
-        updatedTask.allDeviceCount += 1;
+        updatedTask.allDeviceCount = Number(updatedTask.allDeviceCount) + 1;
         task.taskTemplate.devices = updatedTask.allDeviceCount;
         break;
     }
   }
   function addAssignedResource(taskId: number, type: string) {
-    const updatedTask = tasks.value.find((task) => {
+    let updatedTask = tasks.value.find((task) => {
       if (task.id == taskId) {
         return task;
       }
@@ -92,14 +99,14 @@ export const useTaskStore = defineStore("task", () => {
     }
     switch (type) {
       case "Employee":
-        updatedTask.employeeCount += 1;
+        updatedTask.employeeCount = Number(updatedTask.employeeCount) + 1;
         break;
       case "Vehicle":
-        updatedTask.vehicleCount += 1;
+        updatedTask.vehicleCount = Number(updatedTask.vehicleCount) + 1;
         break;
 
       default:
-        updatedTask.deviceCout += 1;
+        updatedTask.deviceCout = Number(updatedTask.deviceCout) + 1;
         break;
     }
   }
@@ -136,25 +143,144 @@ export const useTaskStore = defineStore("task", () => {
       }
     }
   }
-  async function addRelatedDate(id, singleTask, dateTime) {
+  function removeRelatedTasks() {
+    // Remove Added realated resource before
+    selectedTask.value.relatedTasks.forEach((relatedTask, index) => {
+      if (
+        index > 0 &&
+        relatedTask.id &&
+        relatedTask.id.toString().length > 12
+      ) {
+        tasks.value = tasks.value.filter((task) => task.id != relatedTask.id);
+      }
+    });
+
+    selectedTask.value.relatedTasks.length = 1;
+  }
+  function addRelatedDate(dateTime) {
+    const id = generateMinusId();
+    selectedTask.value.relatedTasks.push({
+      id,
+      date: dateTime.startDate,
+      startTime: dateTime.startTime,
+      endTime: dateTime.endTime,
+      taskTemplate: {
+        id,
+        employees_count: selectedTask.value.taskTemplate.employees_count,
+        employees: selectedTask.value.taskTemplate.employees,
+        vehicle_count: selectedTask.value.taskTemplate.vehicle_count,
+        vehicle: selectedTask.value.taskTemplate.vehicle,
+        devices_count: selectedTask.value.taskTemplate.devices_count,
+        devices: selectedTask.value.taskTemplate.devices,
+        startTime: dateTime.startTime,
+        endTime: dateTime.endTime,
+        color: selectedTask.value.taskTemplate.color,
+      },
+      orderDetails: {
+        latitude: "",
+        longitude: "",
+        id: selectedTask.value.orderDetails.id,
+        orderNumber: selectedTask.value.orderDetails.orderNumber,
+        customerName:
+          selectedTask.value.orderDetails.customerName || "No Customer",
+      },
+      otherDetails: {
+        requiredSkills: "",
+        dress: "",
+        language: "",
+        teamLeadDescription: "",
+        teamLeadContactPerson: "",
+        notificationTemplate: "",
+      },
+      resources: {
+        devices: [],
+        users: [],
+        vehicles: [],
+      },
+      mappedResources: generateDefaultResources(
+        {
+          devices: [],
+          users: [],
+          vehicles: [],
+        },
+        {
+          employees: selectedTask.value.taskTemplate.employees,
+          vehicle: selectedTask.value.taskTemplate.vehicle,
+          devices: selectedTask.value.taskTemplate.devices,
+        }
+      ),
+    });
+    const tempTask = {
+      id,
+      title: selectedTask.value.title,
+      startTime: dateTime.startTime,
+      endTime: dateTime.endTime,
+      description: selectedTask.value.description,
+      date: dateTime.startDate,
+      color: "#f00",
+      deviceCout: selectedTask.value.taskTemplate.devices_count || 0,
+      allDeviceCount: selectedTask.value.taskTemplate.devices || 0,
+      employeeCount: selectedTask.value.taskTemplate.employees_count || 0,
+      allEmployeeCount: selectedTask.value.taskTemplate.employees || 0,
+      vehicleCount: selectedTask.value.taskTemplate.vehicle_count || 0,
+      allVehicleCount: selectedTask.value.taskTemplate.vehicle || 0,
+      orderId: selectedTask.value.orderDetails.id,
+      users: selectedTask.value.users,
+      address: selectedTask.value.taskTemplate.location,
+      customer: selectedTask.value.orderDetails.customerName || "No Customer",
+    };
+    addTask(tempTask);
+  }
+  async function addRelatedResources(id, singleTask, dateTime) {
     selectedTask.value.relatedTasks.push({
       date: dateTime.startDate,
       startTime: dateTime.startTime,
       endTime: dateTime.endTime,
       taskTemplate: {
         id: -1,
-        employees_count:
-          selectedTask.value.taskTemplate.employee_occupied_count,
-        employees: selectedTask.value.taskTemplate.employee_available_count,
-        vehicle_count: selectedTask.value.taskTemplate.vehicle_occupied_count,
-        vehicle: selectedTask.value.taskTemplate.vehicle_available_count,
-        devices_count: selectedTask.value.taskTemplate.device_occupied_count,
-        devices: selectedTask.value.taskTemplate.device_available_count,
+        employees_count: selectedTask.value.taskTemplate.employees_count,
+        employees: selectedTask.value.taskTemplate.employees,
+        vehicle_count: selectedTask.value.taskTemplate.vehicle_count,
+        vehicle: selectedTask.value.taskTemplate.vehicle,
+        devices_count: selectedTask.value.taskTemplate.devices_count,
+        devices: selectedTask.value.taskTemplate.devices,
         startTime: dateTime.startTime,
         endTime: dateTime.endTime,
+        color: selectedTask.value.taskTemplate.color,
       },
-      resources: [],
-      mappedResources: [],
+      orderDetails: {
+        latitude: "",
+        longitude: "",
+        id: selectedTask.value.orderDetails.id,
+        orderNumber: selectedTask.value.orderDetails.orderNumber,
+        customerName:
+          selectedTask.value.orderDetails.customerName || "No Customer",
+      },
+      otherDetails: {
+        requiredSkills: "",
+        dress: "",
+        language: "",
+        teamLeadDescription: "",
+        teamLeadContactPerson: "",
+        notificationTemplate: "",
+      },
+      resources: {
+        devices: [],
+        users: [],
+        vehicles: [],
+      },
+      mappedResources: generateDefaultResources(
+        {
+          devices: [],
+          users: [],
+          vehicles: [],
+        },
+        {
+          employees: selectedTask.value.taskTemplate.employees,
+          vehicle: selectedTask.value.taskTemplate.vehicle,
+          devices: selectedTask.value.taskTemplate.devices,
+        }
+      ),
     });
     const savedTaskId = await updateTask(id, singleTask);
     const newTask = {
@@ -190,9 +316,10 @@ export const useTaskStore = defineStore("task", () => {
       permission: taskData.taskTemplate.permission,
       date_type: "date",
       duration: null,
-      start_time: null,
-      end_time: null,
-      resource_location_category_value: null,
+      start_time: taskData.startTime,
+      end_time: taskData.endTime,
+      resource_location_category_value:
+        taskData.taskTemplate.resource_location_category,
       task_description: taskData.description,
       required_skills: null,
       dress: null,
@@ -201,17 +328,31 @@ export const useTaskStore = defineStore("task", () => {
       location: null,
       latitude: taskData.orderDetails.latitude || "",
       longitude: taskData.orderDetails.longitude || "",
-      repetitions: 1,
-      repetitions_date: ["2025-04-29"],
+      repetitions: selectedTask.value.relatedTasks.length,
+      repetitions_date: selectedTask.value.relatedTasks.map(
+        (task) => task.date || ""
+      ),
       tasks_contact_person: [null],
       teamlead_description: null,
       teamlead_contact_person: null,
-      emp: [[taskData.taskTemplate.employees_count || ""]],
-      e_count: [taskData.taskTemplate.employees || 0],
-      veh: [[taskData.taskTemplate.vehicle_count || ""]],
-      v_count: [taskData.taskTemplate.vehicle || 0],
-      dev: [[taskData.taskTemplate.devices_count || ""]],
-      d_count: [taskData.taskTemplate.devices || 0],
+      emp: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.employeesIds || []
+      ),
+      e_count: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.employees || 0
+      ),
+      veh: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.vehiclesIds || []
+      ),
+      v_count: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.vehicle || 0
+      ),
+      dev_rep: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.devicesIds || []
+      ),
+      d_count: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.devices || 0
+      ),
       language: [],
       predecessor: [],
       successor: [],
@@ -223,33 +364,46 @@ export const useTaskStore = defineStore("task", () => {
       input_end_date: null,
       rates: [0],
       base_wage: [0],
-      plan_start_time: ["00:00"],
-      plan_end_time: ["00:00"],
-      pause_time: ["00:00"],
+      plan_start_time: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.startTime || "00:00"
+      ),
+      plan_end_time: selectedTask.value.relatedTasks.map(
+        (task) => task.taskTemplate.endTime || "00:00"
+      ),
+      pause_time: selectedTask.value.relatedTasks.map((task) => "00:00"),
       repeptition_type: 0,
-      travel_charges: [0],
+      travel_charges: selectedTask.value.relatedTasks.map((task) => 0),
       is_add_date: true,
       primary_color: "task_template",
-      custom_emp: [[]],
-      custom_emp_open: [[]],
+      custom_emp: selectedTask.value.relatedTasks.map((task) => []),
+      custom_open: selectedTask.value.relatedTasks.map((task) => []),
       task_status: null,
       task_status_id: null,
     };
     const onSuccess = (res) => {
-      const newTask: Task = {
-        id: res.task_ids[0],
-        title: taskData.title,
-        description: taskData.description,
-        date: taskData.date,
-        color: taskData.color || "#e5e7eb",
-        deviceCout: Number(taskData.taskTemplate.devices_count),
-        allDeviceCount: Number(taskData.taskTemplate.devices),
-        employeeCount: Number(taskData.taskTemplate.employees_count),
-        allEmployeeCount: Number(taskData.taskTemplate.employees),
-        vehicleCount: Number(taskData.taskTemplate.vehicle_count),
-        allVehicleCount: Number(taskData.taskTemplate.vehicle),
-      };
-      addTask(newTask);
+      taskData.relatedTasks.forEach((item, index) => {
+        debugger;
+        const newTask: Task = {
+          id: res.task_ids[index],
+          title: item.title,
+          description: item.description,
+          date: item.date,
+          color: item.taskTemplate.color || "#e5e7eb",
+          deviceCout: Number(item.taskTemplate.devices_count) || 0,
+          allDeviceCount: Number(item.taskTemplate.devices) || 0,
+          employeeCount: Number(item.taskTemplate.employees_count) || 0,
+          allEmployeeCount: Number(item.taskTemplate.employees) || 0,
+          vehicleCount: Number(item.taskTemplate.vehicle_count) || 0,
+          allVehicleCount: Number(item.taskTemplate.vehicle) || 0,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          customer: item.orderDetails.customerName || "No Customer",
+          orderId: item.orderDetails.id,
+          users: item.users,
+          address: item.taskTemplate.location,
+        };
+        addTask(newTask);
+      });
       globalStore.setLoadingApi(false);
     };
     taskApi.create(mockTask, { onSuccess });
@@ -457,7 +611,9 @@ export const useTaskStore = defineStore("task", () => {
     return selectedTask.value;
   }
   function continueToCreate(taskData) {
+    const id = generateMinusId();
     const newTask = {
+      id,
       title: taskData.taskTitle,
       description: taskData.description,
       date: taskData.date,
@@ -478,12 +634,93 @@ export const useTaskStore = defineStore("task", () => {
         teamLeadContactPerson: "",
         notificationTemplate: "",
       },
-      taskTemplate: taskData.taskTemplate,
+      taskTemplate: { ...taskData.taskTemplate, id },
       activities: [],
-      resources: [],
+      resources: {
+        devices: [],
+        users: [],
+        vehicles: [],
+      },
+      mappedResources: generateDefaultResources(
+        {
+          devices: [],
+          users: [],
+          vehicles: [],
+        },
+        {
+          employees: taskData.taskTemplate.employees,
+          vehicle: taskData.taskTemplate.vehicle,
+          devices: taskData.taskTemplate.devices,
+        }
+      ),
       attachments: [],
-      relatedTasks: [],
+      relatedTasks: [
+        {
+          id,
+          title: taskData.taskTitle,
+          description: taskData.description,
+          date: taskData.date,
+          startTime: "00:00",
+          endTime: "00:00",
+          orderDetails: {
+            latitude: "",
+            longitude: "",
+            id: taskData.orderDetails.id,
+            orderNumber: taskData.orderDetails.orderNumber,
+            customerName: taskData.orderDetails.customerName || "No Customer",
+          },
+          otherDetails: {
+            requiredSkills: "",
+            dress: "",
+            language: "",
+            teamLeadDescription: "",
+            teamLeadContactPerson: "",
+            notificationTemplate: "",
+          },
+          taskTemplate: { ...taskData.taskTemplate, id },
+          activities: [],
+          resources: {
+            devices: [],
+            users: [],
+            vehicles: [],
+          },
+          mappedResources: generateDefaultResources(
+            {
+              devices: [],
+              users: [],
+              vehicles: [],
+            },
+            {
+              employees: taskData.taskTemplate.employees,
+              vehicle: taskData.taskTemplate.vehicle,
+              devices: taskData.taskTemplate.devices,
+            }
+          ),
+          attachments: [],
+        },
+      ],
     };
+    const tempTask = {
+      id,
+      title: taskData.taskTitle,
+      startTime: taskData.startTime,
+      endTime: taskData.endTime,
+      description: taskData.description,
+      date: taskData.date,
+      // color: taskData.taskTemplate.color || "#e5e7eb",
+      color: "#f00",
+      deviceCout: taskData.taskTemplate.devices_count || 0,
+      allDeviceCount: taskData.taskTemplate.devices || 0,
+      employeeCount: taskData.taskTemplate.employees_count || 0,
+      allEmployeeCount: taskData.taskTemplate.employees || 0,
+      vehicleCount: taskData.taskTemplate.vehicle_count || 0,
+      allVehicleCount: taskData.taskTemplate.vehicle || 0,
+      orderId: taskData.orderDetails.id,
+      users: taskData.users,
+      address: taskData.taskTemplate.location,
+      customer: taskData.orderDetails.customerName || "No Customer",
+    };
+    addTask(tempTask);
     setSelectedTask(newTask);
   }
 
@@ -575,6 +812,8 @@ export const useTaskStore = defineStore("task", () => {
     createTask,
     updateTask,
     addRelatedDate,
+    addRelatedResources,
+    removeRelatedTasks,
     addResource,
     addResourcesId,
     addAssignedResource,

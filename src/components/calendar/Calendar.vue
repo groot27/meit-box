@@ -133,7 +133,6 @@ const handleTaskClick = (task: Task, event: MouseEvent) => {
 };
 
 const closeTaskModal = () => {
-  taskStore.setSelectedTask(null);
   isTaskModalOpen.value = false;
   // selectedDate.value = null;
   modalPosition.value = null;
@@ -145,6 +144,7 @@ const closeTaskInfoModal = () => {
 };
 
 const closeTaskEditSidebar = () => {
+  taskStore.setSelectedTask(null);
   isTaskEditSidebarOpen.value = false;
   selectedTask.value = null;
   // Remove taskId from URL by navigating back to base route

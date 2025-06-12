@@ -112,6 +112,8 @@ const fillDescription = () => {
         devices_count: taskTemplates.value[template].devices,
         devices: taskTemplates.value[template].devices_count,
         permission: taskTemplates.value[template].permission,
+        locationDescription: "",
+        location: orderDetails.value.orderLocation,
       };
     }
   });
@@ -152,6 +154,8 @@ watch(selectedOrder, () => {
           id: taskOrders.value[order].id,
           customerName: taskOrders.value[order].customer_name || "No Customer",
           orderNumber: taskOrders.value[order].order_number || "No Order",
+          orderLocation:
+            taskOrders.value[order].order_location || "No Location",
         };
       }
     });

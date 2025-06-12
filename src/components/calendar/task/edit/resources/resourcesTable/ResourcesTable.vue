@@ -114,10 +114,10 @@ const updateEmployeeStatus = async (id, status) => {
       type: "emp",
       user_id: id,
     });
-    taskStore.selectedTask.value.mappedResources =
-      taskStore.selectedTask.value.mappedResources.filter(
-        (resource) => resource.resourcesId !== id
-      );
+    // taskStore.selectedTask.value.mappedResources =
+    //   taskStore.selectedTask.value.mappedResources.filter(
+    //     (resource) => resource.resourcesId !== id
+    //   );
   } else {
     await taskApi.updateEmployeeStatus({
       status: status === "confirmed" ? "assigned" : status,
@@ -126,11 +126,11 @@ const updateEmployeeStatus = async (id, status) => {
       task_id: props.taskId,
       type: "emp",
     });
-    taskStore.selectedTask.value.mappedResources.forEach((resource) => {
-      if (resource.resourcesId == id) {
-        resource.status = status;
-      }
-    });
+    // taskStore.selectedTask.value.mappedResources.forEach((resource) => {
+    //   if (resource.resourcesId == id) {
+    //     resource.status = status;
+    //   }
+    // });
   }
   globalStore.setLoadingApi(false);
 };
@@ -145,10 +145,10 @@ const updateVehicleStatus = async (id, status) => {
       type: "emp",
       user_id: id,
     });
-    taskStore.selectedTask.value.mappedResources =
-      taskStore.selectedTask.value.mappedResources.filter(
-        (resource) => resource.resourcesId !== id
-      );
+    // taskStore.selectedTask.value.mappedResources =
+    //   taskStore.selectedTask.value.mappedResources.filter(
+    //     (resource) => resource.resourcesId !== id
+    //   );
   } else {
     await taskApi.updateEmployeeStatus({
       status: status === "confirmed" ? "assigned" : status,
@@ -157,11 +157,11 @@ const updateVehicleStatus = async (id, status) => {
       task_id: props.taskId,
       type: "emp",
     });
-    taskStore.selectedTask.value.mappedResources.forEach((resource) => {
-      if (resource.resourcesId == id) {
-        resource.status = status;
-      }
-    });
+    // taskStore.selectedTask.value.mappedResources.forEach((resource) => {
+    //   if (resource.resourcesId == id) {
+    //     resource.status = status;
+    //   }
+    // });
   }
   globalStore.setLoadingApi(false);
 };
@@ -172,11 +172,11 @@ const updateIdsOfTask = (id, type) => {
 
 const newStatus = (index, type) => {
   taskStore.addAssignedResource(props.taskId, type);
-  taskStore.selectedTask.value.mappedResources.forEach((resource) => {
-    if (resource.id === index) {
-      resource.status = type === "Employee" ? "confirmed" : "planned";
-    }
-  });
+  // taskStore.selectedTask.value.mappedResources.forEach((resource) => {
+  //   if (resource.id === index) {
+  //     resource.status = type === "Employee" ? "confirmed" : "planned";
+  //   }
+  // });
 };
 onMounted(() => {
   // document.addEventListener("click", handleClickOutside);

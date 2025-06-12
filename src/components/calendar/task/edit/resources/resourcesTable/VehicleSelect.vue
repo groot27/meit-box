@@ -43,11 +43,6 @@ const confirmedVehicle = async (
   newVehicle: vehicleType,
   oldVehicle: vehicleType
 ) => {
-  if (!route.params.taskId) {
-    emit("update:Ids", newVehicle.key, "Vehicle");
-    emit("addNewStatus", props.row, "Vehicle");
-    return;
-  }
   globalStore.setLoadingApi(true);
   await taskApi.confirmVehicleTask({
     check_conflict_task: true,
@@ -62,6 +57,11 @@ const confirmedVehicle = async (
 
 const setNewVehicle = (vehicle: vehicleType) => {
   if (vehicle.value && vehicle.value != props.vehicle.value) {
+    if (!route.params.taskId) {
+      emit("update:Ids", vehicle.key, "Vehicle");
+      emit("addNewStatus", props.row, "Vehicle");
+      return;
+    }
     confirmedVehicle(vehicle, props.vehicle);
   }
 };

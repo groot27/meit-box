@@ -46,12 +46,6 @@ const fetchEmployeeOptions = async (query: string = "") => {
 };
 
 const confirmedEmployee = async (employee: employeeType) => {
-  if (!route.params.taskId) {
-    selectedEmployee.value = employee.value;
-    emit("update:Ids", employee.key, "Employee");
-    emit("addNewStatus", props.row, "Employee");
-    return;
-  }
   globalStore.setLoadingApi(true);
   employeeId.value = employee.key;
   employeeName.value = employee.value;
@@ -89,10 +83,18 @@ onMounted(() => {
     }
   }
 });
+const setNewEmployee = (employee) => {
+  if (!route.params.taskId) {
+    emit("update:Ids", employee.key, "Employee");
+    emit("addNewStatus", props.row, "Employee");
+    return;
+  }
+  confirmedEmployee(employee);
+};
 </script>
 <template>
   <router-link
-    v-if="selectedEmployee"
+    v-if="employeeName"
     class="text-blue-400"
     :to="`/user/${employeeId}`"
     >{{ employeeName }}</router-link
@@ -104,6 +106,6 @@ onMounted(() => {
     :placeholder="t('common.placeholder.employee')"
     :loading="employeeLoading"
     @search="fetchEmployeeOptions"
-    @update:model-value="confirmedEmployee"
+    @update:model-value="setNewEmployee"
   />
 </template>
