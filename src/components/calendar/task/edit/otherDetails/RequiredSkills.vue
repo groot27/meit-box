@@ -8,7 +8,7 @@ import { useCalendarStore } from "@/stores/CalendarStore";
 const { t } = useI18n();
 const calendarStore = useCalendarStore();
 const props = defineProps<{
-  skill: string;
+  skill: string | null | undefined;
 }>();
 const emit = defineEmits<{
   (e: "update", selectedRequiredSkill);

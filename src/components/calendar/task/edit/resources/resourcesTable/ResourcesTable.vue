@@ -7,7 +7,6 @@ import DevicesSelect from "./DevicesSelect.vue";
 import { taskApi } from "@/api/taskApi";
 import { statusColorClasses } from "@/types/TaskTypes";
 import { useGlobalStore } from "@/stores";
-import { onBeforeUnmount } from "vue";
 import { useCalendarStore } from "@/stores/CalendarStore";
 import { useTaskStore } from "@/stores/TaskStore";
 import { useToast } from "vue-toastification";
@@ -16,15 +15,15 @@ const toast = useToast();
 const { t } = useI18n();
 const taskStore = useTaskStore();
 const props = defineProps<{
-  devices: string;
-  vehicle: string;
-  employees: string;
-  resourcesValues: any;
-  date: string;
-  startTime: string;
-  endTime: string;
-  taskId: number;
-  resources: any;
+  devices: string | null | undefined;
+  vehicle: string | null | undefined;
+  employees: string | null | undefined;
+  resourcesValues: any | null | undefined;
+  date: string | null | undefined;
+  startTime: string | null | undefined;
+  endTime: string | null | undefined;
+  taskId: number | null | undefined;
+  resources: any | null | undefined;
 }>();
 const emit = defineEmits<{
   (e: "update:resourcesIds", id, type: string): void;
@@ -114,10 +113,6 @@ const updateEmployeeStatus = async (id, status) => {
       type: "emp",
       user_id: id,
     });
-    // taskStore.selectedTask.value.mappedResources =
-    //   taskStore.selectedTask.value.mappedResources.filter(
-    //     (resource) => resource.resourcesId !== id
-    //   );
   } else {
     await taskApi.updateEmployeeStatus({
       status: status === "confirmed" ? "assigned" : status,
@@ -126,11 +121,6 @@ const updateEmployeeStatus = async (id, status) => {
       task_id: props.taskId,
       type: "emp",
     });
-    // taskStore.selectedTask.value.mappedResources.forEach((resource) => {
-    //   if (resource.resourcesId == id) {
-    //     resource.status = status;
-    //   }
-    // });
   }
   globalStore.setLoadingApi(false);
 };
@@ -145,10 +135,6 @@ const updateVehicleStatus = async (id, status) => {
       type: "emp",
       user_id: id,
     });
-    // taskStore.selectedTask.value.mappedResources =
-    //   taskStore.selectedTask.value.mappedResources.filter(
-    //     (resource) => resource.resourcesId !== id
-    //   );
   } else {
     await taskApi.updateEmployeeStatus({
       status: status === "confirmed" ? "assigned" : status,
@@ -157,11 +143,6 @@ const updateVehicleStatus = async (id, status) => {
       task_id: props.taskId,
       type: "emp",
     });
-    // taskStore.selectedTask.value.mappedResources.forEach((resource) => {
-    //   if (resource.resourcesId == id) {
-    //     resource.status = status;
-    //   }
-    // });
   }
   globalStore.setLoadingApi(false);
 };
@@ -172,11 +153,6 @@ const updateIdsOfTask = (id, type) => {
 
 const newStatus = (index, type) => {
   taskStore.addAssignedResource(props.taskId, type);
-  // taskStore.selectedTask.value.mappedResources.forEach((resource) => {
-  //   if (resource.id === index) {
-  //     resource.status = type === "Employee" ? "confirmed" : "planned";
-  //   }
-  // });
 };
 onMounted(() => {
   // document.addEventListener("click", handleClickOutside);

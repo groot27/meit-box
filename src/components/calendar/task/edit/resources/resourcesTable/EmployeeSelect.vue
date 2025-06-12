@@ -17,10 +17,10 @@ type employeeType = {
   value: string;
 };
 const props = defineProps<{
-  employee: employeeType;
-  employees: any;
-  row: number;
-  taskId: number;
+  employee: employeeType | null | undefined;
+  employees: any | null | undefined;
+  row: number | null | undefined;
+  taskId: number | null | undefined;
 }>();
 const emit = defineEmits<{
   (e: "update", selectedEmployee);

@@ -14,10 +14,10 @@ type vehicleType = {
   value: string;
 };
 const props = defineProps<{
-  vehicle: vehicleType;
-  vehicles: any;
-  row: number;
-  taskId: number;
+  vehicle: vehicleType | null | undefined;
+  vehicles: any | null | undefined;
+  row: number | null | undefined;
+  taskId: number | null | undefined;
 }>();
 const emit = defineEmits<{
   (e: "update", selectedVehicle);

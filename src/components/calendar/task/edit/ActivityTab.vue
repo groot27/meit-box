@@ -7,8 +7,8 @@ import { ActivityComment, ActivityHistory } from "@/types/TaskTypes";
 const { t } = useI18n();
 
 const props = defineProps<{
-  comments: ActivityComment[];
-  history: ActivityHistory[];
+  comments: ActivityComment[] | null | undefined;
+  history: ActivityHistory[] | null | undefined;
 }>();
 
 const activityFilter = ref<"all" | "comments" | "history">("all");

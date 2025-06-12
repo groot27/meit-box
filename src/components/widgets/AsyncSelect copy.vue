@@ -12,8 +12,8 @@ defineOptions({
 const props = defineProps<{
   modelValue: string | object | null;
   options: Array<string | object>;
-  placeholder?: string;
-  loading: boolean;
+  placeholder?: string | null | undefined;
+  loading: boolean | null | undefined;
 }>();
 
 const emit = defineEmits<{

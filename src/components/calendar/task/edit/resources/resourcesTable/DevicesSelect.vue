@@ -7,8 +7,8 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 const props = defineProps<{
-  device: string;
-  devices: any;
+  device: string | null | undefined;
+  devices: any | null | undefined;
 }>();
 const emit = defineEmits<{
   (e: "update", selectedDevice);

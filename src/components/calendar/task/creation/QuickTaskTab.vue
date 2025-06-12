@@ -10,7 +10,7 @@ import { format } from "date-fns";
 
 const { t } = useI18n();
 const porps = defineProps<{
-  date: any;
+  date: any | null | undefined;
 }>();
 const emit = defineEmits<{
   (

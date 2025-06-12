@@ -32,7 +32,9 @@ const emit = defineEmits<{
 
 const activeTab = ref("project");
 
-const singleTask: TaskEditType = computed(() => taskStore.selectedTask);
+const singleTask = computed<TaskEditType | undefined>(
+  () => taskStore.selectedTask
+);
 const route = useRoute();
 const router = useRouter();
 const comments = ref([]);
@@ -49,14 +51,14 @@ const handleSubmit = () => {
 };
 const addRelatedTasks = () => {
   taskStore.removeRelatedTasks();
-  let currentDate = new Date(singleTask.details.date);
-  const endDate = new Date(singleTask.details.endDate);
+  let currentDate = new Date(singleTask.value.details.date);
+  const endDate = new Date(singleTask.value.details.endDate);
   currentDate = addDays(currentDate, 1);
   while (currentDate <= endDate) {
     taskStore.addRelatedDate({
       startDate: format(currentDate, "yyyy-MM-dd"),
-      startTime: singleTask.details.startTime,
-      endTime: singleTask.details.endTime,
+      startTime: singleTask.value.details.startTime,
+      endTime: singleTask.value.details.endTime,
     });
     currentDate = addDays(currentDate, 1);
   }
@@ -68,13 +70,13 @@ const handleClose = () => {
 
 const handleAddDocuments = (files: File[]) => {
   const formData = new FormData();
-  formData.append("order_id", singleTask.orderDetails.id.toString());
-  formData.append("task_id", singleTask.details.id.toString());
+  formData.append("order_id", singleTask.value.orderDetails.id.toString());
+  formData.append("task_id", singleTask.value.details.id.toString());
   formData.append("file", files[0]);
   const fileName = files[0].name.split(".")[0];
   globalStore.setLoadingApi(true);
   const onSuccess = (res) => {
-    singleTask.attachments.push({ id: res.document_id, name: fileName });
+    singleTask.value.attachments.push({ id: res.document_id, name: fileName });
     globalStore.setLoadingApi(false);
   };
   taskApi.addDocument(formData, { onSuccess });
@@ -82,7 +84,7 @@ const handleAddDocuments = (files: File[]) => {
 
 const handleRemoveDocument = (docId: string) => {
   const onSuccess = () => {
-    singleTask.attachments = singleTask.attachments.filter(
+    singleTask.value.attachments = singleTask.value.attachments.filter(
       (file) => file.id != docId
     );
     globalStore.setLoadingApi(false);
@@ -97,35 +99,36 @@ const handleArchiveClick = () => {
 const updateResourcesIdsTask = (id, type) => {
   switch (type) {
     case "Employee":
-      if (singleTask.details.employeesIds) {
-        singleTask.details.employeesIds.push(id);
+      if (singleTask.value.details.employeesIds) {
+        singleTask.value.details.employeesIds.push(id);
       } else {
-        singleTask.details.employeesIds = [id];
+        singleTask.value.details.employeesIds = [id];
       }
-      singleTask.details.employeesCount =
-        singleTask.details.employeesIds.length;
+      singleTask.value.details.employeesCount =
+        singleTask.value.details.employeesIds.length;
       break;
     case "Vehicle":
-      if (singleTask.details.vehiclesIds) {
-        singleTask.details.vehiclesIds.push(id);
+      if (singleTask.value.details.vehiclesIds) {
+        singleTask.value.details.vehiclesIds.push(id);
       } else {
-        singleTask.details.vehiclesIds = [id];
+        singleTask.value.details.vehiclesIds = [id];
       }
-      singleTask.details.vehiclesCount = singleTask.details.vehiclesIds.length;
+      singleTask.value.details.vehiclesCount =
+        singleTask.value.details.vehiclesIds.length;
       break;
     default:
-      if (singleTask.details.devicesIds) {
-        singleTask.details.devicesIds.push(id);
+      if (singleTask.value.details.devicesIds) {
+        singleTask.value.details.devicesIds.push(id);
       } else {
-        singleTask.details.devicesIds = [id];
+        singleTask.value.details.devicesIds = [id];
       }
       break;
   }
   // emit("update", singleTask);
 };
 const updateLocation = (place) => {
-  singleTask.orderDetails.latitude = place.geometry.location.lat();
-  singleTask.orderDetails.longitude = place.geometry.location.lng();
+  singleTask.value.orderDetails.latitude = place.geometry.location.lat();
+  singleTask.value.orderDetails.longitude = place.geometry.location.lng();
 };
 const updateRepeatTask = async (dateTime) => {
   await taskStore.addRelatedResources(

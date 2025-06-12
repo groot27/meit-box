@@ -26,7 +26,7 @@ const autocompleteRef = ref<InstanceType<
 
 // Get props
 const props = defineProps<{
-  apiKey: string;
+  apiKey: string | null | undefined;
   address?: string | null;
 }>();
 const internalAddress = ref(props.address ?? "");

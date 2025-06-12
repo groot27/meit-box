@@ -10,12 +10,12 @@ import NotificationTemplates from "./otherDetails/NotificationTemplates.vue";
 const { t } = useI18n();
 
 const props = defineProps<{
-  requiredSkills: string;
-  dress: string;
-  language: Array<string>;
-  teamLeadDescription: string;
-  teamLeadContactPerson: string;
-  notificationTemplate: string;
+  requiredSkills: string | null | undefined;
+  dress: string | null | undefined;
+  language: Array<string> | null | undefined;
+  teamLeadDescription: string | null | undefined;
+  teamLeadContactPerson: string | null | undefined;
+  notificationTemplate: string | null | undefined;
 }>();
 
 const emit = defineEmits<{

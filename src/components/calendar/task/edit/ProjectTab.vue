@@ -10,20 +10,20 @@ import { useRoute } from "vue-router";
 const { t } = useI18n();
 
 const props = defineProps<{
-  order: string;
-  customer: string;
-  taskTitle: string;
-  status: string;
-  permission: string;
-  locationCategory: string;
-  location: string;
-  locationDescription: string;
-  updateTasks: string;
-  startDate: string;
-  endDate: string;
-  startTime: string;
-  endTime: string;
-  description: string;
+  order: string | null | undefined;
+  customer: string | null | undefined;
+  taskTitle: string | null | undefined;
+  status: string | null | undefined;
+  permission: string | null | undefined;
+  locationCategory: string | null | undefined;
+  location: string | null | undefined;
+  locationDescription: string | null | undefined;
+  updateTasks: string | null | undefined;
+  startDate: string | null | undefined;
+  endDate: string | null | undefined;
+  startTime: string | null | undefined;
+  endTime: string | null | undefined;
+  description: string | null | undefined;
 }>();
 
 const emit = defineEmits<{

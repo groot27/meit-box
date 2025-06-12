@@ -8,7 +8,7 @@ import { useCalendarStore } from "@/stores/CalendarStore";
 const { t } = useI18n();
 const calendarStore = useCalendarStore();
 const props = defineProps<{
-  dress: string;
+  dress: string | null | undefined;
 }>();
 
 const emit = defineEmits<{

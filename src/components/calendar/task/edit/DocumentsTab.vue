@@ -7,7 +7,7 @@ import { TaskDocument } from "@/types/TaskTypes";
 const { t } = useI18n();
 
 const props = defineProps<{
-  documents: TaskDocument[];
+  documents: TaskDocument[] | null | undefined;
 }>();
 
 const emit = defineEmits<{

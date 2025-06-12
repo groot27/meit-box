@@ -16,15 +16,15 @@ const globalStore = useGlobalStore();
 const toast = useToast();
 const route = useRoute();
 const props = defineProps<{
-  devices: string;
-  vehicle: string;
-  employees: string;
-  resourcesValues: any;
-  date: string;
-  startTime: string;
-  endTime: string;
-  relatedTasks: any;
-  taskId: number;
+  devices: string | null | undefined;
+  vehicle: string | null | undefined;
+  employees: string | null | undefined;
+  resourcesValues: any | null | undefined;
+  date: string | null | undefined;
+  startTime: string | null | undefined;
+  endTime: string | null | undefined;
+  relatedTasks: any | null | undefined;
+  taskId: number | null | undefined;
 }>();
 const emit = defineEmits<{
   (e: "update:resourcesIds", id, type: string): void;

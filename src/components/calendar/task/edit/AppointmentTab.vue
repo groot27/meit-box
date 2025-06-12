@@ -4,9 +4,9 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 const props = defineProps<{
-  appointmentName: string;
-  username: string;
-  adminGuest: string;
+  appointmentName: string | null | undefined;
+  username: string | null | undefined;
+  adminGuest: string | null | undefined;
 }>();
 
 const emit = defineEmits<{
