@@ -325,7 +325,8 @@ export const useTaskStore = defineStore("task", () => {
       dress: null,
       color: taskData.taskTemplate.color,
       date: null,
-      location: null,
+      location: taskData.taskTemplate.location || null,
+      location_description: taskData.taskTemplate.locationDescription,
       latitude: taskData.orderDetails.latitude || "",
       longitude: taskData.orderDetails.longitude || "",
       repetitions: selectedTask.value.relatedTasks.length,
@@ -382,7 +383,6 @@ export const useTaskStore = defineStore("task", () => {
     };
     const onSuccess = (res) => {
       taskData.relatedTasks.forEach((item, index) => {
-        debugger;
         const newTask: Task = {
           id: res.task_ids[index],
           title: item.title,
@@ -428,7 +428,8 @@ export const useTaskStore = defineStore("task", () => {
       duration: "3",
       start_time: taskData.startTime,
       end_time: taskData.endTime,
-      resource_location_category_value: taskData.location,
+      resource_location_category_value:
+        taskData.taskTemplate.resource_location_category || null,
       task_description: taskData.description,
       invoice_text: null,
       required_skills: taskData.otherDetails.requiredSkills,
@@ -437,7 +438,8 @@ export const useTaskStore = defineStore("task", () => {
       date: taskData.date,
       previous_date: "2025-05-29",
       is_edit: true,
-      location: taskData.location,
+      location: taskData.taskTemplate.location,
+      location_description: taskData.taskTemplate.locationDescription || null,
       latitude: taskData.latitude || null,
       longitude: taskData.longitude || null,
       repetitions: "1",
@@ -466,7 +468,7 @@ export const useTaskStore = defineStore("task", () => {
       successor: [],
       predecessor_hour: null,
       successor_hour: null,
-      start_date: taskData.startDate,
+      start_date: taskData.date,
       end_date: "2025-06-01",
       repetition_value: 0,
       rates_rep: selectedTask.value.relatedTasks.map((task) => "0.00"),
@@ -482,8 +484,9 @@ export const useTaskStore = defineStore("task", () => {
       ),
       travel_charges_rep: selectedTask.value.relatedTasks.map((task) => 0),
       is_add_date: true,
-      updated_date: selectedTask.value.relatedTasks.map((task) => task.date),
-      location_description: null,
+      updated_date: selectedTask.value.relatedTasks.map(
+        (task) => task.date || taskData.date
+      ),
       custom_count_rep: selectedTask.value.relatedTasks.map((task) => 0),
       custom_emp_rep: selectedTask.value.relatedTasks.map((task) => []),
       custom_open_rep: selectedTask.value.relatedTasks.map((task) => []),
@@ -495,29 +498,61 @@ export const useTaskStore = defineStore("task", () => {
     };
     const onSuccess = () => {
       globalStore.setLoadingApi(false);
-      tasks.value = tasks.value.map((task) => {
-        if (task.id == id) {
-          const updatedTask: Task = {
-            id,
-            title: taskData.title,
-            description: taskData.description,
-            date: taskData.date,
-            deviceCout: Number(taskData.taskTemplate.devices_count),
-            allDeviceCount: Number(taskData.taskTemplate.devices),
-            employeeCount: Number(taskData.taskTemplate.employees_count),
-            allEmployeeCount: Number(taskData.taskTemplate.employees),
-            vehicleCount: Number(taskData.taskTemplate.vehicle_count),
-            allVehicleCount: Number(taskData.taskTemplate.vehicle),
-            startTime: taskData.startTime,
-            endTime: taskData.endTime,
-            orderId: taskData.orderDetails.id,
-          };
-          return {
-            ...task,
-            ...updatedTask,
-          };
+      taskData.relatedTasks.forEach((relatedTask) => {
+        const oldTask = tasks.value.find((item) => {
+          if (item.id == relatedTask.taskTemplate.id) {
+            return item;
+          }
+        });
+        if (oldTask) {
+          tasks.value = tasks.value.map((task) => {
+            if (task.id == id) {
+              const updatedTask: Task = {
+                id,
+                title: oldTask.title,
+                description: oldTask.description,
+                date: oldTask.date,
+                deviceCout: Number(oldTask.taskTemplate.devices_count),
+                allDeviceCount: Number(oldTask.taskTemplate.devices),
+                employeeCount: Number(oldTask.taskTemplate.employees_count),
+                allEmployeeCount: Number(oldTask.taskTemplate.employees),
+                vehicleCount: Number(oldTask.taskTemplate.vehicle_count),
+                allVehicleCount: Number(oldTask.taskTemplate.vehicle),
+                startTime: oldTask.startTime,
+                endTime: oldTask.endTime,
+                orderId: oldTask.orderDetails.id,
+                color: oldTask.taskTemplate.color || "#e5e7eb",
+              };
+              return {
+                ...task,
+                ...updatedTask,
+              };
+            }
+            return task;
+          });
+        } else {
+          tasks.value = [
+            ...tasks.value,
+            {
+              id,
+              title: relatedTask.title,
+              description: relatedTask.description,
+              date: taskData.date,
+              deviceCout: Number(relatedTask.taskTemplate.devices_count),
+              allDeviceCount: Number(relatedTask.taskTemplate.devices),
+              employeeCount: Number(relatedTask.taskTemplate.employees_count),
+              allEmployeeCount: Number(relatedTask.taskTemplate.employees),
+              vehicleCount: Number(relatedTask.taskTemplate.vehicle_count),
+              allVehicleCount: Number(relatedTask.taskTemplate.vehicle),
+              startTime: relatedTask.startTime,
+              endTime: relatedTask.endTime,
+              orderId: relatedTask.orderDetails
+                ? relatedTask.orderDetails.id
+                : null,
+              color: relatedTask.taskTemplate.color || "#e5e7eb",
+            },
+          ];
         }
-        return task;
       });
       saveTasks();
     };
