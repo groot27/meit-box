@@ -12,7 +12,7 @@ const { t } = useI18n();
 const props = defineProps<{
   requiredSkills: string;
   dress: string;
-  language: string;
+  language: Array<string>;
   teamLeadDescription: string;
   teamLeadContactPerson: string;
   notificationTemplate: string;
@@ -37,10 +37,7 @@ const emit = defineEmits<{
           t("task.editSidebar.tabs.otherDetails.requiredSkills")
         }}</label>
 
-        <required-skills
-          v-if="props.requiredSkills"
-          :skill="props.requiredSkills"
-        />
+        <required-skills :skill="props.requiredSkills" />
       </div>
 
       <!-- Dress -->

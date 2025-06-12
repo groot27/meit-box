@@ -17,16 +17,19 @@ const emit = defineEmits<{
 
 const selectedNotificationTemplates = ref("");
 const notificationtemplatesLoading = ref(false);
-const notificationtemplatesOptions = ref<string[]>([]);
-const notificationData = ref(null);
+const notificationtemplatesOptions = ref<any>([]);
 const fetchNotificationTemplatesOptions = async (query: string = "") => {
   notificationtemplatesLoading.value = true;
   try {
     const res = await taskApi.getTaskNotificationTemplates(query);
     notificationtemplatesOptions.value = res.data.map(
-      (notificationtemplates) => notificationtemplates.template_name
+      (notificationtemplates) => {
+        return {
+          key: notificationtemplates.id,
+          value: notificationtemplates.template_name,
+        };
+      }
     );
-    notificationData.value = res.data;
   } finally {
     notificationtemplatesLoading.value = false;
   }
@@ -42,19 +45,6 @@ onMounted(() => {
       (notificationtemplates) => notificationtemplates.template_name
     );
 });
-watch(
-  () => props.notification,
-  async (newNotification) => {
-    if (newNotification !== selectedNotificationTemplates.value) {
-      notificationData.value.forEach((item) => {
-        if (item.id == newNotification) {
-          selectedNotificationTemplates.value = item.template_name;
-        }
-      });
-    }
-  },
-  { immediate: true } // Fire once on component mount
-);
 </script>
 <template>
   <async-select

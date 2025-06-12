@@ -56,11 +56,11 @@ const handleTaksEditDisplay = async (taskId) => {
   if (taskId) {
     const task = await taskStore.getTask(taskId);
     if (task) {
-      selectedTask.value = task;
+      // selectedTask.value = task;
       isTaskEditSidebarOpen.value = true;
     }
   } else {
-    selectedTask.value = null;
+    // selectedTask.value = null;
     isTaskEditSidebarOpen.value = false;
   }
 };
@@ -146,7 +146,7 @@ const closeTaskInfoModal = () => {
 const closeTaskEditSidebar = () => {
   taskStore.setSelectedTask(null);
   isTaskEditSidebarOpen.value = false;
-  selectedTask.value = null;
+  // selectedTask.value = null;
   // Remove taskId from URL by navigating back to base route
   router.push("/monthly-view2");
 };
@@ -176,8 +176,8 @@ const handleTaskEdit = (task: Task) => {
   // Close info modal before opening sidebar
   isTaskInfoModalOpen.value = false;
 
-  selectedTask.value = task;
-  isTaskEditSidebarOpen.value = true;
+  // selectedTask.value = task;
+  // isTaskEditSidebarOpen.value = true;
   // Add taskId to URL
   if (task.id) {
     router.push(`/monthly-view2/${task.id}`);
@@ -332,8 +332,7 @@ onMounted(async () => {
     />
 
     <TaskEditSidebar
-      v-if="selectedTask"
-      :task="selectedTask"
+      v-if="isTaskEditSidebarOpen"
       :show="isTaskEditSidebarOpen"
       @close="closeTaskEditSidebar"
       @update="handleTaskUpdate"

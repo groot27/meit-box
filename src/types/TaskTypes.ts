@@ -260,7 +260,10 @@ interface resourceDetailsType {
   users: Array<usersResourceType>;
   vehicles: Array<vehiclesResourceType>;
 }
-interface activitiesType {}
+interface activitiesType {
+  comments: ActivityComment;
+  histories: ActivityHistory;
+}
 interface attachmentsType {}
 export interface TaskType {
   task: TaskDetailsType;
@@ -269,7 +272,65 @@ export interface TaskType {
   activities: activitiesType;
   attachments: Array<attachmentsType>;
 }
+export interface RelatedTaskType {
+  details: {
+    date: string;
+    startTime: string;
+    endTime: string;
+    id: number;
+    employeesCount: number;
+    allEmployeesCount: number;
+    vehiclesCount: number;
+    allVehiclesCount: number;
+    devicesCount: number;
+    allDevicesCount: number;
+  };
+  resources: resourceDetailsType;
+  mappedResources: any;
+}
 export interface TaskEditType {
-  mainTask: TaskType;
-  relatedTasks: Array<TaskType>;
+  orderDetails: {
+    latitude: string;
+    longitude: string;
+    id: number;
+    orderNumber: string;
+    customerName: string;
+  };
+  otherDetails: {
+    requiredSkills: string;
+    dress: [];
+    language: [];
+    teamLeadDescription: string;
+    teamLeadContactPerson: string;
+    notificationTemplate: string;
+  };
+  details: {
+    title: string;
+    description: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    color: string;
+    id: number;
+    employeesCount: number;
+    allEmployeesCount: number;
+    vehiclesCount: number;
+    allVehiclesCount: number;
+    devicesCount: number;
+    allDevicesCount: number;
+    permission: string;
+    resourceLocationCategory: string;
+    location: string;
+    locationDescription: string;
+    endDate: string;
+    employeesIds: Array<number>;
+    vehiclesIds: Array<number>;
+    devicesIds: Array<number>;
+    status: string;
+    updateTasks: string;
+  };
+  activities: activitiesType;
+  resources: resourceDetailsType;
+  attachments: Array<TaskDocument>;
+  relatedTasks;
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { Task } from "@/types/TaskTypes";
+import { Task, TaskEditType } from "@/types/TaskTypes";
 import ProjectTab from "./edit/ProjectTab.vue";
 import ResourcesTab from "./edit/ResourcesTab.vue";
 import OtherDetailsTab from "./edit/OtherDetailsTab.vue";
@@ -20,9 +20,7 @@ const calendarStore = useCalendarStore();
 
 const { t } = useI18n();
 
-const selectedTask = computed(() => taskStore.selectedTask);
 const props = defineProps<{
-  task: Task | null;
   show: boolean;
 }>();
 
@@ -34,50 +32,11 @@ const emit = defineEmits<{
 
 const activeTab = ref("project");
 
-const singleTask = reactive<any>({
-  title: "",
-  description: "",
-  date: "",
-  orderDetails: {},
-  taskTemplate: {},
-  activities: {},
-});
+const singleTask: TaskEditType = computed(() => taskStore.selectedTask);
 const route = useRoute();
 const router = useRouter();
-// Other Details tab state
-const requiredSkills = ref("");
-const dress = ref("");
-const language = ref("doesntMatter");
-const teamLeadDescription = ref("");
-const teamLeadContactPerson = ref("");
-const notificationTemplate = ref("");
 const comments = ref([]);
 const histories = ref([]);
-
-watch(
-  () => taskStore.selectedTask,
-  (newTask) => {
-    if (newTask) {
-      activeTab.value = "project";
-      Object.assign(singleTask, newTask);
-      comments.value = singleTask.activities.comments;
-      histories.value = singleTask.activities.logs;
-      singleTask.endDate = "";
-      // Initialize other details
-      requiredSkills.value = newTask.otherDetails?.requiredSkills || "";
-      dress.value = newTask.otherDetails?.dress || "";
-      language.value = newTask.otherDetails?.language || "doesntMatter";
-      teamLeadDescription.value =
-        newTask.otherDetails?.teamLeadDescription || "";
-      teamLeadContactPerson.value =
-        newTask.otherDetails?.teamLeadContactPerson || "";
-      notificationTemplate.value =
-        newTask.otherDetails?.notificationTemplate || "";
-    }
-  },
-  { immediate: true }
-);
-
 const handleSubmit = () => {
   if (!singleTask) return;
   if (route.params.taskId) {
@@ -90,14 +49,14 @@ const handleSubmit = () => {
 };
 const addRelatedTasks = () => {
   taskStore.removeRelatedTasks();
-  let currentDate = new Date(singleTask.date);
-  const endDate = new Date(singleTask.endDate);
+  let currentDate = new Date(singleTask.details.date);
+  const endDate = new Date(singleTask.details.endDate);
   currentDate = addDays(currentDate, 1);
   while (currentDate <= endDate) {
     taskStore.addRelatedDate({
       startDate: format(currentDate, "yyyy-MM-dd"),
-      startTime: singleTask.startTime,
-      endTime: singleTask.endTime,
+      startTime: singleTask.details.startTime,
+      endTime: singleTask.details.endTime,
     });
     currentDate = addDays(currentDate, 1);
   }
@@ -109,8 +68,8 @@ const handleClose = () => {
 
 const handleAddDocuments = (files: File[]) => {
   const formData = new FormData();
-  formData.append("order_id", singleTask.orderDetails.id);
-  formData.append("task_id", singleTask.taskTemplate.id);
+  formData.append("order_id", singleTask.orderDetails.id.toString());
+  formData.append("task_id", singleTask.details.id.toString());
   formData.append("file", files[0]);
   const fileName = files[0].name.split(".")[0];
   globalStore.setLoadingApi(true);
@@ -138,36 +97,35 @@ const handleArchiveClick = () => {
 const updateResourcesIdsTask = (id, type) => {
   switch (type) {
     case "Employee":
-      if (singleTask.taskTemplate.employeesIds) {
-        singleTask.taskTemplate.employeesIds.push(id);
+      if (singleTask.details.employeesIds) {
+        singleTask.details.employeesIds.push(id);
       } else {
-        singleTask.taskTemplate.employeesIds = [id];
+        singleTask.details.employeesIds = [id];
       }
-      singleTask.taskTemplate.employee_count =
-        singleTask.taskTemplate.employeesIds.length;
+      singleTask.details.employeesCount =
+        singleTask.details.employeesIds.length;
       break;
     case "Vehicle":
-      if (singleTask.taskTemplate.vehiclesIds) {
-        singleTask.taskTemplate.vehicelesIds.push(id);
+      if (singleTask.details.vehiclesIds) {
+        singleTask.details.vehiclesIds.push(id);
       } else {
-        singleTask.taskTemplate.vehicelesIds = [id];
+        singleTask.details.vehiclesIds = [id];
       }
-      singleTask.taskTemplate.vehicle_count =
-        singleTask.taskTemplate.vehicelesIds.length;
+      singleTask.details.vehiclesCount = singleTask.details.vehiclesIds.length;
       break;
     default:
-      if (singleTask.taskTemplate.devicesIds) {
-        singleTask.taskTemplate.devicesIds.push(id);
+      if (singleTask.details.devicesIds) {
+        singleTask.details.devicesIds.push(id);
       } else {
-        singleTask.taskTemplate.devicesIds = [id];
+        singleTask.details.devicesIds = [id];
       }
       break;
   }
   // emit("update", singleTask);
 };
 const updateLocation = (place) => {
-  singleTask.latitude = place.geometry.location.lat();
-  singleTask.longitude = place.geometry.location.lng();
+  singleTask.orderDetails.latitude = place.geometry.location.lat();
+  singleTask.orderDetails.longitude = place.geometry.location.lng();
 };
 const updateRepeatTask = async (dateTime) => {
   await taskStore.addRelatedResources(
@@ -252,22 +210,18 @@ const updateRepeatTask = async (dateTime) => {
         v-if="activeTab === 'project'"
         v-model:order="singleTask.orderDetails.orderNumber"
         v-model:customer="singleTask.orderDetails.customerName"
-        v-model:taskTitle="singleTask.title"
-        v-model:status="singleTask.status"
-        v-model:permission="singleTask.taskTemplate.permission"
-        v-model:locationCategory="
-          singleTask.taskTemplate.resource_location_category
-        "
-        v-model:location="singleTask.taskTemplate.location"
-        v-model:locationDescription="
-          singleTask.taskTemplate.locationDescription
-        "
-        v-model:updateTasks="singleTask.updateTasks"
-        v-model:startDate="singleTask.date"
-        v-model:endDate="singleTask.endDate"
-        v-model:startTime="singleTask.startTime"
-        v-model:endTime="singleTask.endTime"
-        v-model:description="singleTask.description"
+        v-model:taskTitle="singleTask.details.title"
+        v-model:status="singleTask.details.status"
+        v-model:permission="singleTask.details.permission"
+        v-model:locationCategory="singleTask.details.resourceLocationCategory"
+        v-model:location="singleTask.details.location"
+        v-model:locationDescription="singleTask.details.locationDescription"
+        v-model:updateTasks="singleTask.details.updateTasks"
+        v-model:startDate="singleTask.details.date"
+        v-model:endDate="singleTask.details.endDate"
+        v-model:startTime="singleTask.details.startTime"
+        v-model:endTime="singleTask.details.endTime"
+        v-model:description="singleTask.details.description"
         @update:location="updateLocation"
         @update:endDate="addRelatedTasks"
       />
@@ -275,15 +229,15 @@ const updateRepeatTask = async (dateTime) => {
       <!-- Resources Tab -->
       <ResourcesTab
         v-if="activeTab === 'resources'"
-        v-model:devices="singleTask.taskTemplate.devices"
-        v-model:vehicle="singleTask.taskTemplate.vehicle"
-        v-model:employees="singleTask.taskTemplate.employees"
+        v-model:devices="singleTask.details.allDevicesCount"
+        v-model:vehicle="singleTask.details.allVehiclesCount"
+        v-model:employees="singleTask.details.allEmployeesCount"
         v-model:resourcesValues="singleTask.resources"
-        v-model:date="singleTask.date"
-        v-model:startTime="singleTask.startTime"
-        v-model:endTime="singleTask.endTime"
+        v-model:date="singleTask.details.date"
+        v-model:startTime="singleTask.details.startTime"
+        v-model:endTime="singleTask.details.endTime"
         v-model:relatedTasks="singleTask.relatedTasks"
-        v-model:taskId="singleTask.taskTemplate.id"
+        v-model:taskId="singleTask.details.id"
         @update:resourcesIds="updateResourcesIdsTask"
         @update:repeatTask="updateRepeatTask"
       />
@@ -307,8 +261,8 @@ const updateRepeatTask = async (dateTime) => {
       <!-- Activity Tab -->
       <ActivityTab
         v-if="activeTab === 'activity'"
-        :comments="comments"
-        :history="histories"
+        :comments="singleTask.activities.comments"
+        :history="singleTask.activities.histories"
       />
 
       <!-- Documents Tab -->

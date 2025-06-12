@@ -36,10 +36,8 @@ const filteredActivity = computed(() => {
       break;
     default:
       if (
-        props.history &&
-        props.history.length &&
-        props.comments &&
-        props.comments.length
+        (props.history && props.history.length) ||
+        (props.comments && props.comments.length)
       ) {
         items = [
           ...props.comments.map((comment) => ({

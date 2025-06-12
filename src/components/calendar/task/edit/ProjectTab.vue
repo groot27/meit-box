@@ -87,13 +87,17 @@ const onPlaceChanged = (place: any) => {
 const handleShowDescription = () => {
   showLocaltionDescription.value = !showLocaltionDescription.value;
 };
-watch(props, () => {
-  selectedPermission.value = props.permission;
-  allPermissions[selectedPermission.value] = 1;
-  if (props.location) {
-    address.value = props.location;
-  }
-});
+watch(
+  props,
+  () => {
+    selectedPermission.value = props.permission;
+    allPermissions[selectedPermission.value] = 1;
+    if (props.location) {
+      address.value = props.location;
+    }
+  },
+  { deep: true, immediate: true }
+);
 </script>
 
 <template>

@@ -1,6 +1,12 @@
 import { defineStore } from "pinia";
 import { reactive, ref, watch } from "vue";
-import { Task, TaskDisplayType, TaskIndicatorType } from "@/types/TaskTypes";
+import {
+  RelatedTaskType,
+  Task,
+  TaskDisplayType,
+  TaskEditType,
+  TaskIndicatorType,
+} from "@/types/TaskTypes";
 import {
   createQueryString,
   generateDefaultResources,
@@ -19,7 +25,7 @@ export const useTaskStore = defineStore("task", () => {
   const calendarStore = useCalendarStore();
   const globalStore = useGlobalStore();
   const archiveModalDispay = ref(false);
-  const selectedTask = ref<Task>(null);
+  const selectedTask = ref<TaskEditType>(null);
   function setArchiveModalDispay(display: boolean) {
     archiveModalDispay.value = display;
   }
@@ -57,7 +63,7 @@ export const useTaskStore = defineStore("task", () => {
       return;
     }
     const task = selectedTask.value.relatedTasks.find(
-      (task) => task.taskTemplate.id == taskId
+      (task) => task.details.id == taskId
     );
     if (!task) {
       return;
@@ -74,16 +80,16 @@ export const useTaskStore = defineStore("task", () => {
     switch (type) {
       case "Employee":
         updatedTask.allEmployeeCount = Number(updatedTask.allEmployeeCount) + 1;
-        task.taskTemplate.employees = updatedTask.allEmployeeCount;
+        task.details.employees = updatedTask.allEmployeeCount;
         break;
       case "Vehicle":
         updatedTask.allVehicleCount = Number(updatedTask.allVehicleCount) + 1;
-        task.taskTemplate.vehicle = updatedTask.allVehicleCount;
+        task.details.vehicle = updatedTask.allVehicleCount;
         break;
 
       default:
         updatedTask.allDeviceCount = Number(updatedTask.allDeviceCount) + 1;
-        task.taskTemplate.devices = updatedTask.allDeviceCount;
+        task.details.devices = updatedTask.allDeviceCount;
         break;
     }
   }
@@ -111,32 +117,31 @@ export const useTaskStore = defineStore("task", () => {
   }
   function addResourcesId(taskId: number, resourceId: number, type: string) {
     const task = selectedTask.value.relatedTasks.find(
-      (task) => task.taskTemplate.id == taskId
+      (task) => task.details.id == taskId
     );
     if (task) {
       switch (type) {
         case "Employee":
-          if (task.taskTemplate.employeesIds) {
-            task.taskTemplate.employeesIds.push(resourceId);
+          if (task.details.employeesIds) {
+            task.details.employeesIds.push(resourceId);
           } else {
-            task.taskTemplate.employeesIds = [resourceId];
+            task.details.employeesIds = [resourceId];
           }
           break;
         case "Vehicle":
-          if (task.taskTemplate.vehiclesIds) {
-            task.taskTemplate.vehicelesIds.push(resourceId);
+          if (task.details.vehiclesIds) {
+            task.details.vehicelesIds.push(resourceId);
           } else {
-            task.taskTemplate.vehicelesIds = [resourceId];
+            task.details.vehicelesIds = [resourceId];
           }
-          task.taskTemplate.vehicle_count =
-            task.taskTemplate.vehicelesIds.length;
+          task.details.vehicle_count = task.details.vehicelesIds.length;
           break;
 
         default:
-          if (task.taskTemplate.devicesIds) {
-            task.taskTemplate.devicesIds.push(resourceId);
+          if (task.details.devicesIds) {
+            task.details.devicesIds.push(resourceId);
           } else {
-            task.taskTemplate.devicesIds = [resourceId];
+            task.details.devicesIds = [resourceId];
           }
           break;
       }
@@ -336,22 +341,22 @@ export const useTaskStore = defineStore("task", () => {
       teamlead_description: null,
       teamlead_contact_person: null,
       emp: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.employeesIds || []
+        (task) => task.details.employeesIds || []
       ),
       e_count: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.employees || 0
+        (task) => task.details.employees || 0
       ),
       veh: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.vehiclesIds || []
+        (task) => task.details.vehiclesIds || []
       ),
       v_count: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.vehicle || 0
+        (task) => task.details.vehicle || 0
       ),
       dev_rep: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.devicesIds || []
+        (task) => task.details.devicesIds || []
       ),
       d_count: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.devices || 0
+        (task) => task.details.devices || 0
       ),
       language: [],
       predecessor: [],
@@ -365,10 +370,10 @@ export const useTaskStore = defineStore("task", () => {
       rates: [0],
       base_wage: [0],
       plan_start_time: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.startTime || "00:00"
+        (task) => task.details.startTime || "00:00"
       ),
       plan_end_time: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.endTime || "00:00"
+        (task) => task.details.endTime || "00:00"
       ),
       pause_time: selectedTask.value.relatedTasks.map((task) => "00:00"),
       repeptition_type: 0,
@@ -419,7 +424,7 @@ export const useTaskStore = defineStore("task", () => {
       task_template_value: null,
       order_id: taskData.orderDetails.id,
       rep_task_ids: selectedTask.value.relatedTasks.map((task) => {
-        return task.taskTemplate.id || null;
+        return task.details.id || null;
       }),
       task_title: taskData.title,
       permission: taskData.taskTemplate.permission,
@@ -445,22 +450,22 @@ export const useTaskStore = defineStore("task", () => {
       teamlead_description: null,
       teamlead_contact_person: null,
       emp_rep: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.employeesIds || []
+        (task) => task.details.employeesIds || []
       ),
       e_count_rep: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.employees || 0
+        (task) => task.details.employees || 0
       ),
       veh_rep: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.vehiclesIds || []
+        (task) => task.details.vehiclesIds || []
       ),
       v_count_rep: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.vehicle || 0
+        (task) => task.details.vehicle || 0
       ),
       dev_rep: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.devicesIds || []
+        (task) => task.details.devicesIds || []
       ),
       d_count_rep: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.devices || 0
+        (task) => task.details.devices || 0
       ),
       language: [],
       predecessor: [],
@@ -473,10 +478,10 @@ export const useTaskStore = defineStore("task", () => {
       rates_rep: selectedTask.value.relatedTasks.map((task) => "0.00"),
       base_wage_rep: selectedTask.value.relatedTasks.map((task) => "0.00"),
       plan_start_time_rep: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.startTime || "00:00"
+        (task) => task.details.startTime || "00:00"
       ),
       plan_end_time_rep: selectedTask.value.relatedTasks.map(
-        (task) => task.taskTemplate.endTime || "00:00"
+        (task) => task.details.endTime || "00:00"
       ),
       plan_pause_time_rep: selectedTask.value.relatedTasks.map(
         (task) => "00:00"
@@ -577,12 +582,12 @@ export const useTaskStore = defineStore("task", () => {
     globalStore.setLoadingApi(true);
     const res = await taskApi.getOne(id);
 
-    let relatedTasks = res.data.loop_tasks.map((task) => {
+    let relatedTasks: RelatedTaskType = res.data.loop_tasks.map((task) => {
       return {
-        date: task.task.date,
-        startTime: task.task.start_time,
-        endTime: task.task.end_time,
-        taskTemplate: {
+        details: {
+          date: task.task.date,
+          startTime: task.task.start_time,
+          endTime: task.task.end_time,
           id: task.task.id,
           employees_count: task.task.employee_occupied_count,
           employees: task.task.employee_available_count,
@@ -602,11 +607,6 @@ export const useTaskStore = defineStore("task", () => {
 
     globalStore.setLoadingApi(false);
     selectedTask.value = {
-      title: res.data.project.task_title,
-      description: res.data.project.description,
-      date: res.data.project.date,
-      startTime: res.data.project.start_time,
-      endTime: res.data.project.end_time,
       orderDetails: {
         latitude: "",
         longitude: "",
@@ -622,22 +622,31 @@ export const useTaskStore = defineStore("task", () => {
         teamLeadContactPerson: res.data.task.contact_person,
         notificationTemplate: res.data.task.notification_template_id,
       },
-      taskTemplate: {
+      details: {
+        title: res.data.project.task_title,
+        description: res.data.project.description,
+        date: res.data.project.date,
+        startTime: res.data.project.start_time,
+        endTime: res.data.project.end_time,
         color: res.data.project.color || "#e5e7eb",
         id: res.data.task.id,
-        description: res.data.project.description,
-        employees_count: res.data.task.employee_occupied_count,
-        employees: res.data.task.employee_available_count,
-        vehicle_count: res.data.task.vehicle_occupied_count,
-        vehicle: res.data.task.vehicle_available_count,
-        devices_count: res.data.task.device_occupied_count,
-        devices: res.data.task.device_available_count,
+        employeesCount: res.data.task.employee_occupied_count,
+        allEmployeesCount: res.data.task.employee_available_count,
+        vehiclesCount: res.data.task.vehicle_occupied_count,
+        allVehiclesCount: res.data.task.vehicle_available_count,
+        devicesCount: res.data.task.device_occupied_count,
+        allDevicesCount: res.data.task.device_available_count,
         permission: res.data.project.permission,
-        resource_location_category:
+        resourceLocationCategory:
           res.data.project.resource_location_category_value,
         location: res.data.project.location,
+        locationDescription: res.data.project.location_description,
+        status: res.data.project.task_status,
       },
-      activities: res.data.activities,
+      activities: {
+        comments: res.data.activities.comments,
+        histories: res.data.activities.logs,
+      },
       resources: res.data.resource,
       attachments: res.data.attachments,
       relatedTasks,

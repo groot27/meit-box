@@ -1,7 +1,6 @@
 <!-- MultiSelectLanguage.vue -->
 <template>
   <div>
-    <label class="block mb-2">Select Languages:</label>
     <multiselect
       v-model="localSelected"
       :options="options"

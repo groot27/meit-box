@@ -247,14 +247,14 @@ onBeforeUnmount(() => {
   <div class="">
     <template v-for="task in props.relatedTasks" :key="task.id">
       <resources-table
-        v-model:devices="task.taskTemplate.devices"
-        v-model:vehicle="task.taskTemplate.vehicle"
-        v-model:employees="task.taskTemplate.employees"
+        v-model:devices="task.details.devices"
+        v-model:vehicle="task.details.vehicle"
+        v-model:employees="task.details.employees"
         v-model:resourcesValues="task.resources"
         v-model:date="task.date"
         v-model:startTime="task.startTime"
         v-model:endTime="task.endTime"
-        v-model:taskId="task.taskTemplate.id"
+        v-model:taskId="task.details.id"
         v-model:resources="task.mappedResources"
         @show-icons="handleShowIcons"
       />
