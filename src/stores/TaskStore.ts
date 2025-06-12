@@ -1,22 +1,21 @@
 import { defineStore } from "pinia";
 import { reactive, ref, watch } from "vue";
-import { Task, TaskActivity, TaskIndicatorType } from "@/types/TaskTypes";
+import { Task, TaskDisplayType, TaskIndicatorType } from "@/types/TaskTypes";
 import {
   createQueryString,
   generateDefaultResources,
   generateMinusId,
 } from "@/utils/utils";
-import { format, parseISO, setHours, setMinutes } from "date-fns";
+import { format } from "date-fns";
 import { taskApi } from "@/api/taskApi";
 import { useCalendarStore } from "./CalendarStore";
 import { useGlobalStore } from "./index";
-import { useRouter } from "vue-router";
-import ResourcesTab from "@/components/calendar/task/edit/ResourcesTab.vue";
+import { generateTaskForDisplay } from "@/utils/TaskUtils";
 
 type TaskIndicatorKey = keyof TaskIndicatorType;
 
 export const useTaskStore = defineStore("task", () => {
-  const tasks = ref<Task[]>([]);
+  const tasks = ref<TaskDisplayType[]>([]);
   const calendarStore = useCalendarStore();
   const globalStore = useGlobalStore();
   const archiveModalDispay = ref(false);
@@ -408,7 +407,7 @@ export const useTaskStore = defineStore("task", () => {
     };
     taskApi.create(mockTask, { onSuccess });
   }
-  function addTask(newTask: Task) {
+  function addTask(newTask: TaskDisplayType) {
     tasks.value.push(newTask);
   }
 
@@ -735,7 +734,7 @@ export const useTaskStore = defineStore("task", () => {
         },
       ],
     };
-    const tempTask = {
+    const tempTask: TaskDisplayType = {
       id,
       title: taskData.taskTitle,
       startTime: taskData.startTime,
@@ -776,31 +775,11 @@ export const useTaskStore = defineStore("task", () => {
     const onSuccess = (response) => {
       const parsedTasks = response.data;
       if (Array.isArray(parsedTasks)) {
-        const tasksData: Array<Task> = [];
+        const tasksData: Array<TaskDisplayType> = [];
         parsedTasks.forEach((task) => {
           // Check Duplicated Task
           if (!tasks.value.some((item) => item.id === task.id)) {
-            tasksData.push({
-              id: task.id,
-              title: task.task_title,
-              startTime: task.start_time,
-              endTime: task.end_time,
-              description: task.description,
-              date: task.date,
-              color: task.color || "#e5e7eb",
-              deviceCout: task.device_occupied_count,
-              allDeviceCount: task.device_available_count,
-              employeeCount: task.employee_occupied_count,
-              allEmployeeCount: task.employee_available_count,
-              vehicleCount: task.vehicle_occupied_count,
-              allVehicleCount: task.vehicle_available_count,
-              orderId: task.order_id,
-              users: task.users,
-              address: task.resource_location_category_value,
-              customer: task.customer
-                ? task.customer.customer_name || "No Customer"
-                : "No Customer",
-            } as Task);
+            tasksData.push(generateTaskForDisplay(task));
           }
         });
         tasks.value = [...tasks.value, ...tasksData];

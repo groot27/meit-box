@@ -175,3 +175,101 @@ export const statusColorClasses: Record<EmployeeStatus, string> = {
   open: "text-white bg-[#676767] p-2 rounded",
   reject: "text-white bg-[#FF0000] p-2 rounded",
 };
+
+export interface TaskDisplayType {
+  id: number;
+  title: string;
+  startTime: string;
+  endTime: string;
+  description: string;
+  date: string;
+  color: string;
+  deviceCout: number;
+  allDeviceCount: number;
+  employeeCount: number;
+  allEmployeeCount: number;
+  vehicleCount: number;
+  allVehicleCount: number;
+  orderId: number;
+  users: string;
+  address: string;
+  customer: string;
+}
+interface TaskDetailsType {
+  id: number;
+  taskTitle: string;
+  name: string;
+  contactPerson: string;
+  orderId: number;
+  description: string;
+  date: string;
+  color: string;
+  resourceLocationCategoryValue: string;
+  employeesCount: number;
+  allEmployeesCount: number;
+  vehiclesCount: number;
+  allVehiclesCount: number;
+  devicesCount: number;
+  allDevicesCount: number;
+  startTime: string;
+  endTime: string;
+  requiredSkills: string;
+  language: [];
+  dress: [];
+  teamleadDescription: string;
+  notificationTemplateId: string;
+}
+interface projectDetailsType {
+  id: number;
+  taskTitle: string;
+  taskStatus: string;
+  description: string;
+  resourceLocationCategoryValue: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  adminPermission: boolean;
+  employeePermission: boolean;
+  managerPermission: boolean;
+  permission: string;
+  orderId: number;
+  orderNumber: string;
+  customerName: string;
+  tour: string;
+}
+interface devicesResourceType {}
+
+// {
+//         id: 1;
+//         first_name: "Markus";
+//         last_name: "Schiller";
+//         role: "admin";
+//         username: "MarkusSchiller";
+//         mobile_number: "12345";
+//         status: "applied";
+//         user_status: "assigned";
+//         rate_per_hour: 0;
+//         team_lead: 0;
+//         travelling: 0;
+//       }
+interface usersResourceType {}
+interface vehiclesResourceType {}
+interface resourceDetailsType {
+  devices: Array<devicesResourceType>;
+  users: Array<usersResourceType>;
+  vehicles: Array<vehiclesResourceType>;
+}
+interface activitiesType {}
+interface attachmentsType {}
+export interface TaskType {
+  task: TaskDetailsType;
+  project: projectDetailsType;
+  resource: resourceDetailsType;
+  activities: activitiesType;
+  attachments: Array<attachmentsType>;
+}
+export interface TaskEditType {
+  mainTask: TaskType;
+  relatedTasks: Array<TaskType>;
+}

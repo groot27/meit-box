@@ -48,7 +48,7 @@ const handleDateClick = (date: Date) => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow p-4 w-64">
+  <div class="bg-white rounded-lg shadow p-4 w-full">
     <div class="text-center mb-4">
       <h3 class="text-lg font-semibold text-gray-900">
         {{ format(currentDate, "MMMM yyyy") }}
