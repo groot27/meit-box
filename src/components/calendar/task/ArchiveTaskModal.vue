@@ -3,7 +3,9 @@ import { useCalendarStore } from "@/stores/CalendarStore";
 import { useTaskStore } from "@/stores/TaskStore";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const route = useRoute();
 const taskStore = useTaskStore();
 const calendarStore = useCalendarStore();
@@ -30,10 +32,10 @@ const handleArchiveClose = () => {
     <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
       <h3 class="text-lg font-medium text-gray-900 mb-4">
         <span v-show="calendarStore.filterTasks !== 'archive_date'">
-          Do you want to archive this task?
+          {{ t('task.archiveModal.archive') }}
         </span>
         <span v-show="calendarStore.filterTasks === 'archive_date'">
-          Do you want to restore this task?
+          {{ t('task.archiveModal.restore') }}
         </span>
       </h3>
       <div class="flex justify-end space-x-3">
@@ -41,13 +43,13 @@ const handleArchiveClose = () => {
           @click="handleArchiveClose"
           class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
         >
-          No
+          {{ t('task.archiveModal.no') }}
         </button>
         <button
           @click="handleArchiveConfirm"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
         >
-          Yes
+          {{ t('task.archiveModal.yes') }}
         </button>
       </div>
     </div>

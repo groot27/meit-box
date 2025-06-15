@@ -7,6 +7,7 @@ import {
   endOfMonth,
   startOfDay,
   endOfDay,
+  format,
 } from "date-fns";
 import CalendarHeader from "./CalendarHeader.vue";
 import MonthView from "./views/MonthView.vue";
@@ -16,6 +17,7 @@ import TaskModal from "./task/TaskModal.vue";
 import TaskInfoModal from "./task/TaskInfoModal.vue";
 import TaskEditSidebar from "./task/TaskEditSidebar.vue";
 import LeftSidebar from "./leftSide/LeftSidebar.vue";
+import RightSidebar from "./rightSide/RightSidebar.vue";
 import { useCalendarStore } from "@/stores/CalendarStore";
 import { useTaskStore } from "@/stores/TaskStore";
 import { Task } from "@/types/TaskTypes";
@@ -23,7 +25,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useGlobalStore } from "@/stores";
 import TopBarLoading from "@/components/widgets/TopBarLoading.vue";
 import ArchiveTaskModal from "./task/ArchiveTaskModal.vue";
-
+import ExportDataCalendar from "./leftSide/ExportDataCalendar.vue";
 const globalStore = useGlobalStore();
 const calendarStore = useCalendarStore();
 const taskStore = useTaskStore();
@@ -45,15 +47,21 @@ const searchTaskLabel = computed(() => calendarStore.searchTasksLabel);
 const searchTaskValue = computed(() => calendarStore.searchTasksValue);
 const multiFilter = computed(() => calendarStore.multifilterTasks);
 
+const isSidebarCollapsed = ref(false);
+
+const toggleSidebar = () => {
+  isSidebarCollapsed.value = !isSidebarCollapsed.value;
+};
+
 const handleTaksEditDisplay = async (taskId) => {
   if (taskId) {
     const task = await taskStore.getTask(taskId);
     if (task) {
-      selectedTask.value = task;
+      // selectedTask.value = task;
       isTaskEditSidebarOpen.value = true;
     }
   } else {
-    selectedTask.value = null;
+    // selectedTask.value = null;
     isTaskEditSidebarOpen.value = false;
   }
 };
@@ -63,12 +71,12 @@ const setDateByView = () => {
   let end: Date;
   switch (currentView.value) {
     case "month":
-      start = startOfWeek(startOfMonth(currentDate.value));
-      end = endOfWeek(endOfMonth(currentDate.value));
+      start = startOfWeek(startOfMonth(currentDate.value), { weekStartsOn: 1 });
+      end = endOfWeek(endOfMonth(currentDate.value), { weekStartsOn: 1 });
       break;
     case "week":
-      start = startOfWeek(currentDate.value);
-      end = endOfWeek(currentDate.value);
+      start = startOfWeek(currentDate.value, { weekStartsOn: 1 });
+      end = endOfWeek(currentDate.value, { weekStartsOn: 1 });
       break;
     case "day":
       start = startOfDay(currentDate.value);
@@ -138,15 +146,27 @@ const closeTaskInfoModal = () => {
 
 const closeTaskEditSidebar = () => {
   isTaskEditSidebarOpen.value = false;
-  selectedTask.value = null;
+  // selectedTask.value = null;
   // Remove taskId from URL by navigating back to base route
   router.push("/monthly-view2");
 };
 
 const handleTaskCreate = (taskData: any) => {
   if (selectedDate.value) {
-    taskStore.addTask({
+    taskStore.createTask({
       ...taskData,
+      date: selectedDate.value,
+    });
+    closeTaskModal();
+    closeTaskEditSidebar();
+  }
+};
+const handleQuickTaskCreate = async () => {
+  if (selectedDate.value) {
+    await taskStore.continueToCreate({
+      date: format(selectedDate.value, "yyyy-MM-dd"),
+    });
+    taskStore.createTask({
       date: selectedDate.value,
     });
     closeTaskModal();
@@ -164,15 +184,17 @@ const handleTaskCopy = (task: Task) => {
   console.log("Copy task:", task);
 };
 
-const handleTaskEdit = (task: Task) => {
+const handleTaskEdit = async (task: Task) => {
   // Close info modal before opening sidebar
   isTaskInfoModalOpen.value = false;
 
-  selectedTask.value = task;
-  isTaskEditSidebarOpen.value = true;
   // Add taskId to URL
   if (task.id) {
     router.push(`/monthly-view2/${task.id}`);
+  } else {
+    // selectedTask.value = task;
+    await taskStore.continueToCreate(task);
+    isTaskEditSidebarOpen.value = true;
   }
 };
 
@@ -224,10 +246,10 @@ watch(
   }
 );
 
-onMounted(() => {
+onMounted(async () => {
   let { start, end } = setDateByView();
-
   calendarStore.setDateRange(start, end);
+  await calendarStore.getDefaultData();
   taskStore.loadTasks({
     date_between: `${calendarStore.startDate},${calendarStore.endDate}`,
   });
@@ -255,8 +277,21 @@ onMounted(() => {
     <top-bar-loading />
     <div class="flex-1 flex h-full">
       <!-- Mini Calendar -->
-      <div class="p-4 border-r bg-gray-50">
-        <LeftSidebar />
+      <div class="relative">
+        <button
+          class="absolute z-50 top-4 -right-6 bg-gray-200 px-2 py-1 rounded-full hover:bg-gray-300"
+          @click="toggleSidebar"
+        >
+          {{ isSidebarCollapsed ? "▶" : "◀" }}
+        </button>
+        <div
+          :class="[
+            'transition-all duration-300 ease-in-out bg-gray-50 border-r overflow-hidden',
+            isSidebarCollapsed ? 'w-0 p-0' : 'w-[400px] p-4',
+          ]"
+        >
+          <LeftSidebar v-if="!isSidebarCollapsed" />
+        </div>
       </div>
 
       <!-- Main Calendar -->
@@ -275,6 +310,18 @@ onMounted(() => {
           />
         </KeepAlive>
       </div>
+      <div class="relative max-h-full overflow-y-auto">
+        <div
+          :class="[
+            'transition-all duration-300 ease-in-out  border-r overflow-hidden',
+            !calendarStore.upCommingTaskDisplay
+              ? 'w-0 p-0'
+              : 'w-[400px] px-1 py-2',
+          ]"
+        >
+          <RightSidebar v-if="calendarStore.upCommingTaskDisplay" />
+        </div>
+      </div>
     </div>
 
     <TaskModal
@@ -282,7 +329,7 @@ onMounted(() => {
       :date="selectedDate"
       :position="modalPosition"
       @close="closeTaskModal"
-      @create="handleTaskCreate"
+      @create="handleQuickTaskCreate"
       @continue-to-create="handleTaskEdit"
     />
 
@@ -297,12 +344,13 @@ onMounted(() => {
     />
 
     <TaskEditSidebar
-      :task="selectedTask"
+      v-if="isTaskEditSidebarOpen"
       :show="isTaskEditSidebarOpen"
       @close="closeTaskEditSidebar"
       @update="handleTaskUpdate"
       @create="handleTaskCreate"
     />
     <ArchiveTaskModal />
+    <ExportDataCalendar />
   </div>
 </template>

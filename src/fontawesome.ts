@@ -15,7 +15,18 @@ import {
   faComment,
   faHistory,
   faFileUpload,
+  faUserPlus,
+  faUserAltSlash,
+  faFilePdf,
+  faFileArchive,
+  faCheck,
+  faShareNodes,
+  faClock,
+  faRectangleList,
+  faClose,
+  faPencil,
 } from "@fortawesome/free-solid-svg-icons";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
 library.add(
   faUser,
@@ -31,5 +42,16 @@ library.add(
   faCar,
   faComment,
   faHistory,
-  faFileUpload
+  faFileUpload,
+  faUserPlus,
+  faFilePdf,
+  faUserAltSlash,
+  faFileArchive,
+  faCheck,
+  faShareNodes,
+  faClock,
+  faWhatsapp,
+  faRectangleList,
+  faClose,
+  faPencil
 );

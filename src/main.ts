@@ -1,4 +1,4 @@
-import { createApp, defineCustomElement } from "vue";
+import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { createPinia } from "pinia";
 import { VueQueryPlugin } from "@tanstack/vue-query";
@@ -8,6 +8,9 @@ import App from "./App.vue";
 import Calendar from "./pages/Calendar.vue";
 import "./fontawesome";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { loadGoogleMaps } from "./utils/loadGoogleMaps";
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
 const routes = [
   { path: "/monthly-view2", component: Calendar },
@@ -21,10 +24,19 @@ const router = createRouter({
 
 const pinia = createPinia();
 
-createApp(App)
-  .use(router)
-  .use(pinia)
-  .use(VueQueryPlugin)
-  .use(i18n)
-  .component("font-awesome-icon", FontAwesomeIcon)
-  .mount("#app");
+const GOOGLE_API_KEY = "AIzaSyD7fBBrfAmRTdLCO549jxZP3ofuw763zuQ";
+
+loadGoogleMaps(GOOGLE_API_KEY)
+  .then(() => {
+    createApp(App)
+      .use(router)
+      .use(pinia)
+      .use(VueQueryPlugin)
+      .use(i18n)
+      .use(Toast)
+      .component("font-awesome-icon", FontAwesomeIcon)
+      .mount("#app");
+  })
+  .catch((error) => {
+    console.error("Google Maps failed to load:", error);
+  });

@@ -3,11 +3,35 @@ import { reactive, ref, watch } from "vue";
 import { format } from "date-fns";
 import { filterTasksType, SearchTasksType } from "@/types/filters";
 import { multifilterTasks } from "@/types/apiRequest";
+import { taskApi } from "@/api/taskApi";
+import { useGlobalStore } from ".";
 
 type CalendarView = "month" | "week" | "day";
-
+type exportDataType = "daily" | "weekly" | "monthly";
+interface defaultDataType {
+  skills: any;
+  orders: any;
+  taskTemplates: any;
+  employees: any;
+  vehicles: any;
+  contactPerson: any;
+  notifications: any;
+  dresses: any;
+  devices: any;
+}
 type MultifilterKey = keyof multifilterTasks;
 export const useCalendarStore = defineStore("calendar", () => {
+  const defaultData = reactive<defaultDataType>({
+    skills: null,
+    orders: null,
+    taskTemplates: null,
+    employees: null,
+    vehicles: null,
+    contactPerson: null,
+    notifications: null,
+    dresses: null,
+    devices: null,
+  });
   const currentDate = ref(new Date());
   const currentView = ref<CalendarView>("month");
   const startDate = ref<string | null>(null);
@@ -16,9 +40,21 @@ export const useCalendarStore = defineStore("calendar", () => {
   const multifilterTasks = reactive<multifilterTasks>({});
   const searchTasksLabel = ref<SearchTasksType>("");
   const searchTasksValue = ref<string | null>("");
-
+  const upCommingTaskDisplay = ref(false);
+  const exportTaskDisplay = ref(false);
+  const exportTaskType = ref<exportDataType>("daily");
+  const globalStore = useGlobalStore();
   function setCurrentDate(date: Date) {
     currentDate.value = date;
+  }
+  function setUpCommingTaskDisplay(value: boolean) {
+    upCommingTaskDisplay.value = value;
+  }
+  function setExportTaskDisplay(value: boolean) {
+    exportTaskDisplay.value = value;
+  }
+  function setExportTaskType(value: exportDataType) {
+    exportTaskType.value = value;
   }
 
   function setView(view: CalendarView) {
@@ -42,7 +78,33 @@ export const useCalendarStore = defineStore("calendar", () => {
     startDate.value = format(start, "yyyy-MM-dd");
     endDate.value = format(end, "yyyy-MM-dd");
   }
-
+  function setDefaultData(data: defaultDataType) {
+    Object.assign(defaultData, data);
+  }
+  async function getDefaultData() {
+    globalStore.setLoadingApi(true);
+    const skills = await taskApi.getTaskSkills();
+    const orders = await taskApi.getTaskOrders();
+    const devices = await taskApi.getTaskDevices();
+    const taskTemplates = await taskApi.getTaskTitles();
+    const employees = await taskApi.getTaskUsers();
+    const vehicles = await taskApi.getTaskVehicles();
+    const dresses = await taskApi.getTaskDresses();
+    const notifications = await taskApi.getTaskNotificationTemplates();
+    const contactPerson = await taskApi.getTaskContactPersons();
+    setDefaultData({
+      skills: skills.data,
+      orders: orders.data,
+      devices: devices.data,
+      taskTemplates: taskTemplates.data,
+      employees: employees.data,
+      vehicles: vehicles.data,
+      dresses: dresses.data,
+      notifications: notifications.data,
+      contactPerson: contactPerson.data,
+    });
+    globalStore.setLoadingApi(false);
+  }
   function loadState() {
     const savedView = localStorage.getItem("calendarView");
     const savedDate = localStorage.getItem("calendarDate");
@@ -76,6 +138,12 @@ export const useCalendarStore = defineStore("calendar", () => {
     searchTasksLabel,
     searchTasksValue,
     multifilterTasks,
+    defaultData,
+    upCommingTaskDisplay,
+    exportTaskType,
+    exportTaskDisplay,
+    setUpCommingTaskDisplay,
+    setDefaultData,
     setCurrentDate,
     setView,
     setDateRange,
@@ -83,5 +151,8 @@ export const useCalendarStore = defineStore("calendar", () => {
     setSearch,
     setMulltiFilterValue,
     setMulltiFilterKeys,
+    getDefaultData,
+    setExportTaskType,
+    setExportTaskDisplay,
   };
 });

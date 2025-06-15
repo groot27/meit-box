@@ -20,8 +20,8 @@ const currentDate = computed(() => calendarStore.currentDate);
 const calendarDays = computed(() => {
   const monthStart = startOfMonth(currentDate.value);
   const monthEnd = endOfMonth(monthStart);
-  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
-  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
 
   return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 });
@@ -48,7 +48,7 @@ const handleDateClick = (date: Date) => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow p-4 w-64">
+  <div class="bg-white rounded-lg shadow p-4 w-full">
     <div class="text-center mb-4">
       <h3 class="text-lg font-semibold text-gray-900">
         {{ format(currentDate, "MMMM yyyy") }}
@@ -57,7 +57,7 @@ const handleDateClick = (date: Date) => {
 
     <div class="grid grid-cols-7 gap-1 mb-2">
       <div
-        v-for="day in ['S', 'M', 'T', 'W', 'T', 'F', 'S']"
+        v-for="day in ['M', 'T', 'W', 'T', 'F', 'S', 'S']"
         :key="day"
         class="text-center text-xs font-medium text-gray-500"
       >

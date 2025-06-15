@@ -47,6 +47,14 @@ export default {
       monthAndYear: "{month} {year}",
       weekOf: "Week of {date}",
     },
+    upcoming: {
+      title: "Upcoming Tasks",
+      type: "Type",
+      customer: "Customer",
+      orderNumber: "Order-Nummer",
+      loadMore: "Load more",
+      search: "Search the resources",
+    },
   },
   task: {
     modal: {
@@ -126,9 +134,9 @@ export default {
     editSidebar: {
       title: "Edit Task",
       close: "Close",
-      saveChanges: "Save Changes",
+      discard: "Discard",
+      saveChanges: "Save",
       time: "Time",
-      title: "Title",
       description: "Description",
       color: "Color",
       order: "Order",
@@ -141,10 +149,12 @@ export default {
           permission: "Permission",
           locationCategory: "Location Category",
           location: "Location",
+          locationDesc: "Location Description",
           updateTasks: "Update Tasks",
           startEndDate: "Start/End Date",
           time: "Time",
           taskDescription: "Task Description",
+          showDesc: "Show Location Description",
           status: {
             done: "Done",
             notConfirmed: "Not Confirmed",
@@ -188,6 +198,9 @@ export default {
             german: "German",
           },
         },
+        document: {
+          placeHolder: "Click or drop files here",
+        },
       },
     },
     infoModal: {
@@ -199,11 +212,20 @@ export default {
       noTitle: "No title set",
       noTime: "No time set",
       noAddress: "No address set",
+      noCustomer: "No Customer",
+      details: "Details",
+      resources: "Resources",
       labels: {
         title: "Title",
         time: "Time",
         address: "Address",
       },
+    },
+    archiveModal: {
+      archive: "Do you want to archive this task?",
+      restore: "Do you want to restore this task?",
+      yes: "Yes",
+      no: "No",
     },
   },
   leftSidebar: {
@@ -261,6 +283,20 @@ export default {
       order: "Order",
       vehicleCustomField: "Vehicle Custom Field",
       validityFormDocument: "Validity Form Document",
+    },
+  },
+  common: {
+    employee: "Employee",
+    vehicle: "Vehicle",
+    device: "Device",
+    placeholder: {
+      employee: "Select Employee",
+      vehicle: "Select Vehicle",
+      device: "Select Device",
+      contactPerson: "Select Contact Person",
+      dress: "Select Dress",
+      notificationTemplate: "Select Notification Template",
+      requiredSkill: "Select Required Skill",
     },
   },
 };

@@ -33,8 +33,8 @@ const tasks = computed(() => taskStore.tasks);
 const calendarDays = computed(() => {
   const monthStart = startOfMonth(currentDate.value);
   const monthEnd = endOfMonth(monthStart);
-  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
-  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
 
   // Update the date range in the store
   calendarStore.setDateRange(calendarStart, calendarEnd);
@@ -63,13 +63,13 @@ const weekNumbers = computed(() => {
 });
 
 const weekdays = computed(() => [
-  t("calendar.weekdays.short.sun"),
   t("calendar.weekdays.short.mon"),
   t("calendar.weekdays.short.tue"),
   t("calendar.weekdays.short.wed"),
   t("calendar.weekdays.short.thu"),
   t("calendar.weekdays.short.fri"),
   t("calendar.weekdays.short.sat"),
+  t("calendar.weekdays.short.sun"),
 ]);
 
 const getTasksForDate = (date: Date) => {
@@ -104,7 +104,7 @@ const handleTaskClick = (task: Task, event: MouseEvent) => {
 <template>
   <div class="h-full flex flex-col calendar-container">
     <div
-      class="grid grid-cols-[auto_repeat(7,1fr)] border-b bg-white sticky top-0 z-10 h-12"
+      class="grid grid-cols-[auto_repeat(7,1fr)] border-b bg-gray-100 sticky top-0 z-10 h-12"
     >
       <div
         class="py-2 px-3 text-center text-xs font-medium text-gray-500 border-r h-full"

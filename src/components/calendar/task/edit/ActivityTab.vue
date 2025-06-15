@@ -1,6 +1,5 @@
-```vue
 <script setup lang="ts">
-import { defineProps, ref, computed } from "vue";
+import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { format } from "date-fns";
 import { ActivityComment, ActivityHistory } from "@/types/TaskTypes";
@@ -8,8 +7,8 @@ import { ActivityComment, ActivityHistory } from "@/types/TaskTypes";
 const { t } = useI18n();
 
 const props = defineProps<{
-  comments: ActivityComment[];
-  history: ActivityHistory[];
+  comments: ActivityComment[] | null | undefined;
+  history: ActivityHistory[] | null | undefined;
 }>();
 
 const activityFilter = ref<"all" | "comments" | "history">("all");
@@ -20,16 +19,37 @@ const filteredActivity = computed(() => {
   let items: (ActivityComment | ActivityHistory)[] = [];
   switch (activityFilter.value) {
     case "comments":
-      items = props.comments;
+      if (props.comments && props.comments.length) {
+        items = props.comments.map((comment) => ({
+          ...comment,
+          status: "comment",
+        }));
+      }
       break;
     case "history":
-      items = props.history;
+      if (props.history && props.history.length) {
+        items = props.history.map((history) => ({
+          ...history,
+          status: "history",
+        }));
+      }
       break;
     default:
-      items = [
-        ...props.comments.map((comment) => ({ ...comment, status: "comment" })),
-        ...props.history.map((history) => ({ ...history, status: "history" })),
-      ];
+      if (
+        (props.history && props.history.length) ||
+        (props.comments && props.comments.length)
+      ) {
+        items = [
+          ...props.comments.map((comment) => ({
+            ...comment,
+            status: "comment",
+          })),
+          ...props.history.map((history) => ({
+            ...history,
+            status: "history",
+          })),
+        ];
+      }
     // .sort(
     //   (a, b) =>
     //     new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -84,7 +104,7 @@ const formatDate = (timestamp: string) => {
     </div>
 
     <!-- Activity List -->
-    <div class="space-y-4">
+    <div class="space-y-4" v-if="paginatedActivity">
       <template v-for="item in paginatedActivity" :key="item.id">
         <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
           <div
@@ -102,13 +122,15 @@ const formatDate = (timestamp: string) => {
             />
           </div>
           <div class="flex-1">
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center justify-between">
               <span class="font-medium text-gray-900">{{
                 item.user.username
               }}</span>
-              <!-- <span class="text-sm text-gray-500">{{
-                formatDate(item.timestamp)
-              }}</span> -->
+              <span
+                class="text-sm text-gray-500 right-0"
+                v-show="item.status === 'history'"
+                >{{ formatDate(item.created_at) }}</span
+              >
             </div>
             <p class="text-gray-700 mt-1" v-show="item.status === 'history'">
               {{ item.type }}

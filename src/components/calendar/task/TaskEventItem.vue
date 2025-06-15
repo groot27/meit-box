@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from "vue";
+import { computed } from "vue";
 import { format, parseISO, differenceInMinutes } from "date-fns";
-import { Task } from "@/types/TaskTypes";
+import { Task, TaskDisplayType } from "@/types/TaskTypes";
 import { useTaskStore } from "@/stores/TaskStore";
 import { truncateWords } from "@/utils/utils";
 const taskStore = useTaskStore();
 const indicatorDisplay = computed(() => taskStore.taskIndicatorDisplay);
 
 const props = defineProps<{
-  task: Task;
+  task: TaskDisplayType;
   index?: number;
   total?: number;
 }>();
@@ -29,8 +29,8 @@ const taskTitle = computed(() => {
   return truncateWords(props.task.title || "No Title", 3);
 });
 const taskHeight = computed(() => {
-  const startTime = props.task.resourceDetails?.startTime || "";
-  const endTime = props.task.resourceDetails?.endTime || "";
+  const startTime = props.task.startTime || "";
+  const endTime = props.task.endTime || "";
 
   if (!startTime || !endTime) return "48px"; // Default height for tasks without time range
 
@@ -78,6 +78,7 @@ const taskStyle = computed(() => {
 
 <template>
   <div
+    v-if="task"
     class="px-2 py-1 text-xs rounded truncate cursor-pointer relative z-20 transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg hover:z-30"
     :style="taskStyle"
     @click="handleClick"
@@ -116,13 +117,13 @@ const taskStyle = computed(() => {
       <div class="flex items-center" v-show="indicatorDisplay.devices">
         <font-awesome-icon icon="fa-solid fa-tools" />
         <span class="ml-1">{{
-          `${task.deviceCout}/${task.allDeviceCount}`
+          `${task.deviceCount}/${task.allDeviceCount}`
         }}</span>
       </div>
 
       <!-- Time -->
       <span class="flex-1 font-medium" v-show="indicatorDisplay.time">{{
-        format(new Date(task.date), "h:mm a")
+        task.startTime
       }}</span>
     </div>
   </div>

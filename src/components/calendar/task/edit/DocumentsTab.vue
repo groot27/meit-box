@@ -1,13 +1,13 @@
 ```vue
 <script setup lang="ts">
-import { defineProps, defineEmits, ref } from "vue";
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { TaskDocument } from "@/types/TaskTypes";
 
 const { t } = useI18n();
 
 const props = defineProps<{
-  documents: TaskDocument[];
+  documents: TaskDocument[] | null | undefined;
 }>();
 
 const emit = defineEmits<{
@@ -19,7 +19,7 @@ const fileInput = ref<HTMLInputElement | null>(null);
 
 const handleFileSelect = (event: Event) => {
   const input = event.target as HTMLInputElement;
-  
+
   if (input.files) {
     emit("add", Array.from(input.files));
   }

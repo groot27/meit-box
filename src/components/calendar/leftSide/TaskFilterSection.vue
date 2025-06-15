@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { multifilterTasks } from "@/types/apiRequest";
 import { useCalendarStore } from "@/stores/CalendarStore";
@@ -23,12 +23,14 @@ let filters = [
   { key: "e2aSkill", value: "", label: t("leftSidebar.taskFilter.e2aSkill") },
   { key: "e2bSkill", value: "", label: t("leftSidebar.taskFilter.e2bSkill") },
 ];
-onMounted(async () => {
-  const res = await taskApi.getTaskSkills();
-  filters = res.data.map((filter, index) => {
-    calendarStore.setMulltiFilterKeys(filter.name);
-    return { key: index, value: filter.name, label: filter.name };
-  });
+onMounted(async () => {});
+watch(calendarStore.defaultData, (defaultData) => {
+  if (defaultData.skills) {
+    filters = defaultData.skills.map((filter, index) => {
+      calendarStore.setMulltiFilterKeys(filter.name);
+      return { key: index, value: filter.name, label: filter.name };
+    });
+  }
 });
 
 function handleClick(value: keyof multifilterTasks, checked: boolean) {

@@ -5,9 +5,14 @@ import { ref, computed, onMounted, watch } from "vue";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import { useI18n } from "vue-i18n";
 import { stripHtml } from "@/utils/utils";
+import { useCalendarStore } from "@/stores/CalendarStore";
+import { format } from "date-fns";
+import { useTaskStore } from "@/stores/TaskStore";
 
 const { t } = useI18n();
-
+const porps = defineProps<{
+  date: any | null | undefined;
+}>();
 const emit = defineEmits<{
   (
     e: "continueToEdit",
@@ -22,6 +27,8 @@ const emit = defineEmits<{
 
 const description = ref("");
 const orderId = ref("");
+const calendarStore = useCalendarStore();
+const taskStore = useTaskStore();
 
 const selectedOrder = ref("");
 const selectedTask = ref("");
@@ -39,10 +46,7 @@ const isValid = computed(() => selectedOrder.value && selectedTask.value);
 const handleContinue = () => {
   if (isValid.value) {
     emit("continueToEdit", {
-      taskTitle: selectedTask.value,
-      description: description.value,
-      taskTemplate: taskDetails.value,
-      orderDetails: orderDetails.value,
+      date: format(porps.date, "yyyy-MM-dd"),
     });
   }
 };
@@ -63,6 +67,7 @@ const fetchOrderOptions = async (query: string = "") => {
     const res = await taskApi.getTaskOrders(query);
     orderOptions.value = [];
     taskOrders.value = res.data;
+    calendarStore.defaultData.orders = res.data;
     res?.data.forEach((order) => {
       orderOptions.value.push(
         `${order.order_number} | ${
@@ -81,6 +86,7 @@ const fetchTaskOptions = async (query: string = "") => {
     const res = await taskApi.getTaskTitles(query);
     taskOptions.value = [];
     taskTemplates.value = res.data;
+    calendarStore.defaultData.taskTemplates = res.data;
     res?.data.forEach((template) => {
       taskOptions.value.push(template.task_title);
     });
@@ -95,24 +101,24 @@ const fillDescription = () => {
       description.value = stripHtml(
         taskTemplates.value[template].task_description
       );
-      taskDetails.value = {
-        color: taskTemplates.value[template].color,
-        id: taskTemplates.value[template].id,
-        description: taskTemplates.value[template].task_description,
-        employees_count: taskTemplates.value[template].employees,
-        employees: taskTemplates.value[template].employees_count,
-        vehicle_count: taskTemplates.value[template].vehicle,
-        vehicle: taskTemplates.value[template].vehicle_count,
-        devices_count: taskTemplates.value[template].devices,
-        devices: taskTemplates.value[template].devices_count,
-        permission: taskTemplates.value[template].permission,
-      };
+      taskStore.setTaskTemplate(taskTemplates.value[template].id);
     }
   });
 };
 onMounted(() => {
-  fetchTaskOptions();
-  fetchOrderOptions();
+  taskOptions.value = calendarStore.defaultData.taskTemplates.map(
+    (template) => {
+      return template.task_title;
+    }
+  );
+  taskTemplates.value = calendarStore.defaultData.taskTemplates;
+
+  orderOptions.value = calendarStore.defaultData.orders.map((order) => {
+    return `${order.order_number} | ${
+      order.order_location || "No Location Set"
+    } | ${order.customer_name || "No Customer"}`;
+  });
+  taskOrders.value = calendarStore.defaultData.orders;
 });
 
 watch(selectedTask, () => {
@@ -129,12 +135,7 @@ watch(selectedOrder, () => {
         taskOrders.value[order].order_number ==
         selectedOrder.value.split("|")[0].trim()
       ) {
-        orderDetails.value = {
-          latitude: taskOrders.value[order].latitude,
-          longitude: taskOrders.value[order].longitude,
-          id: taskOrders.value[order].id,
-          customerName: taskOrders.value[order].customer_name || "No Customer",
-        };
+        taskStore.setOrderDetails(taskOrders.value[order].id);
       }
     });
   }

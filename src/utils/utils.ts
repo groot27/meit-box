@@ -5,6 +5,9 @@ export const v4 = (): string => {
     return v.toString(16);
   });
 };
+export const generateMinusId = (): number => {
+  return Math.ceil(Math.random() * 10000) * -1;
+};
 
 export const truncateWords = (str: string, words: number) => {
   return str.split(" ").slice(0, words).join(" ");
@@ -32,4 +35,90 @@ export const stripHtml = (html) => {
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = html;
   return tempDiv.textContent || tempDiv.innerText || "";
+};
+export const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+};
+const getUserStatus = (status) => {
+  let newStatus;
+  switch (status) {
+    case "assigned":
+      newStatus = "confirmed";
+      break;
+    case "":
+      newStatus = "no_show";
+      break;
+    default:
+      newStatus = status;
+  }
+  return newStatus;
+};
+export const generateDefaultResources = (
+  resourcesValues,
+  availableResourcesCounts
+) => {
+  const resources = [];
+  let count = 1;
+  for (let i = 1; i <= Number(availableResourcesCounts.employees); i++) {
+    if (
+      !resourcesValues.users[i - 1] ||
+      resourcesValues.users[i - 1].status !== "rejected"
+    ) {
+      resources.push({
+        id: count,
+        resourcesId: resourcesValues.users[i - 1]
+          ? resourcesValues.users[i - 1].id
+          : null,
+        number: resourcesValues.users[i - 1]
+          ? resourcesValues.users[i - 1].mobile_number
+          : null,
+        name:
+          resourcesValues && resourcesValues.users[i - 1]
+            ? resourcesValues.users[i - 1].username
+            : "Employee",
+        type: "Employee",
+        count: 0,
+        status:
+          resourcesValues && resourcesValues.users[i - 1]
+            ? getUserStatus(resourcesValues.users[i - 1].user_status)
+            : "open",
+      });
+      count++;
+    }
+  }
+  for (let i = 1; i <= Number(availableResourcesCounts.vehicle); i++) {
+    resources.push({
+      id: count,
+      resourcesId: resourcesValues.vehicles[i - 1]
+        ? resourcesValues.vehicles[i - 1].id
+        : null,
+      name:
+        resourcesValues && resourcesValues.vehicles[i - 1]
+          ? resourcesValues.vehicles[i - 1].number_plate
+          : "Vehicle",
+      type: "Vehicle",
+      count: 0,
+      number: 0,
+      status:
+        resourcesValues && resourcesValues.vehicles[i - 1]
+          ? resourcesValues.vehicles[i - 1].status
+          : "open",
+    });
+    count++;
+  }
+  for (let i = 1; i <= Number(availableResourcesCounts.devices); i++) {
+    resources.push({
+      id: count,
+      resourcesId: null,
+      name: "Device",
+      type: "Device",
+      count: 0,
+      number: 0,
+      status: "open",
+    });
+    count++;
+  }
+  return resources;
 };

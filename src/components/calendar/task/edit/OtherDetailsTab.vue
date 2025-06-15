@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from "vue";
+import { watch } from "vue";
 import { useI18n } from "vue-i18n";
 import Dresses from "./otherDetails/Dresses.vue";
 import RequiredSkills from "./otherDetails/RequiredSkills.vue";
 import ContactPersons from "./otherDetails/ContactPersons.vue";
+import Languages from "./otherDetails/Languages.vue";
 import NotificationTemplates from "./otherDetails/NotificationTemplates.vue";
 
 const { t } = useI18n();
 
 const props = defineProps<{
-  requiredSkills: string;
-  dress: string;
-  language: string;
-  teamLeadDescription: string;
-  teamLeadContactPerson: string;
-  notificationTemplate: string;
+  requiredSkills: string | null | undefined;
+  dress: string | null | undefined;
+  language: Array<string> | null | undefined;
+  teamLeadDescription: string | null | undefined;
+  teamLeadContactPerson: string | null | undefined;
+  notificationTemplate: string | null | undefined;
 }>();
 
 const emit = defineEmits<{
@@ -35,24 +36,8 @@ const emit = defineEmits<{
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.otherDetails.requiredSkills")
         }}</label>
-        <!-- <select
-          :value="requiredSkills"
-          @input="
-            emit(
-              'update:requiredSkills',
-              ($event.target as HTMLSelectElement).value
-            )
-          "
-          class="input-field"
-        >
-          <option value="" disabled>
-            {{ t("task.editSidebar.tabs.otherDetails.requiredSkills") }}
-          </option>
-          <option value="skill1">Skill 1</option>
-          <option value="skill2">Skill 2</option>
-          <option value="skill3">Skill 3</option>
-        </select> -->
-        <required-skills />
+
+        <required-skills :skill="props.requiredSkills" />
       </div>
 
       <!-- Dress -->
@@ -60,17 +45,7 @@ const emit = defineEmits<{
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.otherDetails.dress")
         }}</label>
-        <!-- <select 
-          :value="dress"
-          @input="emit('update:dress', ($event.target as HTMLSelectElement).value)"
-          class="input-field"
-        >
-          <option value="" disabled>{{ t('task.editSidebar.tabs.otherDetails.dress') }}</option>
-          <option value="dress1">Dress 1</option>
-          <option value="dress2">Dress 2</option>
-          <option value="dress3">Dress 3</option>
-        </select> -->
-        <dresses />
+        <dresses :dress="dress" />
       </div>
 
       <!-- Language -->
@@ -78,23 +53,7 @@ const emit = defineEmits<{
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.otherDetails.language")
         }}</label>
-        <select
-          :value="language"
-          @input="
-            emit('update:language', ($event.target as HTMLSelectElement).value)
-          "
-          class="input-field"
-        >
-          <option value="doesntMatter">
-            {{ t("task.editSidebar.tabs.otherDetails.languages.doesntMatter") }}
-          </option>
-          <option value="english">
-            {{ t("task.editSidebar.tabs.otherDetails.languages.english") }}
-          </option>
-          <option value="german">
-            {{ t("task.editSidebar.tabs.otherDetails.languages.german") }}
-          </option>
-        </select>
+        <languages v-model="props.language" />
       </div>
 
       <!-- Team Lead Description -->
@@ -103,7 +62,7 @@ const emit = defineEmits<{
           t("task.editSidebar.tabs.otherDetails.teamLeadDescription")
         }}</label>
         <textarea
-          :value="teamLeadDescription"
+          :value="props.teamLeadDescription"
           @input="
             emit(
               'update:teamLeadDescription',
@@ -123,24 +82,7 @@ const emit = defineEmits<{
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.otherDetails.teamLeadContactPerson")
         }}</label>
-        <!-- <select
-          :value="teamLeadContactPerson"
-          @input="
-            emit(
-              'update:teamLeadContactPerson',
-              ($event.target as HTMLSelectElement).value
-            )
-          "
-          class="input-field"
-        >
-          <option value="" disabled>
-            {{ t("task.editSidebar.tabs.otherDetails.teamLeadContactPerson") }}
-          </option>
-          <option value="person1">Person 1</option>
-          <option value="person2">Person 2</option>
-          <option value="person3">Person 3</option>
-        </select> -->
-        <contact-persons />
+        <contact-persons :person="props.teamLeadContactPerson" />
       </div>
 
       <!-- Notification Template -->
@@ -148,24 +90,7 @@ const emit = defineEmits<{
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.otherDetails.notificationTemplate")
         }}</label>
-        <!-- <select
-          :value="notificationTemplate"
-          @input="
-            emit(
-              'update:notificationTemplate',
-              ($event.target as HTMLSelectElement).value
-            )
-          "
-          class="input-field"
-        >
-          <option value="" disabled>
-            {{ t("task.editSidebar.tabs.otherDetails.notificationTemplate") }}
-          </option>
-          <option value="template1">Template 1</option>
-          <option value="template2">Template 2</option>
-          <option value="template3">Template 3</option>
-        </select> -->
-        <notification-templates />
+        <notification-templates :notification="props.notificationTemplate" />
       </div>
     </div>
   </div>

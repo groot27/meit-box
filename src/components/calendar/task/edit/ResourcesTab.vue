@@ -1,301 +1,272 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import EmployeeSelect from "./resources/EmployeeSelect.vue";
-import VehicleSelect from "./resources/VehicleSelect.vue";
-import DevicesSelect from "./resources/DevicesSelect.vue";
+import { onBeforeUnmount } from "vue";
+import AddDateModal from "./resources/AddDateModal.vue";
+import ResourcesTable from "./resources/resourcesTable/ResourcesTable.vue";
+import { useGlobalStore } from "@/stores/index";
+import { useToast } from "vue-toastification";
 import { taskApi } from "@/api/taskApi";
+import { useCalendarStore } from "@/stores/CalendarStore";
+import { useTaskStore } from "@/stores/TaskStore";
+import { useRoute } from "vue-router";
 
 const { t } = useI18n();
+const globalStore = useGlobalStore();
+const toast = useToast();
+const route = useRoute();
 const props = defineProps<{
-  devices: string;
-  vehicle: string;
-  employees: string;
-  resourcesValues: any;
+  devices: number | null | undefined;
+  vehicle: number | null | undefined;
+  employees: number | null | undefined;
+  resourcesValues: any | null | undefined;
+  date: string | null | undefined;
+  startTime: string | null | undefined;
+  endTime: string | null | undefined;
+  relatedTasks: any | null | undefined;
+  taskId: number | null | undefined;
 }>();
+const emit = defineEmits<{
+  (e: "update:resourcesIds", id, type: string): void;
+  (e: "update:repeatTask", time: any): void;
+}>();
+const showAddDate = ref(false);
 const employeeData = ref(null);
 const deviceData = ref(null);
 const vehicleData = ref(null);
-const fetchEmployeeData = async (query: string = "") => {
-  // let loading = true;
-  try {
-    const res = await taskApi.getTaskUsers(query);
-    employeeData.value = res.data;
-  } finally {
-    // loading = false;
-  }
-};
-const fetchVehicleData = async (query: string = "") => {
-  // let loading = true;
-  try {
-    const res = await taskApi.getTaskVehicles(query);
-    vehicleData.value = res.data;
-  } finally {
-    // loading = false;
-  }
-};
-const fetchDeviceData = async (query: string = "") => {
-  // let loading = true;
-  try {
-    const res = await taskApi.getTaskDevices(query);
-    deviceData.value = res.data;
-  } finally {
-    // loading = false;
-  }
-};
-const resources = ref([
+const showIcons = ref(false);
+const showHiddens = ref(false);
+const selectedRescources = ref([]);
+const calendarStore = useCalendarStore();
+const taskStore = useTaskStore();
+const hiddenResources = ref([
   {
     id: 1,
     name: "",
+    number: null,
+    resourcesId: null,
     type: "Employee",
     count: 0,
     status: "Open",
   },
-  {
-    id: 2,
-    name: "",
-    type: "Vehicle",
-    count: 0,
-    status: "Open",
-  },
-  {
-    id: 3,
-    name: "",
-    type: "Device",
-    count: 0,
-    status: "Open",
-  },
 ]);
-onMounted(() => {
-  if (props) {
-    fetchEmployeeData();
-    fetchDeviceData();
-    fetchVehicleData();
-    let count = 1;
-    resources.value = [];
-    for (let i = 1; i <= Number(props.employees); i++) {
-      props.resourcesValues[i - 1];
-      resources.value.push({
-        id: count,
-        name: props.resourcesValues.users[i - 1]
-          ? props.resourcesValues.users[i - 1].username
-          : "Employee",
+const activeDropdown = ref(null);
+const dropdownRefs = ref([]);
+
+const handleClickOutside = (event) => {
+  const isClickInsideAnyDropdown = dropdownRefs.value.some(
+    (el) => el && el.contains(event.target)
+  );
+  if (!isClickInsideAnyDropdown) {
+    activeDropdown.value = null;
+  }
+};
+
+const addResources = (type: string) => {
+  selectedRescources.value.forEach((taskId) => {
+    taskStore.addResource(taskId, type);
+  });
+};
+const handleAddDate = () => {
+  showAddDate.value = !showAddDate.value;
+};
+
+const handleAddSubTask = (time) => {
+  emit("update:repeatTask", time);
+};
+
+const sendNotification = async (res) => {
+  if (res.message == "fail") {
+    toast.error("please set task template");
+    globalStore.setLoadingApi(false);
+    return;
+  }
+  if (res.data == null) {
+    globalStore.setLoadingApi(false);
+    return;
+  }
+  if (res.data.email) {
+    if (!res.data.data.notification_template) {
+      toast.error("please set Notification Template");
+      globalStore.setLoadingApi(false);
+      return;
+    }
+    if (!res.data.data.notification_template.template_content) {
+      toast.error(
+        "please set Content for selected Notification Template Time Sheet"
+      );
+      globalStore.setLoadingApi(false);
+      return;
+    }
+    await taskApi.sendOrderNotification({
+      orderId: res.data.order_id,
+      emails: [res.data.email_address],
+      subject: res.data.notification_template.template_name,
+      email: true,
+      message: res.data.notification_template.template_content,
+      notification_template: res.data.notification_template.id,
+      documentFiles: [],
+      uploadedDocs: [res.data.order_document_id],
+      task_id: props.taskId,
+    });
+    toast[res.data.status === "true" ? "success" : "error"](res.data.msg);
+    globalStore.setLoadingApi(false);
+  } else {
+    toast.error("Order Not Found");
+  }
+};
+const handleTimeSheet = () => {
+  const onSuccess = (res) => {
+    sendNotification(res);
+  };
+  globalStore.setLoadingApi(true);
+  taskApi.sendTimeSheet(
+    {
+      task_id: props.taskId,
+      "selected_task_id[0]": props.taskId,
+    },
+    { onSuccess }
+  );
+};
+const handleShowIcons = (taskId, selected: boolean) => {
+  if (selected) {
+    selectedRescources.value = [...selectedRescources.value, taskId];
+  } else {
+    selectedRescources.value = selectedRescources.value.filter(
+      (item) => item !== taskId
+    );
+  }
+};
+const handleHiddenResources = async () => {
+  globalStore.setLoadingApi(true);
+  const res = await taskApi.getHiddenRscorces(props.taskId);
+  if (res.data.rejected_user && res.data.rejected_user.length) {
+    hiddenResources.value = [];
+    res.data.rejected_user.forEach((resource, index) => {
+      hiddenResources.value.push({
+        id: index,
+        resourcesId: resource.id,
+        number: resource.mobile_number,
+        name: resource.username,
         type: "Employee",
         count: 0,
-        status: props.resourcesValues.users[i - 1]
-          ? props.resourcesValues.users[i - 1].status
-          : "Open",
+        status: "reject",
       });
-      count++;
-    }
-    for (let i = 1; i <= Number(props.vehicle); i++) {
-      resources.value.push({
-        id: count,
-        name: props.resourcesValues.vehicles[i - 1]
-          ? props.resourcesValues.vehicles[i - 1].number_plate
-          : "Vehicle",
-        type: "Vehicle",
-        count: 0,
-        status: props.resourcesValues.vehicles[i - 1]
-          ? props.resourcesValues.vehicles[i - 1].status
-          : "Open",
-      });
-      count++;
-    }
-    for (let i = 1; i <= Number(props.devices); i++) {
-      resources.value.push({
-        id: count,
-        name: "Device",
-        type: "Device",
-        count: 0,
-        status: "Open",
-      });
-      count++;
-    }
+    });
   }
+  globalStore.setLoadingApi(false);
+  showHiddens.value = true;
+};
+const handdleShowResources = () => {
+  showHiddens.value = false;
+};
+watch(
+  selectedRescources,
+  () => {
+    showIcons.value = selectedRescources.value.length > 0;
+  },
+  { deep: true, immediate: true }
+);
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+  if (props) {
+    employeeData.value = calendarStore.defaultData.employees;
+    vehicleData.value = calendarStore.defaultData.vehicles;
+    deviceData.value = calendarStore.defaultData.devices;
+    let count = 1;
+  }
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 
 <template>
-  <div class="">
-    <div
-      class="flex items-center justify-between bg-blue-300 p-2 rounded-tl rounded-tr h-full"
-    >
-      <div class="flex items-center space-x-2">
-        <input type="checkbox" class="rounded border-gray-300" />
-        <span class="text-sm font-medium">{{
-          t("task.editSidebar.tabs.resources.upcoming")
-        }}</span>
-      </div>
-      <div class="flex items-center space-x-2">
-        <button class="p-2 hover:bg-gray-100 rounded-full">
-          <svg
-            class="w-5 h-5 text-gray-600"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-            />
-          </svg>
-        </button>
-        <button class="p-2 hover:bg-gray-100 rounded-full">
-          <svg
-            class="w-5 h-5 text-gray-600"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-            />
-          </svg>
-        </button>
-        <button class="p-2 hover:bg-gray-100 rounded-full">
-          <svg
-            class="w-5 h-5 text-gray-600"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-            />
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <div
-      class="flex items-center space-x-2 text-sm text-gray-600 bg-gray-100 p-2"
-    >
+  <div
+    class="flex items-center justify-between bg-blue-300 p-2 rounded-tl rounded-tr h-[60px]"
+  >
+    <div class="flex items-center space-x-2 p-2">
       <input type="checkbox" class="rounded border-gray-300" />
-      <span>08.04.2025</span>
-      <span>00:00-00:00</span>
-      <button class="p-1 hover:bg-gray-100 rounded">
-        <svg
-          class="w-4 h-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-          />
-        </svg>
-      </button>
+      <span class="text-sm font-medium">{{
+        t("task.editSidebar.tabs.resources.upcoming")
+      }}</span>
     </div>
-
-    <table class="w-full">
-      <thead class="text-sm text-gray-600 bg-gray-50">
-        <tr>
-          <th class="text-left font-medium py-2">
-            {{ t("task.editSidebar.tabs.resources.name") }}
-          </th>
-          <th class="text-center font-medium py-2">
-            {{ t("task.editSidebar.tabs.resources.count") }}
-          </th>
-          <th class="text-center font-medium py-2">
-            {{ t("task.editSidebar.tabs.resources.details") }}
-          </th>
-          <th class="text-right font-medium py-2">
-            {{ t("task.editSidebar.tabs.resources.status") }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="resource in resources" :key="resource.id" class="border-t">
-          <td class="py-2">
-            <employee-select
-              v-if="resource.type === 'Employee' && employeeData"
-              :employee="resource.name"
-              :employees="employeeData"
-            />
-            <devices-select
-              v-if="resource.type === 'Device' && deviceData"
-              :device="resource.name"
-              :devices="deviceData"
-            />
-            <vehicle-select
-              v-if="resource.type === 'Vehicle' && vehicleData"
-              :vehicle="resource.name"
-              :vehicles="vehicleData"
-            />
-          </td>
-          <td class="text-center py-2">
-            <input
-              type="number"
-              :value="resource.count"
-              min="0"
-              class="w-12 text-center bg-transparent border-none"
-            />
-          </td>
-          <td class="text-center py-2">
-            <div class="flex items-center justify-center space-x-1">
-              <font-awesome-icon
-                v-if="resource.type === 'Employee'"
-                icon="fa-solid fa-user"
-                class="text-gray-500"
-              />
-              <font-awesome-icon
-                v-if="resource.type === 'Vehicle'"
-                icon="fa-solid fa-car"
-                class="text-gray-500"
-              />
-              <button class="p-1 hover:bg-gray-100 rounded">
-                <svg
-                  class="w-4 h-4 text-red-500"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
-              <button class="p-1 hover:bg-gray-100 rounded">
-                <svg
-                  class="w-4 h-4 text-gray-600"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  />
-                </svg>
-              </button>
-            </div>
-          </td>
-          <td class="text-right py-2">
-            <button
-              class="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
-            >
-              {{ resource.status }}
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="flex items-center space-x-8" v-show="showIcons">
+      <div class="flex space-x-2 items-center">
+        <button
+          class="p-1 hover:bg-gray-100 rounded-full"
+          @click="handleTimeSheet"
+        >
+          <font-awesome-icon
+            icon="fa-solid fa-file-pdf"
+            class="text-gray-900"
+          />
+        </button>
+        <button
+          class="p-1 hover:bg-gray-100 rounded-full"
+          @click="handdleShowResources"
+        >
+          <font-awesome-icon icon="fa-solid fa-user" class="text-gray-900" />
+        </button>
+        <button
+          class="p-1 hover:bg-gray-100 rounded-full"
+          @click="handleHiddenResources"
+        >
+          <font-awesome-icon
+            icon="fa-solid fa-user-alt-slash"
+            class="text-gray-500"
+          />
+        </button>
+      </div>
+      <div class="flex space-x-2 items-center">
+        <button
+          class="p-1 hover:bg-gray-100 rounded-full"
+          @click="addResources('Device')"
+        >
+          <font-awesome-icon icon="fa-solid fa-tools" class="text-gray-900" />
+        </button>
+        <button
+          class="p-1 hover:bg-gray-100 rounded-full"
+          @click="addResources('Vehicle')"
+        >
+          <font-awesome-icon icon="fa-solid fa-truck" class="text-gray-900" />
+        </button>
+        <button
+          class="p-1 hover:bg-gray-100 rounded-full"
+          @click="addResources('Employee')"
+        >
+          <font-awesome-icon
+            icon="fa-solid fa-user-plus"
+            class="text-gray-900"
+          />
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="">
+    <template v-for="task in props.relatedTasks" :key="task.id">
+      <resources-table
+        v-model:devices="task.details.devices"
+        v-model:vehicle="task.details.vehicle"
+        v-model:employees="task.details.employees"
+        v-model:resourcesValues="task.resources"
+        v-model:date="task.date"
+        v-model:startTime="task.startTime"
+        v-model:endTime="task.endTime"
+        v-model:taskId="task.details.id"
+        v-model:resources="task.mappedResources"
+        @show-icons="handleShowIcons"
+      />
+    </template>
+    <div class="relative">
+      <span
+        v-if="route.params.taskId"
+        class="text-blue-500 cursor-pointer"
+        @click="handleAddDate"
+        >Add Date</span
+      >
+      <add-date-modal v-on:add-date="handleAddSubTask" v-if="showAddDate" />
+    </div>
   </div>
 </template>

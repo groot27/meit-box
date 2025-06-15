@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { format } from "date-fns";
 import { useI18n } from "vue-i18n";
 import { Task } from "@/types/TaskTypes";
-
+import { statusColorClasses } from "@/types/TaskTypes";
 const { t } = useI18n();
 
 const props = defineProps<{
@@ -17,7 +17,6 @@ const emit = defineEmits<{
   (e: "copy", task: Task): void;
   (e: "edit", task: Task): void;
 }>();
-
 const tooltipStyle = computed(() => {
   if (!props.position) return {};
 
@@ -49,10 +48,24 @@ const handleClose = () => {
   emit("close");
 };
 
+const copiedTooltipVisible = ref(false);
+
 const handleShare = () => {
-  if (props.task) {
-    emit("share", props.task);
-  }
+  if (!props.task) return;
+
+  const textToCopy = `Job: ${props.task.title} Date: ${props.task.date} from ${props.task.startTime}-${props.task.endTime} Location: ${props.task.address}`;
+
+  navigator.clipboard
+    .writeText(textToCopy)
+    .then(() => {
+      copiedTooltipVisible.value = true;
+      setTimeout(() => {
+        copiedTooltipVisible.value = false;
+      }, 2000);
+    })
+    .catch((err) => {
+      console.error("Failed to copy text: ", err);
+    });
 };
 
 const handleCopy = () => {
@@ -83,46 +96,28 @@ const handleEdit = () => {
         class="flex items-center justify-end p-4"
         :style="{ backgroundColor: task.color }"
       >
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-2 relative">
           <button
             @click="handleShare"
             class="p-2 text-white hover:bg-white/20 rounded-full"
             :title="t('task.infoModal.share')"
           >
-            <svg
-              class="w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
-              />
-            </svg>
+            <font-awesome-icon :icon="['fas', 'share-nodes']" />
           </button>
 
-          <button
-            @click="handleCopy"
-            class="p-2 text-white hover:bg-white/20 rounded-full"
-            :title="t('task.infoModal.copy')"
+          <div
+            v-if="copiedTooltipVisible"
+            class="absolute top-0 left-1/2 -translate-x-1/2 bg-blue-400 text-white text-xs px-2 py-1 rounded shadow"
           >
-            <svg
-              class="w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
-          </button>
+            copied to clipboard
+          </div>
+
+          <router-link
+            :to="`/finance-dashboard?order_id=${task.orderId}&activeTab=worktime`"
+            class="text-white"
+          >
+            <font-awesome-icon :icon="['fas', 'clock']" />
+          </router-link>
 
           <button
             @click="handleEdit"
@@ -170,7 +165,9 @@ const handleEdit = () => {
       <div class="p-4 space-y-6">
         <!-- Details Box -->
         <div class="bg-gray-50 rounded-lg p-4 shadow-sm ring-1 ring-gray-900/5">
-          <h3 class="text-sm font-medium text-gray-700 mb-3">Details</h3>
+          <h3 class="text-sm font-medium text-gray-700 mb-3">
+            {{ t("task.infoModal.details") }}
+          </h3>
           <div class="space-y-3">
             <!-- Title -->
             <div class="flex items-center space-x-2">
@@ -208,11 +205,7 @@ const handleEdit = () => {
                 />
               </svg>
               <span class="text-gray-900">
-                {{
-                  task.date
-                    ? format(new Date(task.date), "h:mm a, MMM d, yyyy")
-                    : t("task.infoModal.noTime")
-                }}
+                {{ task.startTime }}
               </span>
             </div>
 
@@ -238,75 +231,34 @@ const handleEdit = () => {
                 />
               </svg>
               <span class="text-gray-900">
-                {{
-                  task.resourceDetails?.address || t("task.infoModal.noAddress")
-                }}
+                {{ task.address || t("task.infoModal.noAddress") }}
               </span>
             </div>
           </div>
         </div>
 
         <!-- Resource Box -->
-        <div class="bg-gray-50 rounded-lg p-4 shadow-sm ring-1 ring-gray-900/5">
-          <h3 class="text-sm font-medium text-gray-700 mb-3">Resources</h3>
+        <div
+          class="bg-gray-50 rounded-lg p-4 shadow-sm ring-1 ring-gray-900/5"
+          v-if="task.users && task.users.length"
+        >
+          <h3 class="text-sm font-medium text-gray-700 mb-3">
+            {{ t("task.infoModal.resources") }}
+          </h3>
           <div class="space-y-3">
-            <!-- Skill -->
-            <div class="flex items-center space-x-2">
-              <svg
-                class="w-5 h-5 text-gray-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
-              </svg>
-              <span class="text-gray-900">{{
-                task.resourceDetails?.skill || "No skill specified"
-              }}</span>
-            </div>
-
-            <!-- User Quantity -->
-            <div class="flex items-center space-x-2">
-              <svg
-                class="w-5 h-5 text-gray-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              <span class="text-gray-900"
-                >{{ task.resourceDetails?.userQuantity || "1" }} users</span
-              >
-            </div>
-
-            <!-- Rate per Hour -->
-            <div class="flex items-center space-x-2">
-              <svg
-                class="w-5 h-5 text-gray-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span class="text-gray-900">{{
-                task.resourceDetails?.ratePerHour || "No rate specified"
+            <!-- Employee -->
+            <div
+              class="flex items-center justify-between"
+              v-for="user in task.users"
+            >
+              <div>
+                <font-awesome-icon icon="fa-solid fa-user" />
+                <span class="text-gray-900">{{
+                  `${user.first_name} ${user.last_name}`
+                }}</span>
+              </div>
+              <span :class="statusColorClasses[user.status]">{{
+                `${user.status}`
               }}</span>
             </div>
           </div>

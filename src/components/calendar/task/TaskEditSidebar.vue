@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { Task } from "@/types/TaskTypes";
+import { Task, TaskEditType } from "@/types/TaskTypes";
 import ProjectTab from "./edit/ProjectTab.vue";
 import ResourcesTab from "./edit/ResourcesTab.vue";
 import OtherDetailsTab from "./edit/OtherDetailsTab.vue";
@@ -10,9 +10,10 @@ import DocumentsTab from "./edit/DocumentsTab.vue";
 import { useTaskStore } from "@/stores/TaskStore";
 import { useCalendarStore } from "@/stores/CalendarStore";
 import { reactive } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { taskApi } from "@/api/taskApi";
 import { useGlobalStore } from "@/stores/index";
+import { addDays, format } from "date-fns";
 const taskStore = useTaskStore();
 const globalStore = useGlobalStore();
 const calendarStore = useCalendarStore();
@@ -20,7 +21,6 @@ const calendarStore = useCalendarStore();
 const { t } = useI18n();
 
 const props = defineProps<{
-  task: Task | null;
   show: boolean;
 }>();
 
@@ -32,94 +32,35 @@ const emit = defineEmits<{
 
 const activeTab = ref("project");
 
-const singleTask = reactive<any>({
-  title: "",
-  description: "",
-  date: "",
-  orderDetails: {},
-  taskTemplate: {},
-  activities: {},
-});
+const singleTask = computed<TaskEditType | undefined>(
+  () => taskStore.selectedTask
+);
 const route = useRoute();
-// Other Details tab state
-const requiredSkills = ref("");
-const dress = ref("");
-const language = ref("doesntMatter");
-const teamLeadDescription = ref("");
-const teamLeadContactPerson = ref("");
-const notificationTemplate = ref("");
+const router = useRouter();
 const comments = ref([]);
 const histories = ref([]);
-// Mock data for activity
-const mockComments = [
-  {
-    id: "1",
-    author: "John Doe",
-    content: "Added new resource requirements",
-    timestamp: "2025-03-15T10:30:00Z",
-    avatarUrl: "https://i.pravatar.cc/40?img=1",
-  },
-  {
-    id: "2",
-    author: "Jane Smith",
-    content: "Updated location details",
-    timestamp: "2025-03-15T11:15:00Z",
-    avatarUrl: "https://i.pravatar.cc/40?img=2",
-  },
-];
-
-const mockHistory = [
-  {
-    id: "1",
-    user: "System",
-    action: "created",
-    timestamp: "2025-03-15T09:00:00Z",
-  },
-  {
-    id: "2",
-    user: "John Doe",
-    action: "updated",
-    field: "title",
-    oldValue: "Old Title",
-    newValue: "New Title",
-    timestamp: "2025-03-15T10:00:00Z",
-  },
-];
-
-watch(
-  () => props.task,
-  (newTask) => {
-    if (newTask) {
-      activeTab.value = "project";
-      Object.assign(singleTask, newTask);
-
-      comments.value = singleTask.activities.comments;
-      histories.value = singleTask.activities.logs;
-      // Initialize other details
-      requiredSkills.value = newTask.otherDetails?.requiredSkills || "";
-      dress.value = newTask.otherDetails?.dress || "";
-      language.value = newTask.otherDetails?.language || "doesntMatter";
-      teamLeadDescription.value =
-        newTask.otherDetails?.teamLeadDescription || "";
-      teamLeadContactPerson.value =
-        newTask.otherDetails?.teamLeadContactPerson || "";
-      notificationTemplate.value =
-        newTask.otherDetails?.notificationTemplate || "";
-    }
-  },
-  { immediate: true }
-);
-
 const handleSubmit = () => {
   if (!singleTask) return;
-
   if (route.params.taskId) {
     console.log("🚀 ~ handleSubmit ~ update");
     emit("update", singleTask);
   } else {
     console.log("🚀 ~ handleSubmit ~ create");
-
     emit("create", singleTask);
+  }
+};
+const addRelatedTasks = () => {
+  taskStore.removeRelatedTasks();
+  let currentDate = new Date(singleTask.value.details.date);
+  const endDate = new Date(singleTask.value.details.endDate);
+  currentDate = addDays(currentDate, 1);
+  while (currentDate <= endDate) {
+    taskStore.addRelatedDate({
+      startDate: format(currentDate, "yyyy-MM-dd"),
+      startTime: singleTask.value.details.startTime,
+      endTime: singleTask.value.details.endTime,
+    });
+    currentDate = addDays(currentDate, 1);
   }
 };
 
@@ -129,13 +70,13 @@ const handleClose = () => {
 
 const handleAddDocuments = (files: File[]) => {
   const formData = new FormData();
-  formData.append("order_id", singleTask.orderDetails.id);
-  formData.append("task_id", singleTask.taskTemplate.id);
+  formData.append("order_id", singleTask.value.orderDetails.id.toString());
+  formData.append("task_id", singleTask.value.details.id.toString());
   formData.append("file", files[0]);
   const fileName = files[0].name.split(".")[0];
   globalStore.setLoadingApi(true);
   const onSuccess = (res) => {
-    singleTask.attachments.push({ id: res.document_id, name: fileName });
+    singleTask.value.attachments.push({ id: res.document_id, name: fileName });
     globalStore.setLoadingApi(false);
   };
   taskApi.addDocument(formData, { onSuccess });
@@ -143,7 +84,7 @@ const handleAddDocuments = (files: File[]) => {
 
 const handleRemoveDocument = (docId: string) => {
   const onSuccess = () => {
-    singleTask.attachments = singleTask.attachments.filter(
+    singleTask.value.attachments = singleTask.value.attachments.filter(
       (file) => file.id != docId
     );
     globalStore.setLoadingApi(false);
@@ -153,6 +94,50 @@ const handleRemoveDocument = (docId: string) => {
 };
 const handleArchiveClick = () => {
   taskStore.setArchiveModalDispay(true);
+};
+
+const updateResourcesIdsTask = (id, type) => {
+  switch (type) {
+    case "Employee":
+      if (singleTask.value.details.employeesIds) {
+        singleTask.value.details.employeesIds.push(id);
+      } else {
+        singleTask.value.details.employeesIds = [id];
+      }
+      singleTask.value.details.employeesCount =
+        singleTask.value.details.employeesIds.length;
+      break;
+    case "Vehicle":
+      if (singleTask.value.details.vehiclesIds) {
+        singleTask.value.details.vehiclesIds.push(id);
+      } else {
+        singleTask.value.details.vehiclesIds = [id];
+      }
+      singleTask.value.details.vehiclesCount =
+        singleTask.value.details.vehiclesIds.length;
+      break;
+    default:
+      if (singleTask.value.details.devicesIds) {
+        singleTask.value.details.devicesIds.push(id);
+      } else {
+        singleTask.value.details.devicesIds = [id];
+      }
+      break;
+  }
+  // emit("update", singleTask);
+};
+const updateLocation = (place) => {
+  singleTask.value.orderDetails.latitude = place.geometry.location.lat();
+  singleTask.value.orderDetails.longitude = place.geometry.location.lng();
+};
+const updateRepeatTask = async (dateTime) => {
+  await taskStore.addRelatedResources(
+    route.params.taskId,
+    singleTask,
+    dateTime
+  );
+  // window.location = "/monthly-view2";
+  router.push("/monthly-view2");
 };
 </script>
 
@@ -182,14 +167,14 @@ const handleArchiveClick = () => {
       <div class="pt-2 flex gap-x-2">
         <button
           @click="handleClose"
-          class="w-full px-6 py-3 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-500"
+          class="w-full px-2 py-3 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-500"
         >
           {{ t("task.editSidebar.discard") }}
         </button>
         <button
           @click="handleSubmit"
           type="submit"
-          class="w-full px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          class="w-full px-2 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
         >
           {{ t("task.editSidebar.saveChanges") }}
         </button>
@@ -222,50 +207,65 @@ const handleArchiveClick = () => {
     </div>
 
     <!-- Content -->
-    <div class="p-6 space-y-4 overflow-y-auto h-full">
+    <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-128px)] h-full">
       <!-- Project Tab -->
       <ProjectTab
         v-if="activeTab === 'project'"
-        v-model:order="singleTask.orderDetails.id"
+        v-model:order="singleTask.orderDetails.orderNumber"
         v-model:customer="singleTask.orderDetails.customerName"
-        v-model:taskTitle="singleTask.title"
-        v-model:status="singleTask.status"
-        v-model:permission="singleTask.taskTemplate.permission"
-        v-model:locationCategory="singleTask.location"
-        v-model:location="singleTask.address"
-        v-model:updateTasks="singleTask.updateTasks"
-        v-model:startDate="singleTask.startDate"
-        v-model:endDate="singleTask.endDate"
-        v-model:startTime="singleTask.startTime"
-        v-model:endTime="singleTask.endTime"
-        v-model:description="singleTask.description"
+        v-model:taskTitle="singleTask.details.title"
+        v-model:status="singleTask.details.status"
+        v-model:permission="singleTask.details.permission"
+        v-model:locationCategory="singleTask.details.resourceLocationCategory"
+        v-model:location="singleTask.details.location"
+        v-model:locationDescription="singleTask.details.locationDescription"
+        v-model:updateTasks="singleTask.details.updateTasks"
+        v-model:startDate="singleTask.details.date"
+        v-model:endDate="singleTask.details.endDate"
+        v-model:startTime="singleTask.details.startTime"
+        v-model:endTime="singleTask.details.endTime"
+        v-model:description="singleTask.details.description"
+        @update:location="updateLocation"
+        @update:endDate="addRelatedTasks"
       />
 
       <!-- Resources Tab -->
       <ResourcesTab
         v-if="activeTab === 'resources'"
-        v-model:devices="singleTask.taskTemplate.devices"
-        v-model:vehicle="singleTask.taskTemplate.vehicle"
-        v-model:employees="singleTask.taskTemplate.employees"
+        v-model:devices="singleTask.details.allDevicesCount"
+        v-model:vehicle="singleTask.details.allVehiclesCount"
+        v-model:employees="singleTask.details.allEmployeesCount"
         v-model:resourcesValues="singleTask.resources"
+        v-model:date="singleTask.details.date"
+        v-model:startTime="singleTask.details.startTime"
+        v-model:endTime="singleTask.details.endTime"
+        v-model:relatedTasks="singleTask.relatedTasks"
+        v-model:taskId="singleTask.details.id"
+        @update:resourcesIds="updateResourcesIdsTask"
+        @update:repeatTask="updateRepeatTask"
       />
-
       <!-- Other Details Tab -->
       <OtherDetailsTab
         v-if="activeTab === 'otherDetails'"
-        v-model:requiredSkills="requiredSkills"
-        v-model:dress="dress"
-        v-model:language="language"
-        v-model:teamLeadDescription="teamLeadDescription"
-        v-model:teamLeadContactPerson="teamLeadContactPerson"
-        v-model:notificationTemplate="notificationTemplate"
+        v-model:requiredSkills="singleTask.otherDetails.requiredSkills"
+        v-model:dress="singleTask.otherDetails.dress"
+        v-model:language="singleTask.otherDetails.language"
+        v-model:teamLeadDescription="
+          singleTask.otherDetails.teamLeadDescription
+        "
+        v-model:teamLeadContactPerson="
+          singleTask.otherDetails.teamLeadContactPerson
+        "
+        v-model:notificationTemplate="
+          singleTask.otherDetails.notificationTemplate
+        "
       />
 
       <!-- Activity Tab -->
       <ActivityTab
         v-if="activeTab === 'activity'"
-        :comments="comments"
-        :history="histories"
+        :comments="singleTask.activities.comments"
+        :history="singleTask.activities.histories"
       />
 
       <!-- Documents Tab -->
