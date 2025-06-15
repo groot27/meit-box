@@ -102,6 +102,20 @@ const handleWhatsAppLink = async (resource, type) => {
     { onSuccess }
   );
 };
+const formatLabel = (key) => {
+  const labels = {
+    confirmed: t("task.editSidebar.tabs.resources.statuses.confirmed"),
+    checked_out: t("task.editSidebar.tabs.resources.statuses.checked_out"),
+    no_show: t("task.editSidebar.tabs.resources.statuses.no_show"),
+    prechecked: t("task.editSidebar.tabs.resources.statuses.prechecked"),
+    open: t("task.editSidebar.tabs.resources.statuses.open"),
+    planned: t("task.editSidebar.tabs.resources.statuses.planned"),
+    reject: t("task.editSidebar.tabs.resources.statuses.reject"),
+    remove: t("task.editSidebar.tabs.resources.statuses.remove"),
+    checked_in: t("task.editSidebar.tabs.resources.statuses.checked_in"),
+  };
+  return labels[key] || key;
+};
 const updateEmployeeStatus = async (id, status) => {
   if (!props.taskId) {
     return;
@@ -152,7 +166,7 @@ const updateIdsOfTask = (id, type) => {
 };
 
 const newStatus = (index, type) => {
-  taskStore.addAssignedResource(props.taskId, type);
+  taskStore.addAssignedResource(props.taskId, type, index);
 };
 onMounted(() => {
   // document.addEventListener("click", handleClickOutside);
@@ -280,7 +294,7 @@ onMounted(() => {
                 :key="option"
                 :value="option"
               >
-                {{ option }}
+                {{ formatLabel(option) }}
               </option>
             </select>
           </td>
@@ -313,7 +327,7 @@ onMounted(() => {
                 :key="option"
                 :value="option"
               >
-                {{ option }}
+                {{ formatLabel(option) }}
               </option>
             </select>
           </td>

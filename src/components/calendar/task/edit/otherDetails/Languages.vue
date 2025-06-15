@@ -1,4 +1,3 @@
-<!-- MultiSelectLanguage.vue -->
 <template>
   <div>
     <multiselect
@@ -8,7 +7,6 @@
       :close-on-select="false"
       placeholder="Pick one or more"
       :option-disabled="isDisabled"
-      @input="updateSelection"
     />
   </div>
 </template>
@@ -18,6 +16,7 @@ import { ref, watch } from "vue";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 
+// Props and Emits
 const props = defineProps({
   modelValue: {
     type: Array,
@@ -26,22 +25,27 @@ const props = defineProps({
 });
 const emit = defineEmits(["update:modelValue"]);
 
+// Data
 const options = ["english", "german", "doesn't matter"];
 const localSelected = ref([...props.modelValue]);
 
+// Sync local state to parent
+watch(localSelected, (newVal) => {
+  emit("update:modelValue", newVal);
+});
+
+// Sync parent prop to local
 watch(
   () => props.modelValue,
   (newVal) => {
-    localSelected.value = [...newVal];
+    if (JSON.stringify(newVal) !== JSON.stringify(localSelected.value)) {
+      localSelected.value = [...newVal];
+    }
   }
 );
 
-function updateSelection() {
-  emit("update:modelValue", localSelected.value);
-}
-
-// Disable options already selected
+// Optional: Disable already selected items (if needed)
 function isDisabled(option) {
-  return localSelected.value.includes(option);
+  return false; // or remove this prop entirely
 }
 </script>

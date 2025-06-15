@@ -36,9 +36,11 @@ const deviceData = ref(null);
 const vehicleData = ref(null);
 const showIcons = ref(false);
 const showHiddens = ref(false);
+const selected = ref(false);
 const selectedRescources = ref([]);
 const calendarStore = useCalendarStore();
 const taskStore = useTaskStore();
+const resources = ref(null);
 const hiddenResources = ref([
   {
     id: 1,
@@ -157,6 +159,10 @@ const handleHiddenResources = async () => {
   globalStore.setLoadingApi(false);
   showHiddens.value = true;
 };
+const handleFilterResources = () => {
+  selected.value = !selected.value;
+  resources.value = taskStore.filterRelatedResources(selected.value);
+};
 const handdleShowResources = () => {
   showHiddens.value = false;
 };
@@ -173,7 +179,7 @@ onMounted(() => {
     employeeData.value = calendarStore.defaultData.employees;
     vehicleData.value = calendarStore.defaultData.vehicles;
     deviceData.value = calendarStore.defaultData.devices;
-    let count = 1;
+    resources.value = props.relatedTasks;
   }
 });
 
@@ -187,7 +193,12 @@ onBeforeUnmount(() => {
     class="flex items-center justify-between bg-blue-300 p-2 rounded-tl rounded-tr h-[60px]"
   >
     <div class="flex items-center space-x-2 p-2">
-      <input type="checkbox" class="rounded border-gray-300" />
+      <input
+        type="checkbox"
+        class="rounded border-gray-300"
+        :checked="selected"
+        @change="handleFilterResources"
+      />
       <span class="text-sm font-medium">{{
         t("task.editSidebar.tabs.resources.upcoming")
       }}</span>
@@ -244,16 +255,16 @@ onBeforeUnmount(() => {
       </div>
     </div>
   </div>
-  <div class="">
-    <template v-for="task in props.relatedTasks" :key="task.id">
+  <div class="" v-if="resources">
+    <template v-for="task in resources" :key="task.id">
       <resources-table
         v-model:devices="task.details.devices"
         v-model:vehicle="task.details.vehicle"
         v-model:employees="task.details.employees"
         v-model:resourcesValues="task.resources"
-        v-model:date="task.date"
-        v-model:startTime="task.startTime"
-        v-model:endTime="task.endTime"
+        v-model:date="task.details.date"
+        v-model:startTime="task.details.startTime"
+        v-model:endTime="task.details.endTime"
         v-model:taskId="task.details.id"
         v-model:resources="task.mappedResources"
         @show-icons="handleShowIcons"

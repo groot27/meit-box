@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import { taskApi } from "@/api/taskApi";
 import { useI18n } from "vue-i18n";
@@ -7,45 +7,54 @@ import { useCalendarStore } from "@/stores/CalendarStore";
 
 const { t } = useI18n();
 const calendarStore = useCalendarStore();
+
 const props = defineProps<{
-  notification: string | null | undefined;
+  modelValue: string | null | undefined;
 }>();
 
 const emit = defineEmits<{
-  (e: "update", selectedNotificationTemplates);
+  (e: "update:modelValue", value: string): void;
 }>();
 
-const selectedNotificationTemplates = ref("");
+const selectedNotificationTemplates = ref(props.modelValue ?? "");
 const notificationtemplatesLoading = ref(false);
-const notificationtemplatesOptions = ref<any>([]);
+const notificationtemplatesOptions = ref<string[]>([]);
+
 const fetchNotificationTemplatesOptions = async (query: string = "") => {
   notificationtemplatesLoading.value = true;
   try {
     const res = await taskApi.getTaskNotificationTemplates(query);
     notificationtemplatesOptions.value = res.data.map(
-      (notificationtemplates) => {
-        return {
-          key: notificationtemplates.id,
-          value: notificationtemplates.template_name,
-        };
-      }
+      (template) => template.template_name
     );
   } finally {
     notificationtemplatesLoading.value = false;
   }
 };
-watch(selectedNotificationTemplates, () => {
-  if (selectedNotificationTemplates) {
-    emit("update", selectedNotificationTemplates);
+
+// Sync parent -> local
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (newVal !== selectedNotificationTemplates.value) {
+      selectedNotificationTemplates.value = newVal ?? "";
+    }
   }
+);
+
+// Sync local -> parent
+watch(selectedNotificationTemplates, (val) => {
+  emit("update:modelValue", val);
 });
+
 onMounted(() => {
   notificationtemplatesOptions.value =
     calendarStore.defaultData.notifications.map(
-      (notificationtemplates) => notificationtemplates.template_name
+      (template) => template.template_name
     );
 });
 </script>
+
 <template>
   <async-select
     v-model="selectedNotificationTemplates"

@@ -198,8 +198,8 @@ const handleTaskEdit = async (task: Task) => {
   }
 };
 
-const handleTaskUpdate = (updatedTask: Task) => {
-  taskStore.updateTask(String(route.params.taskId), updatedTask);
+const handleTaskUpdate = async (updatedTask: Task) => {
+  await taskStore.updateTask(String(route.params.taskId), updatedTask);
   closeTaskEditSidebar();
 };
 

@@ -1,9 +1,5 @@
 import { TaskDisplayType, TaskEditType } from "@/types/TaskTypes";
 
-export const generateTaskForEdit = () => {
-  // const task: TaskEditType = {};
-  return task;
-};
 export const generateTaskForDisplay = (task) => {
   return {
     id: task.id,
@@ -13,12 +9,12 @@ export const generateTaskForDisplay = (task) => {
     description: task.description,
     date: task.date,
     color: task.color || "#e5e7eb",
-    deviceCount: task.device_occupied_count,
-    allDeviceCount: task.device_available_count,
-    employeeCount: task.employee_occupied_count,
-    allEmployeeCount: task.employee_available_count,
-    vehicleCount: task.vehicle_occupied_count,
-    allVehicleCount: task.vehicle_available_count,
+    devicesCount: task.device_occupied_count,
+    allDevicesCount: task.device_available_count,
+    employeesCount: task.employee_occupied_count,
+    allEmployeesCount: task.employee_available_count,
+    vehiclesCount: task.vehicle_occupied_count,
+    allVehiclesCount: task.vehicle_available_count,
     orderId: task.order_id,
     users: task.users,
     address: task.resource_location_category_value,
@@ -78,7 +74,7 @@ export const generateTaskCreateBody = (
     d_count: selectedTask.value.relatedTasks.map(
       (task) => task.details.devices || 0
     ),
-    language: [],
+    language: selectedTask.value.otherDetails.language,
     predecessor: [],
     successor: [],
     predecessor_hour: null,
@@ -104,5 +100,88 @@ export const generateTaskCreateBody = (
     custom_open: selectedTask.value.relatedTasks.map((task) => []),
     task_status: null,
     task_status_id: null,
+  };
+};
+export const generateUpdateTaskBody = (selectedTask) => {
+  return {
+    extra_emp: [],
+    id: selectedTask.value.details.id,
+    task_template_value: null,
+    order_id: selectedTask.value.orderDetails.id,
+    rep_task_ids: selectedTask.value.relatedTasks.map((task) => {
+      return task.details.id || null;
+    }),
+    task_title: selectedTask.value.details.title,
+    permission: selectedTask.value.details.permission,
+    date_type: "duration",
+    duration: "3",
+    start_time: selectedTask.value.details.startTime,
+    end_time: selectedTask.value.details.endTime,
+    resource_location_category_value:
+      selectedTask.value.details.resourceLocationCategory || null,
+    task_description: selectedTask.value.details.description,
+    invoice_text: null,
+    required_skills: selectedTask.value.otherDetails.requiredSkills,
+    dress: null,
+    color: selectedTask.value.details.color,
+    date: selectedTask.value.details.date,
+    previous_date: "",
+    is_edit: true,
+    location: selectedTask.value.details.location,
+    location_description:
+      selectedTask.value.details.locationDescription || null,
+    latitude: selectedTask.value.orderDetails.latitude || null,
+    longitude: selectedTask.value.orderDetails.longitude || null,
+    repetitions: "1",
+    teamlead_description: null,
+    teamlead_contact_person: null,
+    emp_rep: selectedTask.value.relatedTasks.map(
+      (task) => task.details.employeesIds || []
+    ),
+    e_count_rep: selectedTask.value.relatedTasks.map(
+      (task) => task.details.employeesCount || 0
+    ),
+    veh_rep: selectedTask.value.relatedTasks.map(
+      (task) => task.details.vehiclesIds || []
+    ),
+    v_count_rep: selectedTask.value.relatedTasks.map(
+      (task) => task.details.vehiclesCount || 0
+    ),
+    dev_rep: selectedTask.value.relatedTasks.map(
+      (task) => task.details.devicesIds || []
+    ),
+    d_count_rep: selectedTask.value.relatedTasks.map(
+      (task) => task.details.devicesCount || 0
+    ),
+    language: [],
+    predecessor: [],
+    successor: [],
+    predecessor_hour: null,
+    successor_hour: null,
+    start_date: selectedTask.value.details.date,
+    end_date: "",
+    repetition_value: 0,
+    rates_rep: selectedTask.value.relatedTasks.map((task) => "0.00"),
+    base_wage_rep: selectedTask.value.relatedTasks.map((task) => "0.00"),
+    plan_start_time_rep: selectedTask.value.relatedTasks.map(
+      (task) => task.details.startTime || "00:00"
+    ),
+    plan_end_time_rep: selectedTask.value.relatedTasks.map(
+      (task) => task.details.endTime || "00:00"
+    ),
+    plan_pause_time_rep: selectedTask.value.relatedTasks.map((task) => "00:00"),
+    travel_charges_rep: selectedTask.value.relatedTasks.map((task) => 0),
+    is_add_date: true,
+    updated_date: selectedTask.value.relatedTasks.map(
+      (task) => task.details.date
+    ),
+    custom_count_rep: selectedTask.value.relatedTasks.map((task) => 0),
+    custom_emp_rep: selectedTask.value.relatedTasks.map((task) => []),
+    custom_open_rep: selectedTask.value.relatedTasks.map((task) => []),
+    primary_color: "task_template",
+    notification_template_id: selectedTask.value.details.notificationTemplate,
+    task_status: null,
+    task_status_id: null,
+    end_series: false,
   };
 };

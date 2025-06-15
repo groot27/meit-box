@@ -71,10 +71,10 @@ const updatePermission = (event) => {
 // Function to format key names into readable labels
 const formatLabel = (key) => {
   const labels = {
-    admin: "Admin",
-    employee: "Employee",
-    manager: "Manager",
-    all: "All Access",
+    admin: t("task.editSidebar.tabs.project.permissions.admin"),
+    employee: t("task.editSidebar.tabs.project.permissions.employee"),
+    manager: t("task.editSidebar.tabs.project.permissions.manager"),
+    all: t("task.editSidebar.tabs.project.permissions.all"),
   };
   return labels[key] || key;
 };

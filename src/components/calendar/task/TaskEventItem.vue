@@ -101,7 +101,7 @@ const taskStyle = computed(() => {
       <div class="flex items-center" v-show="indicatorDisplay.employee">
         <font-awesome-icon icon="fa-solid fa-user" />
         <span class="ml-1">{{
-          `${task.employeeCount}/${task.allEmployeeCount}`
+          `${task.employeesCount}/${task.allEmployeesCount}`
         }}</span>
       </div>
 
@@ -109,7 +109,7 @@ const taskStyle = computed(() => {
       <div class="flex items-center" v-show="indicatorDisplay.vehicle">
         <font-awesome-icon icon="fa-solid fa-truck" />
         <span class="ml-1">{{
-          `${task.vehicleCount}/${task.allVehicleCount}`
+          `${task.vehiclesCount}/${task.allVehiclesCount}`
         }}</span>
       </div>
 
@@ -117,7 +117,7 @@ const taskStyle = computed(() => {
       <div class="flex items-center" v-show="indicatorDisplay.devices">
         <font-awesome-icon icon="fa-solid fa-tools" />
         <span class="ml-1">{{
-          `${task.deviceCount}/${task.allDeviceCount}`
+          `${task.devicesCount}/${task.allDevicesCount}`
         }}</span>
       </div>
 

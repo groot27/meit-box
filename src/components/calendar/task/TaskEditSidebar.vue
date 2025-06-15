@@ -139,6 +139,15 @@ const updateRepeatTask = async (dateTime) => {
   // window.location = "/monthly-view2";
   router.push("/monthly-view2");
 };
+const updateRelatedTask = () => {
+  singleTask.value.relatedTasks.forEach((task) => {
+    if (task.details.id === singleTask.value.details.id) {
+      task.details.date = singleTask.value.details.date;
+      task.details.startTime = singleTask.value.details.startTime;
+      task.details.endTime = singleTask.value.details.endTime;
+    }
+  });
+};
 </script>
 
 <template>
@@ -227,6 +236,7 @@ const updateRepeatTask = async (dateTime) => {
         v-model:description="singleTask.details.description"
         @update:location="updateLocation"
         @update:endDate="addRelatedTasks"
+        @update:startDate="updateRelatedTask"
       />
 
       <!-- Resources Tab -->

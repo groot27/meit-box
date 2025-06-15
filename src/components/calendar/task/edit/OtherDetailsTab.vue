@@ -21,7 +21,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "update:requiredSkills", value: string): void;
   (e: "update:dress", value: string): void;
-  (e: "update:language", value: string): void;
+  (e: "update:language", value: Array<string>): void;
   (e: "update:teamLeadDescription", value: string): void;
   (e: "update:teamLeadContactPerson", value: string): void;
   (e: "update:notificationTemplate", value: string): void;
@@ -37,7 +37,10 @@ const emit = defineEmits<{
           t("task.editSidebar.tabs.otherDetails.requiredSkills")
         }}</label>
 
-        <required-skills :skill="props.requiredSkills" />
+        <required-skills
+          v-model="props.requiredSkills"
+          @update:modelValue="emit('update:requiredSkills', $event)"
+        />
       </div>
 
       <!-- Dress -->
@@ -53,7 +56,10 @@ const emit = defineEmits<{
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.otherDetails.language")
         }}</label>
-        <languages v-model="props.language" />
+        <languages
+          v-model="props.language"
+          @update:modelValue="emit('update:language', $event)"
+        />
       </div>
 
       <!-- Team Lead Description -->
@@ -82,7 +88,10 @@ const emit = defineEmits<{
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.otherDetails.teamLeadContactPerson")
         }}</label>
-        <contact-persons :person="props.teamLeadContactPerson" />
+        <contact-persons
+          v-model="props.teamLeadContactPerson"
+          @update:modelValue="emit('update:teamLeadContactPerson', $event)"
+        />
       </div>
 
       <!-- Notification Template -->
@@ -90,7 +99,10 @@ const emit = defineEmits<{
         <label class="block text-sm font-medium text-gray-700">{{
           t("task.editSidebar.tabs.otherDetails.notificationTemplate")
         }}</label>
-        <notification-templates :notification="props.notificationTemplate" />
+        <notification-templates
+          v-model="props.notificationTemplate"
+          @update:modelValue="emit('update:notificationTemplate', $event)"
+        />
       </div>
     </div>
   </div>

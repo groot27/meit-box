@@ -162,8 +162,9 @@ export default {
           },
           permissions: {
             employee: "Mitarbeiter",
-            projectManager: "Projektmanager",
-            admin: "Administrator",
+            manager: "Projektleiter",
+            admin: "Admin",
+            all: "Alle",
           },
           locations: {
             berlin: "Berlin",
@@ -184,6 +185,17 @@ export default {
           vehicle: "Fahrzeug",
           device: "Gerät",
           open: "Offen",
+          statuses: {
+            confirmed: "Bestätigt",
+            checked_out: "Checked Out",
+            no_show: "No Show",
+            prechecked: "Vorgecheckt",
+            open: "offen",
+            planned: "geplant",
+            reject: "Abgelehnt",
+            remove: "Löschen",
+            checked_in: "Checked In",
+          },
         },
         otherDetails: {
           requiredSkills: "Task Bereich",
