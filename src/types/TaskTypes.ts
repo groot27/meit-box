@@ -66,7 +66,7 @@ export interface PermissionType {
   manager: number;
   all: number;
 }
-interface taskTemplateType {
+export interface taskTemplateType {
   id: string;
   color: string;
   task_title: string;

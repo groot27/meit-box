@@ -16,9 +16,9 @@ const globalStore = useGlobalStore();
 const toast = useToast();
 const route = useRoute();
 const props = defineProps<{
-  devices: string | null | undefined;
-  vehicle: string | null | undefined;
-  employees: string | null | undefined;
+  devices: number | null | undefined;
+  vehicle: number | null | undefined;
+  employees: number | null | undefined;
   resourcesValues: any | null | undefined;
   date: string | null | undefined;
   startTime: string | null | undefined;

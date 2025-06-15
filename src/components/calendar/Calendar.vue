@@ -172,17 +172,17 @@ const handleTaskCopy = (task: Task) => {
   console.log("Copy task:", task);
 };
 
-const handleTaskEdit = (task: Task) => {
+const handleTaskEdit = async (task: Task) => {
   // Close info modal before opening sidebar
   isTaskInfoModalOpen.value = false;
 
-  // selectedTask.value = task;
-  // isTaskEditSidebarOpen.value = true;
   // Add taskId to URL
   if (task.id) {
     router.push(`/monthly-view2/${task.id}`);
   } else {
-    taskStore.continueToCreate(task);
+    // selectedTask.value = task;
+    await taskStore.continueToCreate(task);
+    isTaskEditSidebarOpen.value = true;
   }
 };
 

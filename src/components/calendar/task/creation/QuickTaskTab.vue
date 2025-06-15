@@ -7,6 +7,7 @@ import { useI18n } from "vue-i18n";
 import { stripHtml } from "@/utils/utils";
 import { useCalendarStore } from "@/stores/CalendarStore";
 import { format } from "date-fns";
+import { useTaskStore } from "@/stores/TaskStore";
 
 const { t } = useI18n();
 const porps = defineProps<{
@@ -27,6 +28,7 @@ const emit = defineEmits<{
 const description = ref("");
 const orderId = ref("");
 const calendarStore = useCalendarStore();
+const taskStore = useTaskStore();
 
 const selectedOrder = ref("");
 const selectedTask = ref("");
@@ -44,10 +46,6 @@ const isValid = computed(() => selectedOrder.value && selectedTask.value);
 const handleContinue = () => {
   if (isValid.value) {
     emit("continueToEdit", {
-      taskTitle: selectedTask.value,
-      description: description.value,
-      taskTemplate: taskDetails.value,
-      orderDetails: orderDetails.value,
       date: format(porps.date, "yyyy-MM-dd"),
     });
   }
@@ -69,6 +67,7 @@ const fetchOrderOptions = async (query: string = "") => {
     const res = await taskApi.getTaskOrders(query);
     orderOptions.value = [];
     taskOrders.value = res.data;
+    calendarStore.defaultData.orders = res.data;
     res?.data.forEach((order) => {
       orderOptions.value.push(
         `${order.order_number} | ${
@@ -87,6 +86,7 @@ const fetchTaskOptions = async (query: string = "") => {
     const res = await taskApi.getTaskTitles(query);
     taskOptions.value = [];
     taskTemplates.value = res.data;
+    calendarStore.defaultData.taskTemplates = res.data;
     res?.data.forEach((template) => {
       taskOptions.value.push(template.task_title);
     });
@@ -101,20 +101,7 @@ const fillDescription = () => {
       description.value = stripHtml(
         taskTemplates.value[template].task_description
       );
-      taskDetails.value = {
-        color: taskTemplates.value[template].color,
-        id: taskTemplates.value[template].id,
-        description: taskTemplates.value[template].task_description,
-        employees_count: taskTemplates.value[template].employees,
-        employees: taskTemplates.value[template].employees_count,
-        vehicle_count: taskTemplates.value[template].vehicle,
-        vehicle: taskTemplates.value[template].vehicle_count,
-        devices_count: taskTemplates.value[template].devices,
-        devices: taskTemplates.value[template].devices_count,
-        permission: taskTemplates.value[template].permission,
-        locationDescription: "",
-        location: orderDetails.value.orderLocation,
-      };
+      taskStore.setTaskTemplate(taskTemplates.value[template].id);
     }
   });
 };
@@ -148,15 +135,7 @@ watch(selectedOrder, () => {
         taskOrders.value[order].order_number ==
         selectedOrder.value.split("|")[0].trim()
       ) {
-        orderDetails.value = {
-          latitude: taskOrders.value[order].latitude,
-          longitude: taskOrders.value[order].longitude,
-          id: taskOrders.value[order].id,
-          customerName: taskOrders.value[order].customer_name || "No Customer",
-          orderNumber: taskOrders.value[order].order_number || "No Order",
-          orderLocation:
-            taskOrders.value[order].order_location || "No Location",
-        };
+        taskStore.setOrderDetails(taskOrders.value[order].id);
       }
     });
   }

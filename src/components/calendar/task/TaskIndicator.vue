@@ -8,7 +8,7 @@ const taskStore = useTaskStore();
 const indicatorDisplay = computed(() => taskStore.taskIndicatorDisplay);
 
 const props = defineProps<{
-  task: Task;
+  task?: Task;
 }>();
 
 const emit = defineEmits<{
