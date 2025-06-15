@@ -7,6 +7,7 @@ import {
   endOfMonth,
   startOfDay,
   endOfDay,
+  format,
 } from "date-fns";
 import CalendarHeader from "./CalendarHeader.vue";
 import MonthView from "./views/MonthView.vue";
@@ -144,7 +145,6 @@ const closeTaskInfoModal = () => {
 };
 
 const closeTaskEditSidebar = () => {
-  taskStore.setSelectedTask(null);
   isTaskEditSidebarOpen.value = false;
   // selectedTask.value = null;
   // Remove taskId from URL by navigating back to base route
@@ -155,6 +155,18 @@ const handleTaskCreate = (taskData: any) => {
   if (selectedDate.value) {
     taskStore.createTask({
       ...taskData,
+      date: selectedDate.value,
+    });
+    closeTaskModal();
+    closeTaskEditSidebar();
+  }
+};
+const handleQuickTaskCreate = async () => {
+  if (selectedDate.value) {
+    await taskStore.continueToCreate({
+      date: format(selectedDate.value, "yyyy-MM-dd"),
+    });
+    taskStore.createTask({
       date: selectedDate.value,
     });
     closeTaskModal();
@@ -317,7 +329,7 @@ onMounted(async () => {
       :date="selectedDate"
       :position="modalPosition"
       @close="closeTaskModal"
-      @create="handleTaskCreate"
+      @create="handleQuickTaskCreate"
       @continue-to-create="handleTaskEdit"
     />
 

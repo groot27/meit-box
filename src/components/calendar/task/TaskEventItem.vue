@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { format, parseISO, differenceInMinutes } from "date-fns";
-import { Task } from "@/types/TaskTypes";
+import { Task, TaskDisplayType } from "@/types/TaskTypes";
 import { useTaskStore } from "@/stores/TaskStore";
 import { truncateWords } from "@/utils/utils";
 const taskStore = useTaskStore();
 const indicatorDisplay = computed(() => taskStore.taskIndicatorDisplay);
 
 const props = defineProps<{
-  task: Task;
+  task: TaskDisplayType;
   index?: number;
   total?: number;
 }>();
@@ -117,7 +117,7 @@ const taskStyle = computed(() => {
       <div class="flex items-center" v-show="indicatorDisplay.devices">
         <font-awesome-icon icon="fa-solid fa-tools" />
         <span class="ml-1">{{
-          `${task.deviceCout}/${task.allDeviceCount}`
+          `${task.deviceCount}/${task.allDeviceCount}`
         }}</span>
       </div>
 

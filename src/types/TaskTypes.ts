@@ -184,7 +184,7 @@ export interface TaskDisplayType {
   description: string;
   date: string;
   color: string;
-  deviceCout: number;
+  deviceCount: number;
   allDeviceCount: number;
   employeeCount: number;
   allEmployeeCount: number;
