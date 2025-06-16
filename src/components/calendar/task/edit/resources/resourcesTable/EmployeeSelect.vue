@@ -79,7 +79,6 @@ onMounted(() => {
       selectedEmployee.value = props.employee;
       employeeId.value = props.employee.key;
       employeeName.value = props.employee.value;
-      emit("update:Ids", employeeId.value, "Employee");
     }
   }
 });
@@ -88,8 +87,9 @@ const setNewEmployee = (employee) => {
     emit("update:Ids", employee.key, "Employee");
     emit("addNewStatus", props.row, "Employee");
     return;
+  } else {
+    confirmedEmployee(employee);
   }
-  confirmedEmployee(employee);
 };
 </script>
 <template>

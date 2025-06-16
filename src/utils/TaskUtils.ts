@@ -63,19 +63,19 @@ export const generateTaskCreateBody = (
       (task) => task.details.employeesIds || []
     ),
     e_count: selectedTask.value.relatedTasks.map(
-      (task) => task.details.employeesCount || 0
+      (task) => task.details.allEmployeesCount || 0
     ),
     veh: selectedTask.value.relatedTasks.map(
       (task) => task.details.vehiclesIds || []
     ),
     v_count: selectedTask.value.relatedTasks.map(
-      (task) => task.details.vehiclesCount || 0
+      (task) => task.details.allVehiclesCount || 0
     ),
     dev_rep: selectedTask.value.relatedTasks.map(
       (task) => task.details.devicesIds || []
     ),
     d_count: selectedTask.value.relatedTasks.map(
-      (task) => task.details.devicesCount || 0
+      (task) => task.details.allDevicesCount || 0
     ),
     language: selectedTask.value.otherDetails.language,
     predecessor: [],
@@ -143,19 +143,19 @@ export const generateUpdateTaskBody = (selectedTask) => {
       (task) => task.details.employeesIds || []
     ),
     e_count_rep: selectedTask.value.relatedTasks.map(
-      (task) => task.details.employeesCount || 0
+      (task) => task.details.allEmployeesCount || 0
     ),
     veh_rep: selectedTask.value.relatedTasks.map(
       (task) => task.details.vehiclesIds || []
     ),
     v_count_rep: selectedTask.value.relatedTasks.map(
-      (task) => task.details.vehiclesCount || 0
+      (task) => task.details.allVehiclesCount || 0
     ),
     dev_rep: selectedTask.value.relatedTasks.map(
       (task) => task.details.devicesIds || []
     ),
     d_count_rep: selectedTask.value.relatedTasks.map(
-      (task) => task.details.devicesCount || 0
+      (task) => task.details.allDevicesCount || 0
     ),
     language: selectedTask.value.otherDetails.language,
     predecessor: [],
