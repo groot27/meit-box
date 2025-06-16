@@ -72,7 +72,6 @@ export const generateDefaultResources = (
       !resourcesValues.users[i - 1] ||
       resourcesValues.users[i - 1].status !== "rejected"
     ) {
-      debugger;
       resources.push({
         id: count,
         resourcesId: resourcesValues.users[i - 1]

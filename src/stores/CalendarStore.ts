@@ -18,6 +18,7 @@ interface defaultDataType {
   notifications: any;
   dresses: any;
   devices: any;
+  locations: any;
 }
 type MultifilterKey = keyof multifilterTasks;
 export const useCalendarStore = defineStore("calendar", () => {
@@ -31,6 +32,7 @@ export const useCalendarStore = defineStore("calendar", () => {
     notifications: null,
     dresses: null,
     devices: null,
+    locations: null,
   });
   const currentDate = ref(new Date());
   const currentView = ref<CalendarView>("month");
@@ -92,6 +94,14 @@ export const useCalendarStore = defineStore("calendar", () => {
     const dresses = await taskApi.getTaskDresses();
     const notifications = await taskApi.getTaskNotificationTemplates();
     const contactPerson = await taskApi.getTaskContactPersons();
+    const locations = await taskApi.getLocationCategoryList();
+    // const locations = {
+    //   data: [
+    //     { id: 1, location: "Berlin" },
+    //     { id: 2, location: "Dessue" },
+    //   ],
+    // };
+
     setDefaultData({
       skills: skills.data,
       orders: orders.data,
@@ -102,6 +112,9 @@ export const useCalendarStore = defineStore("calendar", () => {
       dresses: dresses.data,
       notifications: notifications.data,
       contactPerson: contactPerson.data,
+      locations: locations.data.map((location) => {
+        return { id: location.id, name: location.name };
+      }),
     });
     globalStore.setLoadingApi(false);
   }

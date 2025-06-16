@@ -50,7 +50,7 @@ watch(selectedContactPersons, (val) => {
 
 onMounted(() => {
   contactpersonsOptions.value = calendarStore.defaultData.contactPerson.map(
-    (person) => `${person.id} | ${person.name} | ${person.phone}`
+    (person) => person.name
   );
 });
 </script>

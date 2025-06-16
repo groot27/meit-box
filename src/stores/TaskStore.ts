@@ -329,7 +329,7 @@ export const useTaskStore = defineStore("task", () => {
       globalStore.setLoadingApi(false);
       selectedTask.value.relatedTasks.forEach((relatedTask) => {
         const oldTask = tasks.value.find((item) => {
-          if (item.details.id == relatedTask.details.id) {
+          if (item.id && item.id == relatedTask.details.id) {
             return item;
           }
         });
@@ -379,7 +379,7 @@ export const useTaskStore = defineStore("task", () => {
               allVehiclesCount: relatedTask.details.allVehiclesCount,
               startTime: relatedTask.details.startTime,
               endTime: relatedTask.details.endTime,
-              orderId: relatedTask.orderDetails.id,
+              orderId: relatedTask.details.orderId || null,
               color: relatedTask.details.color || "#e5e7eb",
               users: relatedTask.users,
               address: relatedTask.address,
@@ -413,7 +413,6 @@ export const useTaskStore = defineStore("task", () => {
   async function getTask(id: string) {
     globalStore.setLoadingApi(true);
     const res = await taskApi.getOne(id);
-    debugger;
     let relatedTasks: RelatedTaskType = res.data.loop_tasks.map((task) => {
       return {
         details: {
@@ -726,7 +725,6 @@ export const useTaskStore = defineStore("task", () => {
   }
 
   function filterRelatedResources(filter: boolean) {
-    debugger;
     if (!filter) {
       return selectedTask.value.relatedTasks;
     }

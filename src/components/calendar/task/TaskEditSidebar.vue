@@ -127,8 +127,31 @@ const updateResourcesIdsTask = (id, type) => {
   // emit("update", singleTask);
 };
 const updateLocation = (place) => {
-  singleTask.value.orderDetails.latitude = place.geometry.location.lat();
-  singleTask.value.orderDetails.longitude = place.geometry.location.lng();
+  const onSuccess = (res) => {
+    globalStore.setLoadingApi(false);
+    if (!res.resource_category_id) {
+      singleTask.value.details.resourceLocationCategory = "";
+    }
+    singleTask.value.details.resourceLocationCategory =
+      calendarStore.defaultData.locations.find(
+        (location) => location.id === res.resource_category_id
+      ).name;
+  };
+  if (place.geometry) {
+    singleTask.value.orderDetails.latitude = place.geometry.location.lat();
+    singleTask.value.orderDetails.longitude = place.geometry.location.lng();
+    singleTask.value.details.location = place.formatted_address;
+    globalStore.setLoadingApi(true);
+    taskApi.getLocationCategory(
+      {
+        latitude: place.geometry.location.lat(),
+        longitude: place.geometry.location.lng(),
+      },
+      { onSuccess }
+    );
+  } else if (place) {
+    singleTask.value.details.location = place;
+  }
 };
 const updateRepeatTask = async (dateTime) => {
   await taskStore.addRelatedResources(
@@ -237,6 +260,8 @@ const updateRelatedTask = () => {
         @update:location="updateLocation"
         @update:endDate="addRelatedTasks"
         @update:startDate="updateRelatedTask"
+        @update:startTime="updateRelatedTask"
+        @update:endTime="updateRelatedTask"
       />
 
       <!-- Resources Tab -->

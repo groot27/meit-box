@@ -6,6 +6,7 @@ import AddressInput from "@/components/widgets/AddressInput.vue";
 import "jodit/build/jodit.min.css";
 import { JoditEditor } from "jodit-vue";
 import { useRoute } from "vue-router";
+import { useCalendarStore } from "@/stores/CalendarStore";
 
 const { t } = useI18n();
 
@@ -42,10 +43,11 @@ const emit = defineEmits<{
   (e: "update:endTime", value: string): void;
   (e: "update:description", value: string): void;
 }>();
-
+const calendarStore = useCalendarStore();
 const selectedPermission = ref("");
 const address = ref("");
 const showLocaltionDescription = ref(false);
+const locations = computed(() => calendarStore.defaultData.locations);
 const allPermissions = ref<PermissionType>({
   admin: 0,
   employee: 0,
@@ -188,14 +190,12 @@ watch(
           "
           class="input-field"
         >
-          <option :value="locationCategory">
-            {{ locationCategory }}
-          </option>
-          <option value="berlin">
-            {{ t("task.editSidebar.tabs.project.locations.berlin") }}
-          </option>
-          <option value="dessau">
-            {{ t("task.editSidebar.tabs.project.locations.dessau") }}
+          <option
+            v-for="locationCat in locations"
+            :key="locationCat.name"
+            :value="locationCat.name"
+          >
+            {{ locationCat.name }}
           </option>
         </select>
       </div>

@@ -54,8 +54,11 @@ export const generateTaskCreateBody = (
       (task) => task.date || ""
     ),
     tasks_contact_person: [null],
-    teamlead_description: null,
-    teamlead_contact_person: null,
+    teamlead_description: selectedTask.value.otherDetails.teamleadDescription,
+    teamlead_contact_person:
+      selectedTask.value.otherDetails.teamLeadContactPerson,
+    notification_template_id:
+      selectedTask.value.otherDetails.notificationTemplate,
     emp: selectedTask.value.relatedTasks.map(
       (task) => task.details.employeesIds || []
     ),
@@ -133,8 +136,9 @@ export const generateUpdateTaskBody = (selectedTask) => {
     latitude: selectedTask.value.orderDetails.latitude || null,
     longitude: selectedTask.value.orderDetails.longitude || null,
     repetitions: "1",
-    teamlead_description: null,
-    teamlead_contact_person: null,
+    teamlead_description: selectedTask.value.otherDetails.teamleadDescription,
+    teamlead_contact_person:
+      selectedTask.value.otherDetails.teamLeadContactPerson,
     emp_rep: selectedTask.value.relatedTasks.map(
       (task) => task.details.employeesIds || []
     ),
@@ -179,7 +183,8 @@ export const generateUpdateTaskBody = (selectedTask) => {
     custom_emp_rep: selectedTask.value.relatedTasks.map((task) => []),
     custom_open_rep: selectedTask.value.relatedTasks.map((task) => []),
     primary_color: "task_template",
-    notification_template_id: selectedTask.value.details.notificationTemplate,
+    notification_template_id:
+      selectedTask.value.otherDetails.notificationTemplate,
     task_status: null,
     task_status_id: null,
     end_series: false,
@@ -189,7 +194,6 @@ export const generateAssignedResources = (
   resourceIds: string,
   resourcesItems
 ) => {
-  debugger;
   const ids = resourceIds.split("+");
   const list = [];
   ids.forEach((id) => {

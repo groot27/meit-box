@@ -302,4 +302,24 @@ export const taskApi = {
       throw err;
     }
   },
+  getLocationCategory: async (data: any, callbacks?: Callbacks) => {
+    try {
+      const res = await api.post(`/resource/location`, data);
+      callbacks?.onSuccess?.(res);
+      return res;
+    } catch (err) {
+      callbacks?.onError?.(err);
+      throw err;
+    }
+  },
+  getLocationCategoryList: async (callbacks?: Callbacks) => {
+    try {
+      const res = await api.get(`/resource-location-categories`);
+      callbacks?.onSuccess?.(res);
+      return res;
+    } catch (err) {
+      callbacks?.onError?.(err);
+      throw err;
+    }
+  },
 };
