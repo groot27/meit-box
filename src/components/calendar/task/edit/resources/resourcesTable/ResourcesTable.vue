@@ -160,7 +160,13 @@ const updateVehicleStatus = async (id, status) => {
   }
   globalStore.setLoadingApi(false);
 };
-
+const setFirstResources = () => {
+  props.resources.forEach((resource) => {
+    if (resource.resourcesId) {
+      updateIdsOfTask(resource.resourcesId, resource.type);
+    }
+  });
+};
 const updateIdsOfTask = (id, type) => {
   taskStore.addResourcesId(props.taskId, id, type);
 };
@@ -174,6 +180,7 @@ onMounted(() => {
     employeeData.value = calendarStore.defaultData.employees;
     vehicleData.value = calendarStore.defaultData.vehicles;
     deviceData.value = calendarStore.defaultData.devices;
+    setFirstResources();
   }
 });
 </script>
@@ -218,6 +225,7 @@ onMounted(() => {
           <td class="py-2">
             <employee-select
               v-if="resource.type === 'Employee' && employeeData"
+              :key="resource.id"
               :employee="{ key: resource.resourcesId, value: resource.name }"
               :row="resource.id"
               :employees="employeeData"
@@ -229,11 +237,13 @@ onMounted(() => {
               v-if="resource.type === 'Device' && deviceData"
               :device="resource.name"
               :devices="deviceData"
+              :key="resource.id"
             />
             <vehicle-select
               v-if="resource.type === 'Vehicle' && vehicleData"
               :vehicle="{ key: resource.resourcesId, value: resource.name }"
               :row="resource.id"
+              :key="resource.id"
               :taskId="props.taskId"
               :vehicles="vehicleData"
               @update:Ids="updateIdsOfTask"

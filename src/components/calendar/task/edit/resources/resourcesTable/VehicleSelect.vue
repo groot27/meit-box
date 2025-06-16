@@ -73,7 +73,7 @@ onMounted(() => {
     if (props.vehicle.value !== "Vehicle") {
       selectedVehicle.value = props.vehicle;
       vehicleId.value = props.vehicle.value;
-      emit("update:Ids", props.vehicle.key, "Vehicle");
+      // emit("update:Ids", props.vehicle.key, "Vehicle");
     }
     oldSelectedVehicle.value = props.vehicle;
   }
