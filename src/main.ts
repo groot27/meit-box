@@ -11,10 +11,12 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { loadGoogleMaps } from "./utils/loadGoogleMaps";
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
+import Orders from "./pages/Orders.vue";
 
 const routes = [
   { path: "/monthly-view2", component: Calendar },
   { path: "/monthly-view2/:taskId", component: Calendar },
+  { path: "/order-list2", component: Orders },
 ];
 
 const router = createRouter({
