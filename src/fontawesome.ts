@@ -25,6 +25,12 @@ import {
   faRectangleList,
   faClose,
   faPencil,
+  faBell,
+  faFilter,
+  faPrint,
+  faFileCirclePlus,
+  faChevronDown,
+  faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
@@ -53,5 +59,11 @@ library.add(
   faWhatsapp,
   faRectangleList,
   faClose,
-  faPencil
+  faPencil,
+  faBell,
+  faFilter,
+  faPrint,
+  faFileCirclePlus,
+  faChevronDown,
+  faChevronUp
 );

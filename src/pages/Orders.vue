@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Calendar from "@/components/calendar/Calendar.vue";
+import OrderList from "@/components/orders/OrderList.vue";
 </script>
 
 <template>
-  <Calendar />
+  <OrderList />
 </template>
