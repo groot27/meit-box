@@ -53,6 +53,7 @@ const confirmedEmployee = async (employee: employeeType) => {
     if (res.status == 400) {
       toast.error(res.message);
       selectedEmployee.value = null;
+      employeeName.value = null;
     } else {
       emit("update:Ids", employee.key, "Employee");
       emit("addNewStatus", props.row, "Employee");
