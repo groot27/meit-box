@@ -65,6 +65,7 @@ const addRelatedTasks = () => {
 };
 
 const handleClose = () => {
+  taskStore.setSelectedTask(null);
   emit("close");
 };
 
