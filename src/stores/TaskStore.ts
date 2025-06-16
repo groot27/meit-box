@@ -17,6 +17,7 @@ import { taskApi } from "@/api/taskApi";
 import { useCalendarStore } from "./CalendarStore";
 import { useGlobalStore } from "./index";
 import {
+  generateAssignedResources,
   generateTaskCreateBody,
   generateTaskForDisplay,
   generateUpdateTaskBody,
@@ -328,7 +329,7 @@ export const useTaskStore = defineStore("task", () => {
       globalStore.setLoadingApi(false);
       selectedTask.value.relatedTasks.forEach((relatedTask) => {
         const oldTask = tasks.value.find((item) => {
-          if (item.id == relatedTask.details.id) {
+          if (item.details.id == relatedTask.details.id) {
             return item;
           }
         });
@@ -431,6 +432,7 @@ export const useTaskStore = defineStore("task", () => {
           allDevicesCount: Number(task.task.device_available_count),
           customer: task.task.customer_name || "No Customer",
           orderId: task.task.ored_id,
+          resourceLocationCategory: task.task.resource_location_category_value,
         },
         resources: task.resource,
         mappedResources: generateDefaultResources(task.resource, {
@@ -518,12 +520,18 @@ export const useTaskStore = defineStore("task", () => {
         endTime: "00:00",
         color: selectedTaskTemplate.value.color || "#e5e7eb",
         id,
-        employeesCount: Number(selectedTaskTemplate.value.employees) || 0,
+        employeesCount: selectedTaskTemplate.value.employees
+          ? selectedTaskTemplate.value.employees.split("+").length
+          : 0,
         allEmployeesCount:
           Number(selectedTaskTemplate.value.employees_count) || 0,
-        vehiclesCount: Number(selectedTaskTemplate.value.vehicle) || 0,
+        vehiclesCount: selectedTaskTemplate.value.vehicle
+          ? selectedTaskTemplate.value.vehicle.split("+").length
+          : 0,
         allVehiclesCount: Number(selectedTaskTemplate.value.vehicle_count) || 0,
-        devicesCount: Number(selectedTaskTemplate.value.devices) || 0,
+        devicesCount: selectedTaskTemplate.value.devices
+          ? selectedTaskTemplate.value.devices.split("+").length
+          : 0,
         allDevicesCount: Number(selectedTaskTemplate.value.devices_count) || 0,
         permission: selectedTaskTemplate.value.permission || "",
         resourceLocationCategory:
@@ -543,15 +551,45 @@ export const useTaskStore = defineStore("task", () => {
         histories: [],
       },
       resources: {
-        devices: [],
-        users: [],
-        vehicles: [],
+        devices: selectedTaskTemplate.value.devices
+          ? generateAssignedResources(
+              selectedTaskTemplate.value.devices,
+              calendarStore.defaultData.devices
+            )
+          : [],
+        users: selectedTaskTemplate.value.employees
+          ? generateAssignedResources(
+              selectedTaskTemplate.value.employees,
+              calendarStore.defaultData.employees
+            )
+          : [],
+        vehicles: selectedTaskTemplate.value.vehicle
+          ? generateAssignedResources(
+              selectedTaskTemplate.value.vehicle,
+              calendarStore.defaultData.vehicles
+            )
+          : [],
       },
       mappedResources: generateDefaultResources(
         {
-          devices: [],
-          users: [],
-          vehicles: [],
+          devices: selectedTaskTemplate.value.devices
+            ? generateAssignedResources(
+                selectedTaskTemplate.value.devices,
+                calendarStore.defaultData.devices
+              )
+            : [],
+          users: selectedTaskTemplate.value.employees
+            ? generateAssignedResources(
+                selectedTaskTemplate.value.employees,
+                calendarStore.defaultData.employees
+              )
+            : [],
+          vehicles: selectedTaskTemplate.value.vehicle
+            ? generateAssignedResources(
+                selectedTaskTemplate.value.vehicle,
+                calendarStore.defaultData.vehicles
+              )
+            : [],
         },
         {
           employees: Number(selectedTaskTemplate.value.employees_count) || 0,
@@ -570,13 +608,19 @@ export const useTaskStore = defineStore("task", () => {
             endTime: "00:00",
             color: selectedTaskTemplate.value.color || "#e5e7eb",
             id,
-            employeesCount: Number(selectedTaskTemplate.value.employees) || 0,
+            employeesCount: selectedTaskTemplate.value.employees
+              ? selectedTaskTemplate.value.employees.split("+").length
+              : 0,
             allEmployeesCount:
               Number(selectedTaskTemplate.value.employees_count) || 0,
-            vehiclesCount: Number(selectedTaskTemplate.value.vehicle) || 0,
+            vehiclesCount: selectedTaskTemplate.value.vehicle
+              ? selectedTaskTemplate.value.vehicle.split("+").length
+              : 0,
             allVehiclesCount:
               Number(selectedTaskTemplate.value.vehicle_count) || 0,
-            devicesCount: Number(selectedTaskTemplate.value.devices) || 0,
+            devicesCount: selectedTaskTemplate.value.devices
+              ? selectedTaskTemplate.value.devices.split("+").length
+              : 0,
             allDevicesCount:
               Number(selectedTaskTemplate.value.devices_count) || 0,
             permission: selectedTaskTemplate.value.permission || "",
@@ -592,15 +636,45 @@ export const useTaskStore = defineStore("task", () => {
             orderId: selectedOrderDetails.value.id,
           },
           resources: {
-            devices: [],
-            users: [],
-            vehicles: [],
+            devices: selectedTaskTemplate.value.devices
+              ? generateAssignedResources(
+                  selectedTaskTemplate.value.devices,
+                  calendarStore.defaultData.devices
+                )
+              : [],
+            users: selectedTaskTemplate.value.employees
+              ? generateAssignedResources(
+                  selectedTaskTemplate.value.employees,
+                  calendarStore.defaultData.employees
+                )
+              : [],
+            vehicles: selectedTaskTemplate.value.vehicle
+              ? generateAssignedResources(
+                  selectedTaskTemplate.value.vehicle,
+                  calendarStore.defaultData.vehicles
+                )
+              : [],
           },
           mappedResources: generateDefaultResources(
             {
-              devices: [],
-              users: [],
-              vehicles: [],
+              devices: selectedTaskTemplate.value.devices
+                ? generateAssignedResources(
+                    selectedTaskTemplate.value.devices,
+                    calendarStore.defaultData.devices
+                  )
+                : [],
+              users: selectedTaskTemplate.value.employees
+                ? generateAssignedResources(
+                    selectedTaskTemplate.value.employees,
+                    calendarStore.defaultData.employees
+                  )
+                : [],
+              vehicles: selectedTaskTemplate.value.vehicle
+                ? generateAssignedResources(
+                    selectedTaskTemplate.value.vehicle,
+                    calendarStore.defaultData.vehicles
+                  )
+                : [],
             },
             {
               employees:
@@ -620,12 +694,18 @@ export const useTaskStore = defineStore("task", () => {
       endTime: "00:00",
       date: taskData.date,
       color: "#f00",
-      employeesCount: Number(selectedTaskTemplate.value.employees) || 0,
+      employeesCount: selectedTaskTemplate.value.employees
+        ? selectedTaskTemplate.value.employees.split("+").length
+        : 0,
       allEmployeesCount:
         Number(selectedTaskTemplate.value.employees_count) || 0,
-      vehiclesCount: Number(selectedTaskTemplate.value.vehicle) || 0,
+      vehiclesCount: selectedTaskTemplate.value.vehicle
+        ? selectedTaskTemplate.value.vehicle.split("+").length
+        : 0,
       allVehiclesCount: Number(selectedTaskTemplate.value.vehicle_count) || 0,
-      devicesCount: Number(selectedTaskTemplate.value.devices) || 0,
+      devicesCount: selectedTaskTemplate.value.devices
+        ? selectedTaskTemplate.value.devices.split("+").length
+        : 0,
       allDevicesCount: Number(selectedTaskTemplate.value.devices_count) || 0,
       orderId: selectedOrderDetails.value.id,
       users: "",

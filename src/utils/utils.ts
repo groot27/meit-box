@@ -41,8 +41,14 @@ export const getCookie = (name) => {
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop().split(";").shift();
 };
-const getUserStatus = (status) => {
+const getUserStatus = (status, type) => {
   let newStatus;
+  if (!status) {
+    if (type == "Employee") {
+      return "confirmed";
+    }
+    return "planned";
+  }
   switch (status) {
     case "assigned":
       newStatus = "confirmed";
@@ -66,6 +72,7 @@ export const generateDefaultResources = (
       !resourcesValues.users[i - 1] ||
       resourcesValues.users[i - 1].status !== "rejected"
     ) {
+      debugger;
       resources.push({
         id: count,
         resourcesId: resourcesValues.users[i - 1]
@@ -82,7 +89,10 @@ export const generateDefaultResources = (
         count: 0,
         status:
           resourcesValues && resourcesValues.users[i - 1]
-            ? getUserStatus(resourcesValues.users[i - 1].user_status)
+            ? getUserStatus(
+                resourcesValues.users[i - 1].user_status,
+                "Employee"
+              )
             : "open",
       });
       count++;
@@ -103,7 +113,7 @@ export const generateDefaultResources = (
       number: 0,
       status:
         resourcesValues && resourcesValues.vehicles[i - 1]
-          ? resourcesValues.vehicles[i - 1].status
+          ? resourcesValues.vehicles[i - 1].status || "planned"
           : "open",
     });
     count++;

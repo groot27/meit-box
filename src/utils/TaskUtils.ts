@@ -153,7 +153,7 @@ export const generateUpdateTaskBody = (selectedTask) => {
     d_count_rep: selectedTask.value.relatedTasks.map(
       (task) => task.details.devicesCount || 0
     ),
-    language: [],
+    language: selectedTask.value.otherDetails.language,
     predecessor: [],
     successor: [],
     predecessor_hour: null,
@@ -184,4 +184,16 @@ export const generateUpdateTaskBody = (selectedTask) => {
     task_status_id: null,
     end_series: false,
   };
+};
+export const generateAssignedResources = (
+  resourceIds: string,
+  resourcesItems
+) => {
+  debugger;
+  const ids = resourceIds.split("+");
+  const list = [];
+  ids.forEach((id) => {
+    list.push(resourcesItems.find((resource) => resource.id == id));
+  });
+  return list;
 };
