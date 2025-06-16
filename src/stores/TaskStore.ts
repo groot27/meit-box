@@ -535,7 +535,7 @@ export const useTaskStore = defineStore("task", () => {
         permission: selectedTaskTemplate.value.permission || "",
         resourceLocationCategory:
           selectedTaskTemplate.value.resource_location_category_value || "",
-        location: selectedTaskTemplate.value.location || "",
+        location: selectedOrderDetails.value.order_location || "",
         locationDescription:
           selectedTaskTemplate.value.location_description || "",
         status: "",
@@ -625,7 +625,7 @@ export const useTaskStore = defineStore("task", () => {
             permission: selectedTaskTemplate.value.permission || "",
             resourceLocationCategory:
               selectedTaskTemplate.value.resource_location_category_value || "",
-            location: selectedTaskTemplate.value.location || "",
+            location: selectedOrderDetails.value.order_location || "",
             locationDescription:
               selectedTaskTemplate.value.location_description || "",
             status: "",
