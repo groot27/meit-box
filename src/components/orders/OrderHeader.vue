@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 
 const notificationCount = ref(5);
 
 const handleMoreOptions = () => {
-  console.log('More options clicked');
+  console.log("More options clicked");
 };
 
 const handleCreateOrder = () => {
-  console.log('Create order clicked');
+  console.log("Create order clicked");
 };
 
 const handleNotifications = () => {
-  console.log('Notifications clicked');
+  console.log("Notifications clicked");
 };
 </script>
 
 <template>
-  <header class="bg-white border-b border-gray-200 px-6 py-4">
+  <header class="bg-[#1c3f52] border-b border-gray-200 px-6 py-4">
     <div class="flex items-center justify-between">
       <!-- Left side - Title -->
-      <h1 class="text-2xl font-semibold text-gray-900">
-        {{ t('orders.header.title') }}
+      <h1 class="text-2xl font-semibold text-white">
+        {{ t("orders.header.title") }}
       </h1>
 
       <!-- Right side - Actions -->
@@ -46,9 +46,9 @@ const handleNotifications = () => {
         <!-- More Options -->
         <button
           @click="handleMoreOptions"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          class="px-4 py-2 text-sm font-medium text-white bg-opacity-10 bg-black rounded-md hover:bg-gray-50 transition-colors"
         >
-          {{ t('orders.header.moreOptions') }}
+          {{ t("orders.header.moreOptions") }}
         </button>
 
         <!-- Create Order -->
@@ -56,7 +56,7 @@ const handleNotifications = () => {
           @click="handleCreateOrder"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
         >
-          {{ t('orders.header.createOrder') }}
+          {{ t("orders.header.createOrder") }}
         </button>
       </div>
     </div>

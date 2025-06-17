@@ -1,10 +1,19 @@
 import { defineStore } from "pinia";
 import { ref, reactive, computed } from "vue";
-import { Order, OrderFilters, OrderTableColumn, OrderPagination, OrderSort } from "@/types/OrderTypes";
+import {
+  Order,
+  OrderFilters,
+  OrderTableColumn,
+  OrderPagination,
+  OrderSort,
+} from "@/types/OrderTypes";
+import { orderApi } from "@/api/orderApi";
+import { useGlobalStore } from ".";
 
 export const useOrderStore = defineStore("order", () => {
   const orders = ref<Order[]>([]);
   const loading = ref(false);
+  const globalStore = useGlobalStore();
   const filters = reactive<OrderFilters>({
     search: "",
     startDate: "",
@@ -31,26 +40,56 @@ export const useOrderStore = defineStore("order", () => {
   const tableColumns = ref<OrderTableColumn[]>([
     { key: "orderNumber", label: "Order #", sortable: true, visible: true },
     { key: "customerName", label: "Customer", sortable: true, visible: true },
-    { key: "projectManager", label: "Project Manager", sortable: true, visible: true },
-    { key: "contactPerson", label: "Contact Person", sortable: true, visible: true },
+    {
+      key: "projectManager",
+      label: "Project Manager",
+      sortable: true,
+      visible: true,
+    },
+    {
+      key: "contactPerson",
+      label: "Contact Person",
+      sortable: true,
+      visible: true,
+    },
     { key: "orderStatus", label: "Status", sortable: true, visible: true },
     { key: "orderCategory", label: "Category", sortable: true, visible: true },
     { key: "startDate", label: "Start Date", sortable: true, visible: true },
     { key: "endDate", label: "End Date", sortable: true, visible: true },
-    { key: "totalAmount", label: "Total Amount", sortable: true, visible: true },
-    { key: "description", label: "Description", sortable: false, visible: true },
+    {
+      key: "totalAmount",
+      label: "Total Amount",
+      sortable: true,
+      visible: true,
+    },
+    {
+      key: "description",
+      label: "Description",
+      sortable: false,
+      visible: true,
+    },
     { key: "location", label: "Location", sortable: true, visible: true },
     { key: "priority", label: "Priority", sortable: true, visible: true },
     { key: "createdAt", label: "Created", sortable: true, visible: false },
     { key: "updatedAt", label: "Updated", sortable: true, visible: false },
     { key: "assignedTeam", label: "Team", sortable: true, visible: false },
-    { key: "estimatedHours", label: "Est. Hours", sortable: true, visible: false },
-    { key: "actualHours", label: "Actual Hours", sortable: true, visible: false },
+    {
+      key: "estimatedHours",
+      label: "Est. Hours",
+      sortable: true,
+      visible: false,
+    },
+    {
+      key: "actualHours",
+      label: "Actual Hours",
+      sortable: true,
+      visible: false,
+    },
     { key: "progress", label: "Progress", sortable: true, visible: false },
   ]);
 
-  const visibleColumns = computed(() => 
-    tableColumns.value.filter(col => col.visible)
+  const visibleColumns = computed(() =>
+    tableColumns.value.filter((col) => col.visible)
   );
 
   const filteredOrders = computed(() => {
@@ -59,62 +98,71 @@ export const useOrderStore = defineStore("order", () => {
     // Apply search filter
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
-      result = result.filter(order => 
-        order.orderNumber.toLowerCase().includes(searchTerm) ||
-        order.customerName.toLowerCase().includes(searchTerm) ||
-        order.description.toLowerCase().includes(searchTerm)
+      result = result.filter(
+        (order) =>
+          order.orderNumber.toLowerCase().includes(searchTerm) ||
+          order.customerName.toLowerCase().includes(searchTerm) ||
+          order.description.toLowerCase().includes(searchTerm)
       );
     }
 
     // Apply date filters
     if (filters.startDate) {
-      result = result.filter(order => 
-        new Date(order.startDate) >= new Date(filters.startDate)
+      result = result.filter(
+        (order) => new Date(order.startDate) >= new Date(filters.startDate)
       );
     }
 
     if (filters.endDate) {
-      result = result.filter(order => 
-        new Date(order.endDate) <= new Date(filters.endDate)
+      result = result.filter(
+        (order) => new Date(order.endDate) <= new Date(filters.endDate)
       );
     }
 
     // Apply other filters
     if (filters.orderStatus) {
-      result = result.filter(order => order.orderStatus === filters.orderStatus);
+      result = result.filter(
+        (order) => order.orderStatus === filters.orderStatus
+      );
     }
 
     if (filters.orderCategory) {
-      result = result.filter(order => order.orderCategory === filters.orderCategory);
+      result = result.filter(
+        (order) => order.orderCategory === filters.orderCategory
+      );
     }
 
     if (filters.projectManager) {
-      result = result.filter(order => order.projectManager === filters.projectManager);
+      result = result.filter(
+        (order) => order.projectManager === filters.projectManager
+      );
     }
 
     if (filters.customer) {
-      result = result.filter(order => order.customerName === filters.customer);
+      result = result.filter(
+        (order) => order.customerName === filters.customer
+      );
     }
 
     if (filters.contactPerson) {
-      result = result.filter(order => order.contactPerson === filters.contactPerson);
+      result = result.filter(
+        (order) => order.contactPerson === filters.contactPerson
+      );
     }
 
     // Apply sorting
     result.sort((a, b) => {
       const aValue = a[sort.field];
       const bValue = b[sort.field];
-      
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sort.direction === 'asc' 
+
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sort.direction === "asc"
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       }
-      
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sort.direction === 'asc' 
-          ? aValue - bValue
-          : bValue - aValue;
+
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return sort.direction === "asc" ? aValue - bValue : bValue - aValue;
       }
 
       return 0;
@@ -128,6 +176,7 @@ export const useOrderStore = defineStore("order", () => {
   });
 
   const paginatedOrders = computed(() => {
+    debugger;
     const start = (pagination.currentPage - 1) * pagination.itemsPerPage;
     const end = start + pagination.itemsPerPage;
     return filteredOrders.value.slice(start, end);
@@ -136,31 +185,37 @@ export const useOrderStore = defineStore("order", () => {
   // Actions
   const loadOrders = async () => {
     loading.value = true;
+    globalStore.setLoadingApi(true);
     try {
-      // Mock data for now - replace with actual API call
-      const mockOrders: Order[] = Array.from({ length: 100 }, (_, i) => ({
-        id: `order-${i + 1}`,
-        orderNumber: `ORD-${String(i + 1).padStart(4, '0')}`,
-        customerName: `Customer ${i + 1}`,
-        projectManager: `Manager ${(i % 5) + 1}`,
-        contactPerson: `Contact ${i + 1}`,
-        orderStatus: ['pending', 'in-progress', 'completed', 'cancelled'][i % 4],
-        orderCategory: ['development', 'maintenance', 'consulting', 'support'][i % 4],
-        startDate: new Date(2024, i % 12, (i % 28) + 1).toISOString().split('T')[0],
-        endDate: new Date(2024, (i % 12) + 1, (i % 28) + 1).toISOString().split('T')[0],
-        totalAmount: (i + 1) * 1000,
-        description: `Order description for ${i + 1}`,
-        location: `Location ${(i % 3) + 1}`,
-        priority: ['low', 'medium', 'high'][i % 3],
-        createdAt: new Date(2024, i % 12, (i % 28) + 1).toISOString(),
-        updatedAt: new Date().toISOString(),
-        assignedTeam: `Team ${(i % 4) + 1}`,
-        estimatedHours: (i + 1) * 10,
-        actualHours: (i + 1) * 8,
-        progress: Math.min(100, (i + 1) * 5),
-      }));
+      await loadOrdersHeader();
+      const res = await orderApi.getAll();
+      globalStore.setLoadingApi(false);
+      orders.value = res.data.map((order) => {
+        return tableColumns.value.map((col) => {
+          return { [col.key]: order[col.key] || "Not Set" };
+        });
+      });
+    } catch (error) {
+      console.error("Error loading orders:", error);
+    } finally {
+      loading.value = false;
+    }
+  };
+  const loadOrdersHeader = async () => {
+    loading.value = true;
+    try {
+      const res = await orderApi.getHeaders();
+      tableColumns.value = null;
+      tableColumns.value = res.data.map((header) => {
+        return {
+          key: header.column_name,
+          label: header.column_label,
+          sortable: true,
+          visible: header.is_shown,
+        };
+      });
 
-      orders.value = mockOrders;
+      // orders.value = mockOrders;
     } catch (error) {
       console.error("Error loading orders:", error);
     } finally {
@@ -174,7 +229,7 @@ export const useOrderStore = defineStore("order", () => {
   };
 
   const clearFilters = () => {
-    Object.keys(filters).forEach(key => {
+    Object.keys(filters).forEach((key) => {
       filters[key as keyof OrderFilters] = "";
     });
     pagination.currentPage = 1;
@@ -182,10 +237,10 @@ export const useOrderStore = defineStore("order", () => {
 
   const setSort = (field: keyof Order) => {
     if (sort.field === field) {
-      sort.direction = sort.direction === 'asc' ? 'desc' : 'asc';
+      sort.direction = sort.direction === "asc" ? "desc" : "asc";
     } else {
       sort.field = field;
-      sort.direction = 'asc';
+      sort.direction = "asc";
     }
   };
 
@@ -201,7 +256,7 @@ export const useOrderStore = defineStore("order", () => {
   };
 
   const toggleColumnVisibility = (columnKey: keyof Order) => {
-    const column = tableColumns.value.find(col => col.key === columnKey);
+    const column = tableColumns.value.find((col) => col.key === columnKey);
     if (column) {
       column.visible = !column.visible;
     }
@@ -224,5 +279,6 @@ export const useOrderStore = defineStore("order", () => {
     setPage,
     setItemsPerPage,
     toggleColumnVisibility,
+    loadOrdersHeader,
   };
 });

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useOrderStore } from '@/stores/OrderStore';
-import { format } from 'date-fns';
+import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { useOrderStore } from "@/stores/OrderStore";
+import { format } from "date-fns";
 
 const { t } = useI18n();
 const orderStore = useOrderStore();
@@ -34,49 +34,49 @@ const toggleColumnVisibility = (columnKey: string) => {
 };
 
 const handleExport = () => {
-  console.log('Export clicked');
+  console.log("Export clicked");
 };
 
 const handleFilter = () => {
-  console.log('Filter clicked');
+  console.log("Filter clicked");
 };
 
 const handlePrint = () => {
-  console.log('Print clicked');
+  console.log("Print clicked");
 };
 
 const handlePrintPlus = () => {
-  console.log('Print Plus clicked');
+  console.log("Print Plus clicked");
 };
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
   }).format(amount);
 };
 
 const formatDate = (dateString: string) => {
-  return format(new Date(dateString), 'MMM d, yyyy');
+  return format(new Date(dateString), "MMM d, yyyy");
 };
 
 const getStatusColor = (status: string) => {
   const colors = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    'in-progress': 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800',
+    pending: "bg-yellow-100 text-yellow-800",
+    "in-progress": "bg-blue-100 text-blue-800",
+    completed: "bg-green-100 text-green-800",
+    cancelled: "bg-red-100 text-red-800",
   };
-  return colors[status] || 'bg-gray-100 text-gray-800';
+  return colors[status] || "bg-gray-100 text-gray-800";
 };
 
 const getPriorityColor = (priority: string) => {
   const colors = {
-    low: 'bg-gray-100 text-gray-800',
-    medium: 'bg-yellow-100 text-yellow-800',
-    high: 'bg-red-100 text-red-800',
+    low: "bg-gray-100 text-gray-800",
+    medium: "bg-yellow-100 text-yellow-800",
+    high: "bg-red-100 text-red-800",
   };
-  return colors[priority] || 'bg-gray-100 text-gray-800';
+  return colors[priority] || "bg-gray-100 text-gray-800";
 };
 
 // Calculate visible page numbers for pagination
@@ -84,10 +84,10 @@ const visiblePages = computed(() => {
   const current = pagination.value.currentPage;
   const total = pagination.value.totalPages;
   const delta = 2; // Number of pages to show on each side of current page
-  
+
   let start = Math.max(1, current - delta);
   let end = Math.min(total, current + delta);
-  
+
   // Adjust if we're near the beginning or end
   if (end - start < 4) {
     if (start === 1) {
@@ -96,12 +96,12 @@ const visiblePages = computed(() => {
       start = Math.max(1, end - 4);
     }
   }
-  
+
   const pages = [];
   for (let i = start; i <= end; i++) {
     pages.push(i);
   }
-  
+
   return pages;
 });
 
@@ -109,28 +109,30 @@ const visiblePages = computed(() => {
 const tableMinWidth = computed(() => {
   const baseWidth = 150; // Base width per column
   const specialColumns = {
-    'description': 300,
-    'progress': 180,
-    'totalAmount': 120,
-    'orderNumber': 120,
-    'customerName': 180,
-    'projectManager': 160,
-    'contactPerson': 160,
+    description: 300,
+    progress: 180,
+    totalAmount: 120,
+    orderNumber: 120,
+    customerName: 180,
+    projectManager: 160,
+    contactPerson: 160,
   };
-  
+
   let totalWidth = 0;
-  visibleColumns.value.forEach(column => {
+  visibleColumns.value.forEach((column) => {
     totalWidth += specialColumns[column.key] || baseWidth;
   });
-  
+
   return `${totalWidth}px`;
 });
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col h-full max-w-full">
+  <div class="flex-1 flex flex-col h-full w-full">
     <!-- Table Header Actions -->
-    <div class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+    <div
+      class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0 w-full"
+    >
       <div class="flex items-center justify-between">
         <!-- Left side - Action buttons -->
         <div class="flex items-center space-x-2">
@@ -153,7 +155,10 @@ const tableMinWidth = computed(() => {
             class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
             :title="t('orders.table.printPlus')"
           >
-            <font-awesome-icon icon="fa-solid fa-file-circle-plus" class="w-4 h-4" />
+            <font-awesome-icon
+              icon="fa-solid fa-file-circle-plus"
+              class="w-4 h-4"
+            />
           </button>
         </div>
 
@@ -163,7 +168,7 @@ const tableMinWidth = computed(() => {
             @click="handleExport"
             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
           >
-            {{ t('orders.table.export') }}
+            {{ t("orders.table.export") }}
           </button>
 
           <!-- Column Selector -->
@@ -172,9 +177,9 @@ const tableMinWidth = computed(() => {
               @click="showColumnSelector = !showColumnSelector"
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2"
             >
-              <span>{{ t('orders.table.columns') }}</span>
-              <font-awesome-icon 
-                icon="fa-solid fa-chevron-down" 
+              <span>{{ t("orders.table.columns") }}</span>
+              <font-awesome-icon
+                icon="fa-solid fa-chevron-down"
                 class="w-3 h-3 transition-transform"
                 :class="{ 'rotate-180': showColumnSelector }"
               />
@@ -183,11 +188,11 @@ const tableMinWidth = computed(() => {
             <!-- Column Selector Dropdown -->
             <div
               v-if="showColumnSelector"
-              class="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-80 overflow-y-auto"
+              class="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-80 overflow-y-auto"
             >
               <div class="p-4">
                 <h3 class="text-sm font-medium text-gray-900 mb-3">
-                  {{ t('orders.table.selectColumns') }}
+                  {{ t("orders.table.selectColumns") }}
                 </h3>
                 <div class="space-y-2">
                   <label
@@ -201,7 +206,9 @@ const tableMinWidth = computed(() => {
                       @change="toggleColumnVisibility(column.key)"
                       class="rounded border-gray-300"
                     />
-                    <span class="text-sm text-gray-700">{{ column.label }}</span>
+                    <span class="text-sm text-gray-700">{{
+                      column.label
+                    }}</span>
                   </label>
                 </div>
               </div>
@@ -214,7 +221,7 @@ const tableMinWidth = computed(() => {
     <!-- Table Container with Horizontal Scroll -->
     <div class="flex-1 max-w-full overflow-scroll">
       <div class="min-w-full">
-        <table 
+        <table
           class="w-full divide-y divide-gray-200 table-fixed"
           :style="{ minWidth: tableMinWidth }"
         >
@@ -227,29 +234,51 @@ const tableMinWidth = computed(() => {
                 :class="{
                   'w-80': column.key === 'description',
                   'w-48': column.key === 'progress',
-                  'w-32': column.key === 'totalAmount' || column.key === 'orderNumber',
-                  'w-44': column.key === 'customerName' || column.key === 'projectManager' || column.key === 'contactPerson',
-                  'w-36': !['description', 'progress', 'totalAmount', 'orderNumber', 'customerName', 'projectManager', 'contactPerson'].includes(column.key)
+                  'w-32':
+                    column.key === 'totalAmount' ||
+                    column.key === 'orderNumber',
+                  'w-44':
+                    column.key === 'customerName' ||
+                    column.key === 'projectManager' ||
+                    column.key === 'contactPerson',
+                  'w-36': ![
+                    'description',
+                    'progress',
+                    'totalAmount',
+                    'orderNumber',
+                    'customerName',
+                    'projectManager',
+                    'contactPerson',
+                  ].includes(column.key),
                 }"
                 @click="column.sortable && handleSort(column.key)"
               >
                 <div class="flex items-center space-x-1">
                   <span class="truncate">{{ column.label }}</span>
-                  <div v-if="column.sortable" class="flex flex-col flex-shrink-0">
+                  <div
+                    v-if="column.sortable"
+                    class="flex flex-col flex-shrink-0"
+                  >
                     <font-awesome-icon
                       icon="fa-solid fa-chevron-up"
                       class="w-2 h-2"
                       :class="{
-                        'text-blue-600': sort.field === column.key && sort.direction === 'asc',
-                        'text-gray-400': sort.field !== column.key || sort.direction !== 'asc'
+                        'text-blue-600':
+                          sort.field === column.key && sort.direction === 'asc',
+                        'text-gray-400':
+                          sort.field !== column.key || sort.direction !== 'asc',
                       }"
                     />
                     <font-awesome-icon
                       icon="fa-solid fa-chevron-down"
                       class="w-2 h-2"
                       :class="{
-                        'text-blue-600': sort.field === column.key && sort.direction === 'desc',
-                        'text-gray-400': sort.field !== column.key || sort.direction !== 'desc'
+                        'text-blue-600':
+                          sort.field === column.key &&
+                          sort.direction === 'desc',
+                        'text-gray-400':
+                          sort.field !== column.key ||
+                          sort.direction !== 'desc',
                       }"
                     />
                   </div>
@@ -270,9 +299,22 @@ const tableMinWidth = computed(() => {
                 :class="{
                   'w-80': column.key === 'description',
                   'w-48': column.key === 'progress',
-                  'w-32': column.key === 'totalAmount' || column.key === 'orderNumber',
-                  'w-44': column.key === 'customerName' || column.key === 'projectManager' || column.key === 'contactPerson',
-                  'w-36': !['description', 'progress', 'totalAmount', 'orderNumber', 'customerName', 'projectManager', 'contactPerson'].includes(column.key)
+                  'w-32':
+                    column.key === 'totalAmount' ||
+                    column.key === 'orderNumber',
+                  'w-44':
+                    column.key === 'customerName' ||
+                    column.key === 'projectManager' ||
+                    column.key === 'contactPerson',
+                  'w-36': ![
+                    'description',
+                    'progress',
+                    'totalAmount',
+                    'orderNumber',
+                    'customerName',
+                    'projectManager',
+                    'contactPerson',
+                  ].includes(column.key),
                 }"
               >
                 <!-- Order Number -->
@@ -311,7 +353,12 @@ const tableMinWidth = computed(() => {
 
                 <!-- Dates -->
                 <span
-                  v-else-if="column.key === 'startDate' || column.key === 'endDate' || column.key === 'createdAt' || column.key === 'updatedAt'"
+                  v-else-if="
+                    column.key === 'startDate' ||
+                    column.key === 'endDate' ||
+                    column.key === 'createdAt' ||
+                    column.key === 'updatedAt'
+                  "
                   class="text-gray-500 whitespace-nowrap"
                 >
                   {{ formatDate(order[column.key]) }}
@@ -328,7 +375,10 @@ const tableMinWidth = computed(() => {
                       :style="{ width: `${order[column.key]}%` }"
                     ></div>
                   </div>
-                  <span class="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">{{ order[column.key] }}%</span>
+                  <span
+                    class="text-xs text-gray-500 whitespace-nowrap flex-shrink-0"
+                    >{{ order[column.key] }}%</span
+                  >
                 </div>
 
                 <!-- Description -->
@@ -336,17 +386,14 @@ const tableMinWidth = computed(() => {
                   v-else-if="column.key === 'description'"
                   class="text-gray-900"
                 >
-                  <span
-                    class="block truncate"
-                    :title="order[column.key]"
-                  >
+                  <span class="block truncate" :title="order[column.key]">
                     {{ order[column.key] }}
                   </span>
                 </div>
 
                 <!-- Default -->
-                <span 
-                  v-else 
+                <span
+                  v-else
                   class="text-gray-900 block truncate"
                   :title="String(order[column.key])"
                 >
@@ -366,10 +413,16 @@ const tableMinWidth = computed(() => {
         <div class="flex items-center space-x-4">
           <!-- Items per page selector -->
           <div class="flex items-center space-x-2">
-            <label class="text-sm text-gray-700 whitespace-nowrap">{{ t('orders.table.itemsPerPage') }}:</label>
+            <label class="text-sm text-gray-700 whitespace-nowrap"
+              >{{ t("orders.table.itemsPerPage") }}:</label
+            >
             <select
               :value="pagination.itemsPerPage"
-              @change="handleItemsPerPageChange(parseInt(($event.target as HTMLSelectElement).value))"
+              @change="
+                handleItemsPerPageChange(
+                  parseInt(($event.target as HTMLSelectElement).value)
+                )
+              "
               class="border border-gray-300 rounded px-2 py-1 text-sm"
             >
               <option
@@ -384,13 +437,20 @@ const tableMinWidth = computed(() => {
 
           <!-- Showing info -->
           <div class="text-sm text-gray-700 whitespace-nowrap">
-            {{ t('orders.table.showing') }}
-            <span class="font-medium">{{ (pagination.currentPage - 1) * pagination.itemsPerPage + 1 }}</span>
-            {{ t('orders.table.to') }}
-            <span class="font-medium">{{ Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems) }}</span>
-            {{ t('orders.table.of') }}
+            {{ t("orders.table.showing") }}
+            <span class="font-medium">{{
+              (pagination.currentPage - 1) * pagination.itemsPerPage + 1
+            }}</span>
+            {{ t("orders.table.to") }}
+            <span class="font-medium">{{
+              Math.min(
+                pagination.currentPage * pagination.itemsPerPage,
+                pagination.totalItems
+              )
+            }}</span>
+            {{ t("orders.table.of") }}
             <span class="font-medium">{{ pagination.totalItems }}</span>
-            {{ t('orders.table.results') }}
+            {{ t("orders.table.results") }}
           </div>
         </div>
 
@@ -401,7 +461,7 @@ const tableMinWidth = computed(() => {
             :disabled="pagination.currentPage === 1"
             class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ t('orders.table.previous') }}
+            {{ t("orders.table.previous") }}
           </button>
 
           <!-- First page -->
@@ -429,7 +489,8 @@ const tableMinWidth = computed(() => {
             class="px-3 py-1 text-sm font-medium rounded-md"
             :class="{
               'bg-blue-600 text-white': pagination.currentPage === page,
-              'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50': pagination.currentPage !== page
+              'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50':
+                pagination.currentPage !== page,
             }"
           >
             {{ page }}
@@ -437,7 +498,9 @@ const tableMinWidth = computed(() => {
 
           <!-- Ellipsis after -->
           <span
-            v-if="visiblePages[visiblePages.length - 1] < pagination.totalPages - 1"
+            v-if="
+              visiblePages[visiblePages.length - 1] < pagination.totalPages - 1
+            "
             class="px-2 py-1 text-sm text-gray-500"
           >
             ...
@@ -457,7 +520,7 @@ const tableMinWidth = computed(() => {
             :disabled="pagination.currentPage === pagination.totalPages"
             class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ t('orders.table.next') }}
+            {{ t("orders.table.next") }}
           </button>
         </div>
       </div>
