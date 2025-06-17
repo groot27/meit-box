@@ -136,7 +136,7 @@ export const useTaskStore = defineStore("task", () => {
     if (!task) {
       return;
     }
-    const resource = task.mappedResources.find((item) => (item.id = rowIndex));
+    const resource = task.mappedResources.find((item) => item.id == rowIndex);
 
     switch (type) {
       case "Employee":
