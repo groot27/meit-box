@@ -154,6 +154,7 @@ export const useTaskStore = defineStore("task", () => {
       default:
         updatedTask.devicesCount = Number(updatedTask.devicesCount) + 1;
         task.details.devicesCount = updatedTask.devicesCount;
+        resource.status = "planned";
         break;
     }
   }
@@ -176,7 +177,7 @@ export const useTaskStore = defineStore("task", () => {
           } else {
             task.details.vehicelesIds = [resourceId];
           }
-          task.details.vehicle_count = task.details.vehicelesIds.length;
+          // task.details.vehicle_count = task.details.vehicelesIds.length;
           break;
 
         default:

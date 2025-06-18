@@ -237,7 +237,11 @@ onMounted(() => {
               v-if="resource.type === 'Device' && deviceData"
               :device="resource.name"
               :devices="deviceData"
+              :row="resource.id"
               :key="resource.id"
+              :taskId="props.taskId"
+              @update:Ids="updateIdsOfTask"
+              @addNewStatus="newStatus"
             />
             <vehicle-select
               v-if="resource.type === 'Vehicle' && vehicleData"

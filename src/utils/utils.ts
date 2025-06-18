@@ -120,12 +120,20 @@ export const generateDefaultResources = (
   for (let i = 1; i <= Number(availableResourcesCounts.devices); i++) {
     resources.push({
       id: count,
-      resourcesId: null,
-      name: "Device",
+      resourcesId: resourcesValues.devices[i - 1]
+        ? resourcesValues.devices[i - 1].id
+        : null,
+      name:
+        resourcesValues && resourcesValues.devices[i - 1]
+          ? resourcesValues.devices[i - 1].device_type
+          : "Device",
       type: "Device",
       count: 0,
       number: 0,
-      status: "open",
+      status:
+        resourcesValues && resourcesValues.devices[i - 1]
+          ? resourcesValues.devices[i - 1].status || "planned"
+          : "open",
     });
     count++;
   }
