@@ -1,5 +1,5 @@
 export interface Order {
-  id: string;
+  id: number;
   orderNumber: string;
   customerName: string;
   projectManager: string;
@@ -18,6 +18,7 @@ export interface Order {
   estimatedHours: number;
   actualHours: number;
   progress: number;
+  isPinned: boolean;
 }
 
 export interface OrderFilters {
@@ -47,5 +48,5 @@ export interface OrderPagination {
 
 export interface OrderSort {
   field: keyof Order;
-  direction: 'asc' | 'desc';
+  direction: "asc" | "desc";
 }

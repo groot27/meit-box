@@ -31,6 +31,8 @@ import {
   faFileCirclePlus,
   faChevronDown,
   faChevronUp,
+  faThumbTack,
+  faCopy,
 } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
@@ -65,5 +67,7 @@ library.add(
   faPrint,
   faFileCirclePlus,
   faChevronDown,
-  faChevronUp
+  faChevronUp,
+  faThumbTack,
+  faCopy
 );

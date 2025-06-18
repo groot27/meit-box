@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderStore } from "@/stores/OrderStore";
 import { format } from "date-fns";
+import { useRouter } from "vue-router";
 
 const { t } = useI18n();
 const orderStore = useOrderStore();
+const router = useRouter();
 
 const showColumnSelector = ref(false);
 
@@ -104,6 +106,15 @@ const visiblePages = computed(() => {
 
   return pages;
 });
+
+const handlePin = (id) => {
+  orderStore.togglePinOrder(id);
+};
+const handleCopy = () => {};
+const handleEdit = (id) => {
+  router.push(`new-edit-order/${id}`);
+};
+const handleRemove = () => {};
 
 // Calculate minimum table width based on visible columns
 const tableMinWidth = computed(() => {
@@ -284,13 +295,19 @@ const tableMinWidth = computed(() => {
                   </div>
                 </div>
               </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 border-r border-gray-200 last:border-r-0"
+                key="actions"
+              >
+                Actions
+              </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="bg-white divide-y divide-gray-200" v-if="orders">
             <tr
               v-for="order in orders"
-              :key="order.id"
-              class="hover:bg-gray-50"
+              :key="order.orderNumber"
+              class="hover:bg-gray-50 transition-all"
             >
               <td
                 v-for="column in visibleColumns"
@@ -399,6 +416,36 @@ const tableMinWidth = computed(() => {
                 >
                   {{ order[column.key] }}
                 </span>
+              </td>
+              <td
+                class="px-6 py-4 text-sm border-r border-gray-100 last:border-r-0 gap-2 flex"
+              >
+                <button
+                  @click="() => handlePin(order.id)"
+                  :class="`p-2 rounded-lg bg-purple-200 ${
+                    order.isPinned ? 'text-purple-800' : 'text-purple-300'
+                  }`"
+                >
+                  <font-awesome-icon :icon="['fas', 'thumb-tack']" />
+                </button>
+                <button
+                  @click="handleCopy"
+                  class="p-2 rounded-lg bg-green-200 text-green-500"
+                >
+                  <font-awesome-icon :icon="['fas', 'copy']" />
+                </button>
+                <button
+                  @click="handleEdit(order.id)"
+                  class="p-2 rounded-lg bg-blue-200 text-blue-500"
+                >
+                  <font-awesome-icon :icon="['fas', 'pencil']" />
+                </button>
+                <button
+                  @click="handleRemove"
+                  class="p-2 rounded-lg bg-red-200 text-red-500"
+                >
+                  <font-awesome-icon :icon="['fas', 'trash']" />
+                </button>
               </td>
             </tr>
           </tbody>
