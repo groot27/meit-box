@@ -19,6 +19,7 @@ import {
   faUserAltSlash,
   faFilePdf,
   faFileArchive,
+  faFileLines,
   faCheck,
   faShareNodes,
   faClock,
@@ -33,6 +34,7 @@ import {
   faChevronUp,
   faThumbTack,
   faCopy,
+  faListCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
@@ -69,5 +71,7 @@ library.add(
   faChevronDown,
   faChevronUp,
   faThumbTack,
-  faCopy
+  faCopy,
+  faListCheck,
+  faFileLines
 );

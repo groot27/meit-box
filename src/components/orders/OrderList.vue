@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { useOrderStore } from "@/stores/OrderStore";
 import OrderHeader from "./OrderHeader.vue";
 import OrderFilters from "./OrderFilters.vue";
@@ -7,7 +7,7 @@ import OrderTable from "./OrderTable.vue";
 import TopBarLoading from "@/components/widgets/TopBarLoading.vue";
 
 const orderStore = useOrderStore();
-
+const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
 onMounted(() => {
   orderStore.loadOrders();
 });
@@ -19,10 +19,15 @@ onMounted(() => {
 
     <div class="flex-1 flex overflow-hidden relative">
       <top-bar-loading />
-      <div class="w-1/6">
+      <div
+        :class="[
+          'transition-all duration-300 ease-in-out overflow-hidden',
+          leftSideDisplay ? 'w-1/6' : 'w-0',
+        ]"
+      >
         <OrderFilters />
       </div>
-      <div class="w-5/6">
+      <div :class="leftSideDisplay ? 'w-5/6' : 'w-full'">
         <OrderTable />
       </div>
     </div>

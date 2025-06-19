@@ -10,12 +10,14 @@ const orderStore = useOrderStore();
 const router = useRouter();
 
 const showColumnSelector = ref(false);
+const inquiryFilterSelected = ref(false);
 
 const orders = computed(() => orderStore.paginatedOrders);
 const visibleColumns = computed(() => orderStore.visibleColumns);
 const pagination = computed(() => orderStore.pagination);
 const sort = computed(() => orderStore.sort);
 const tableColumns = computed(() => orderStore.tableColumns);
+const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
 
 const itemsPerPageOptions = [10, 20, 30, 40, 50];
 
@@ -39,12 +41,13 @@ const handleExport = () => {
   console.log("Export clicked");
 };
 
-const handleFilter = () => {
-  console.log("Filter clicked");
+const handleFilterDiplay = () => {
+  orderStore.toggleLeftSideDisplay();
 };
 
-const handlePrint = () => {
-  console.log("Print clicked");
+const handleInquiryFilter = () => {
+  inquiryFilterSelected.value = !inquiryFilterSelected.value;
+  // orderStore.setInquiryFilter()
 };
 
 const handlePrintPlus = () => {
@@ -148,18 +151,28 @@ const tableMinWidth = computed(() => {
         <!-- Left side - Action buttons -->
         <div class="flex items-center space-x-2">
           <button
-            @click="handleFilter"
-            class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+            @click="handleFilterDiplay"
+            :class="[
+              'p-2  hover:bg-gray-100 rounded-lg transition-colors border border-1',
+              leftSideDisplay
+                ? 'text-green-500 border-green-500'
+                : 'text-gray-600 border-gray-600',
+            ]"
             :title="t('orders.table.filter')"
           >
-            <font-awesome-icon icon="fa-solid fa-filter" class="w-4 h-4" />
+            <font-awesome-icon icon="fa-solid fa-list-check" class="w-4 h-4" />
           </button>
           <button
-            @click="handlePrint"
-            class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+            @click="handleInquiryFilter"
+            :class="[
+              'p-2  hover:bg-gray-100 rounded-lg transition-colors border border-1',
+              inquiryFilterSelected
+                ? 'text-green-500 border-green-500'
+                : 'text-gray-600 border-gray-600',
+            ]"
             :title="t('orders.table.print')"
           >
-            <font-awesome-icon icon="fa-solid fa-print" class="w-4 h-4" />
+            <font-awesome-icon icon="fa-solid fa-file-lines" class="w-4 h-4" />
           </button>
           <button
             @click="handlePrintPlus"

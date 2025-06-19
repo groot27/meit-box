@@ -12,6 +12,7 @@ import { orderApi } from "@/api/orderApi";
 export const useOrderStore = defineStore("order", () => {
   const orders = ref<Order[]>([]);
   const loading = ref(false);
+  const leftSideDisplay = ref(true);
   const filters = reactive<OrderFilters>({
     search: "",
     startDate: "",
@@ -183,6 +184,10 @@ export const useOrderStore = defineStore("order", () => {
   });
 
   // Actions
+  const toggleLeftSideDisplay = () => {
+    leftSideDisplay.value = !leftSideDisplay.value;
+  };
+
   const loadOrders = async () => {
     loading.value = true;
     try {
@@ -266,7 +271,7 @@ export const useOrderStore = defineStore("order", () => {
   };
 
   const togglePinOrder = (orderID: number) => {
-    orderApi.togglePin({ id: orderID, tabel: "orders" });
+    // orderApi.togglePin({ id: orderID, tabel: "orders" });
     orders.value.forEach((order) => {
       if (order.id === orderID) {
         order.isPinned = !order.isPinned;
@@ -284,6 +289,8 @@ export const useOrderStore = defineStore("order", () => {
     visibleColumns,
     filteredOrders,
     paginatedOrders,
+    leftSideDisplay,
+    toggleLeftSideDisplay,
     loadOrders,
     setFilter,
     clearFilters,
