@@ -163,16 +163,12 @@ const updateVehicleStatus = async (id, status) => {
 const setFirstResources = () => {
   props.resources.forEach((resource) => {
     if (resource.resourcesId) {
-      updateIdsOfTask(resource.resourcesId, resource.type);
+      updateIdsOfTask(resource.resourcesId, resource.id, resource.type);
     }
   });
 };
-const updateIdsOfTask = (id, type) => {
-  taskStore.addResourcesId(props.taskId, id, type);
-};
-
-const newStatus = (index, type) => {
-  taskStore.addAssignedResource(props.taskId, type, index);
+const updateIdsOfTask = (id, rowIndex, type) => {
+  taskStore.addResourcesId(props.taskId, id, rowIndex, type);
 };
 onMounted(() => {
   // document.addEventListener("click", handleClickOutside);
@@ -231,13 +227,15 @@ onMounted(() => {
               :employees="employeeData"
               :taskId="props.taskId"
               @update:Ids="updateIdsOfTask"
-              @addNewStatus="newStatus"
             />
             <devices-select
               v-if="resource.type === 'Device' && deviceData"
               :device="resource.name"
               :devices="deviceData"
+              :row="resource.id"
               :key="resource.id"
+              :taskId="props.taskId"
+              @update:Ids="updateIdsOfTask"
             />
             <vehicle-select
               v-if="resource.type === 'Vehicle' && vehicleData"
@@ -247,7 +245,6 @@ onMounted(() => {
               :taskId="props.taskId"
               :vehicles="vehicleData"
               @update:Ids="updateIdsOfTask"
-              @addNewStatus="newStatus"
             />
           </td>
           <td class="text-center py-2">

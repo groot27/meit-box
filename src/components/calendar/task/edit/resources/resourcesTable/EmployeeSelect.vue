@@ -24,8 +24,8 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
   (e: "update", selectedEmployee);
-  (e: "update:Ids", employeeId, type: string);
-  (e: "addNewStatus", row: number, type: string);
+  (e: "update:Ids", employeeId, row: number, type: string);
+  // (e: "addNewStatus", row: number, type: string);
 }>();
 
 const selectedEmployee = ref(null);
@@ -55,8 +55,8 @@ const confirmedEmployee = async (employee: employeeType) => {
       selectedEmployee.value = null;
       employeeName.value = null;
     } else {
-      emit("update:Ids", employee.key, "Employee");
-      emit("addNewStatus", props.row, "Employee");
+      emit("update:Ids", employee.key, props.row, "Employee");
+      // emit("addNewStatus", props.row, "Employee");
     }
   };
   await taskApi.confirmEmployeeTask(
@@ -85,8 +85,8 @@ onMounted(() => {
 });
 const setNewEmployee = (employee) => {
   if (!route.params.taskId) {
-    emit("update:Ids", employee.key, "Employee");
-    emit("addNewStatus", props.row, "Employee");
+    emit("update:Ids", employee.key, props.row, "Employee");
+    // emit("addNewStatus", props.row, "Employee");
     return;
   } else {
     confirmedEmployee(employee);

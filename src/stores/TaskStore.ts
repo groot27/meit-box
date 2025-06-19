@@ -122,6 +122,7 @@ export const useTaskStore = defineStore("task", () => {
     }
   }
   function addAssignedResource(taskId: number, type: string, rowIndex: number) {
+    debugger;
     let updatedTask = tasks.value.find((task) => {
       if (task.id == taskId) {
         return task;
@@ -136,19 +137,15 @@ export const useTaskStore = defineStore("task", () => {
     if (!task) {
       return;
     }
-    const resource = task.mappedResources.find((item) => item.id == rowIndex);
 
     switch (type) {
       case "Employee":
         updatedTask.employeesCount = Number(updatedTask.employeesCount) + 1;
         task.details.employeesCount = updatedTask.employeesCount;
-        resource.status = "confirmed";
-        task;
         break;
       case "Vehicle":
         updatedTask.vehiclesCount = Number(updatedTask.vehiclesCount) + 1;
         task.details.vehiclesCount = updatedTask.vehiclesCount;
-        resource.status = "planned";
         break;
 
       default:
@@ -157,35 +154,53 @@ export const useTaskStore = defineStore("task", () => {
         break;
     }
   }
-  function addResourcesId(taskId: number, resourceId: number, type: string) {
+  function addResourcesId(
+    taskId: number,
+    resourceId: number,
+    rowIndex: number,
+    type: string
+  ) {
     const task = selectedTask.value.relatedTasks.find(
       (task) => task.details.id == taskId
     );
+    const resource = task.mappedResources.find((item) => item.id == rowIndex);
     if (task) {
+      let keyName: string = "";
+      let allowAssigne = false;
       switch (type) {
         case "Employee":
-          if (task.details.employeesIds) {
-            task.details.employeesIds.push(resourceId);
-          } else {
-            task.details.employeesIds = [resourceId];
-          }
+          keyName = "employeesIds";
+          resource.status = "confirmed";
           break;
         case "Vehicle":
-          if (task.details.vehiclesIds) {
-            task.details.vehicelesIds.push(resourceId);
-          } else {
-            task.details.vehicelesIds = [resourceId];
-          }
-          task.details.vehicle_count = task.details.vehicelesIds.length;
+          keyName = "vehicelesIds";
+          resource.status = "planned";
           break;
-
         default:
-          if (task.details.devicesIds) {
-            task.details.devicesIds.push(resourceId);
-          } else {
-            task.details.devicesIds = [resourceId];
-          }
+          keyName = "devicesIds";
+          resource.status = "planned";
           break;
+      }
+      if (
+        task.details[keyName] &&
+        !task.details[keyName].includes(resourceId)
+      ) {
+        if (!resource.resourcesId) {
+          task.details[keyName].push(resourceId);
+          allowAssigne = true;
+        } else {
+          task.details[keyName][
+            task.details[keyName].indexOf(resource.resourcesId)
+          ] = resourceId;
+          resource.resourcesId = resourceId;
+        }
+      } else if (!task.details[keyName]) {
+        allowAssigne = true;
+        task.details[keyName] = [resourceId];
+      }
+      if (allowAssigne) {
+        addAssignedResource(taskId, type, rowIndex);
+        resource.resourcesId = resourceId;
       }
     }
   }

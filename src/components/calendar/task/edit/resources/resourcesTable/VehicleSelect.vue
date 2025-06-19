@@ -21,8 +21,8 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
   (e: "update", selectedVehicle);
-  (e: "update:Ids", employeeId, type: string);
-  (e: "addNewStatus", row: number, type: string);
+  (e: "update:Ids", employeeId, row: number, type: string);
+  // (e: "addNewStatus", row: number, type: string);
 }>();
 
 const selectedVehicle = ref(null);
@@ -34,7 +34,9 @@ const fetchVehicleOptions = async (query: string = "") => {
   vehicleLoading.value = true;
   try {
     const res = await taskApi.getTaskVehicles(query);
-    vehicleOptions.value = res.data.map((vehicle) => vehicle.number_plate);
+    vehicleOptions.value = res.data.map((vehicle) => {
+      return { key: vehicle.id, value: vehicle.number_plate };
+    });
   } finally {
     vehicleLoading.value = false;
   }
@@ -50,16 +52,16 @@ const confirmedVehicle = async (
     resource_id: newVehicle.key,
     task_id: props.taskId,
   });
-  emit("update:Ids", newVehicle.key, "Vehicle");
-  emit("addNewStatus", props.row, "Vehicle");
+  emit("update:Ids", newVehicle.key, props.row, "Vehicle");
+  // emit("addNewStatus", props.row, "Vehicle");
   globalStore.setLoadingApi(false);
 };
 
 const setNewVehicle = (vehicle: vehicleType) => {
   if (vehicle.value && vehicle.value != props.vehicle.value) {
     if (!route.params.taskId) {
-      emit("update:Ids", vehicle.key, "Vehicle");
-      emit("addNewStatus", props.row, "Vehicle");
+      emit("update:Ids", vehicle.key, props.row, "Vehicle");
+      // emit("addNewStatus", props.row, "Vehicle");
       return;
     }
     confirmedVehicle(vehicle, props.vehicle);
