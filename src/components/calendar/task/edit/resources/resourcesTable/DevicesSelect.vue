@@ -20,72 +20,74 @@ const props = defineProps<{
   taskId: number | null | undefined;
 }>();
 const emit = defineEmits<{
-  (e: "update", selectedVehicle);
-  (e: "update:Ids", employeeId, type: string);
-  (e: "addNewStatus", row: number, type: string);
+  (e: "update", selectedDevice);
+  (e: "update:Ids", employeeId, row: number, type: string);
+  // (e: "addNewStatus", row: number, type: string);
 }>();
 
-const selectedVehicle = ref(null);
-const oldSelectedVehicle = ref(null);
+const selectedDevice = ref(null);
+const oldSelectedDevice = ref(null);
 const deviceId = ref(null);
 const deviceLoading = ref(false);
 const deviceOptions = ref<string[]>([]);
-const fetchVehicleOptions = async (query: string = "") => {
+const fetchDeviceOptions = async (query: string = "") => {
   deviceLoading.value = true;
   try {
-    const res = await taskApi.getTaskVehicles(query);
-    deviceOptions.value = res.data.map((device) => device.number_plate);
+    const res = await taskApi.getTaskDevices(query);
+    deviceOptions.value = res.data.map((device) => {
+      return { key: device.id, value: device.device_number };
+    });
   } finally {
     deviceLoading.value = false;
   }
 };
-const confirmedVehicle = async (
-  newVehicle: deviceType,
-  oldVehicle: deviceType
-) => {
-  globalStore.setLoadingApi(true);
-  await taskApi.confirmVehicleTask({
-    check_conflict_task: true,
-    replaced_value: oldVehicle.key,
-    resource_id: newVehicle.key,
-    task_id: props.taskId,
-  });
-  emit("update:Ids", newVehicle.key, "Vehicle");
-  emit("addNewStatus", props.row, "Vehicle");
-  globalStore.setLoadingApi(false);
-};
+// const confirmedDevice = async (
+//   newDevice: deviceType,
+//   oldDevice: deviceType
+// ) => {
+//   globalStore.setLoadingApi(true);
+//   await taskApi.confirmDeviceTask({
+//     check_conflict_task: true,
+//     replaced_value: oldDevice.key,
+//     resource_id: newDevice.key,
+//     task_id: props.taskId,
+//   });
+//   emit("update:Ids", newDevice.key, "Device");
+//   emit("addNewStatus", props.row, "Device");
+//   globalStore.setLoadingApi(false);
+// };
 
-const setNewVehicle = (device: deviceType) => {
+const setNewDevice = (device: deviceType) => {
   if (device.value && device.value != props.device.value) {
-    if (!route.params.taskId) {
-      emit("update:Ids", device.key, "Vehicle");
-      emit("addNewStatus", props.row, "Vehicle");
-      return;
-    }
-    confirmedVehicle(device, props.device);
+    // if (!route.params.taskId) {
+    emit("update:Ids", device.key, props.row, "Device");
+    // emit("addNewStatus", props.row, "Device");
+    return;
+    // }
+    // confirmedDevice(device, props.device);
   }
 };
 onMounted(() => {
   if (props.devices) {
     deviceOptions.value = props.devices.map((device) => {
-      return { key: device.id, value: device.number_plate };
+      return { key: device.id, value: device.device_number };
     });
-    if (props.device.value !== "Vehicle") {
-      selectedVehicle.value = props.device;
+    if (props.device.value !== "Device") {
+      selectedDevice.value = props.device;
       deviceId.value = props.device.value;
-      // emit("update:Ids", props.device.key, "Vehicle");
+      // emit("update:Ids", props.device.key, "Device");
     }
-    oldSelectedVehicle.value = props.device;
+    oldSelectedDevice.value = props.device;
   }
 });
 </script>
 <template>
   <async-select
-    v-model="selectedVehicle"
+    v-model="selectedDevice"
     :options="deviceOptions"
     :placeholder="t('common.placeholder.device')"
     :loading="deviceLoading"
-    @search="fetchVehicleOptions"
-    @update:model-value="setNewVehicle"
+    @search="fetchDeviceOptions"
+    @update:model-value="setNewDevice"
   />
 </template>
