@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "buildwebpack": "webpack --config webpack.config.cjs",
+    "build:monthly": "webpack --config webpack.config.cjs --config-name remoteMonthlyView",
+    "build:orders": "webpack --config webpack.config.cjs --config-name remoteOrders",
+    "buildwebpack": "concurrently \"npm run build:monthly\" \"npm run build:orders\"",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -35,6 +37,7 @@
     "@vitejs/plugin-vue": "^5.1.3",
     "autoprefixer": "^10.4.16",
     "babel-loader": "^10.0.0",
+    "concurrently": "^9.2.0",
     "css-loader": "^7.1.2",
     "dotenv": "^16.5.0",
     "postcss": "^8.4.31",

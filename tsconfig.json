@@ -3,11 +3,13 @@
     "types": ["vue3-toastify/global"],
     "baseUrl": "./src",
     "paths": {
+      "@/*": ["./src/*"],
       "@/components/*": ["./components/*"],
       "@/api/*": ["./api/*"],
       "@/stores/*": ["./stores/*"],
       "@/types/*": ["./types/*"],
       "@/utils/*": ["./utils/*"],
+      "@/i18n/*": ["./i18n/*"],
       "@/pages/*": ["./pages/*"]
     }
   },

@@ -4,30 +4,44 @@ const { VueLoaderPlugin } = require("vue-loader");
 const dotenv = require("dotenv");
 const { ModuleFederationPlugin } = require("webpack").container;
 
+// Load .env.stage
 const env = dotenv.config({
   path: path.resolve(__dirname, ".env.stage"),
 }).parsed;
 
-const envKeys = Object.keys(env).reduce((prev, next) => {
+const envKeys = Object.keys(env || {}).reduce((prev, next) => {
   prev[`process.env.${next}`] = JSON.stringify(env[next]);
   return prev;
 }, {});
-module.exports = {
-  entry: { remote: "./src/main.ts" },
+
+// Base shared config
+const createBaseConfig = ({
+  name,
+  entryName,
+  entryPath,
+  exposeName,
+  exposePath,
+  remoteFileName,
+  port,
+}) => ({
+  name,
+  entry: { [entryName]: entryPath },
   mode: "development",
   output: {
-    publicPath: "http://localhost:5001/",
-    path: path.resolve(__dirname, "dist"),
-    filename: "bundle.js",
+    publicPath: `http://localhost:${port}/`,
+    path: path.resolve(__dirname, `dist/${name}`),
+    filename: `${entryName}.js`,
+    clean: true,
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"), // alias @ to /src
+      "@": path.resolve(__dirname, "src"),
       "@/components": path.resolve(__dirname, "src/components"),
       "@/api": path.resolve(__dirname, "src/api"),
       "@/stores": path.resolve(__dirname, "src/stores"),
       "@/types": path.resolve(__dirname, "src/types"),
       "@/utils": path.resolve(__dirname, "src/utils"),
+      "@/i18n": path.resolve(__dirname, "src/i18n"),
       "@/pages": path.resolve(__dirname, "src/pages"),
     },
     extensions: [".ts", ".js", ".vue"],
@@ -43,7 +57,7 @@ module.exports = {
         loader: "ts-loader",
         options: {
           appendTsSuffixTo: [/\.vue$/],
-          transpileOnly: true, // optional: faster, but no type checking
+          transpileOnly: true,
         },
         exclude: /node_modules/,
       },
@@ -53,7 +67,7 @@ module.exports = {
       },
       {
         test: /\.svg$/,
-        type: "asset/resource", // emits a file and returns a URL
+        type: "asset/resource",
       },
     ],
   },
@@ -61,10 +75,10 @@ module.exports = {
     new VueLoaderPlugin(),
     new webpack.DefinePlugin(envKeys),
     new ModuleFederationPlugin({
-      name: "remote",
-      filename: "remoteMonthlyView.js",
+      name: entryName,
+      filename: remoteFileName,
       exposes: {
-        "./RemoteMonthlyView": "./src/components/calendar/Calendar.vue",
+        [exposeName]: exposePath,
       },
       shared: {
         vue: {
@@ -75,11 +89,32 @@ module.exports = {
     }),
   ],
   devServer: {
-    port: 5001,
+    port,
     static: path.join(__dirname, "dist"),
     hot: true,
     headers: {
       "Access-Control-Allow-Origin": "*",
     },
   },
-};
+});
+
+module.exports = [
+  createBaseConfig({
+    name: "remoteOrders",
+    entryName: "remoteOrders",
+    entryPath: "./src/remotesEntries/ordersEntry.ts", // <-- new entry file
+    exposeName: "./RemoteOrders",
+    exposePath: "./src/components/orders/OrderList.vue",
+    remoteFileName: "remoteOrders.js",
+    port: 5002,
+  }),
+  createBaseConfig({
+    name: "remoteMonthlyView",
+    entryName: "remoteMonthlyView",
+    entryPath: "./src/remotesEntries/monthlyViewEntry.ts",
+    exposeName: "./RemoteMonthlyView",
+    exposePath: "./src/components/calendar/Calendar.vue",
+    remoteFileName: "remoteMonthlyView.js",
+    port: 5001,
+  }),
+];
