@@ -24,3 +24,17 @@ export interface TaskApiQuery {
   per_page?: number;
   page?: number;
 }
+interface MetaType {
+  current_page: number;
+  last_page: number;
+  path: string;
+  per_page: number;
+  total: number;
+}
+export interface ResponseType {
+  status: boolean;
+  data: Array<any>;
+  links: any;
+  meta: MetaType;
+  message: string;
+}

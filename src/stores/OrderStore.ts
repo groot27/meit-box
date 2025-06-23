@@ -8,11 +8,18 @@ import {
   OrderSort,
 } from "@/types/OrderTypes";
 import { orderApi } from "@/api/orderApi";
+import { useGlobalStore } from ".";
+import { ResponseType } from "@/types/apiRequest";
+import { createQueryString } from "@/utils/utils";
 
 export const useOrderStore = defineStore("order", () => {
   const orders = ref<Order[]>([]);
   const loading = ref(false);
   const leftSideDisplay = ref(true);
+  const globalStore = useGlobalStore();
+  const defaultData = reactive<any>({
+    customers: null,
+  });
   const filters = reactive<OrderFilters>({
     search: "",
     startDate: "",
@@ -95,28 +102,28 @@ export const useOrderStore = defineStore("order", () => {
     let result = [...orders.value];
 
     // Apply search filter
-    if (filters.search) {
-      const searchTerm = filters.search.toLowerCase();
-      result = result.filter(
-        (order) =>
-          order.orderNumber.toLowerCase().includes(searchTerm) ||
-          order.customerName.toLowerCase().includes(searchTerm) ||
-          order.description.toLowerCase().includes(searchTerm)
-      );
-    }
+    // if (filters.search) {
+    //   const searchTerm = filters.search.toLowerCase();
+    // result = result.filter(
+    //   (order) =>
+    //     order.orderNumber.toLowerCase().includes(searchTerm) ||
+    //     order.customerName.toLowerCase().includes(searchTerm) ||
+    //     order.description.toLowerCase().includes(searchTerm)
+    // );
+    // }
 
     // Apply date filters
-    if (filters.startDate) {
-      result = result.filter(
-        (order) => new Date(order.startDate) >= new Date(filters.startDate)
-      );
-    }
+    // if (filters.startDate) {
+    //   result = result.filter(
+    //     (order) => new Date(order.startDate) >= new Date(filters.startDate)
+    //   );
+    // }
 
-    if (filters.endDate) {
-      result = result.filter(
-        (order) => new Date(order.endDate) <= new Date(filters.endDate)
-      );
-    }
+    // if (filters.endDate) {
+    //   result = result.filter(
+    //     (order) => new Date(order.endDate) <= new Date(filters.endDate)
+    //   );
+    // }
 
     // Apply other filters
     if (filters.orderStatus) {
@@ -171,17 +178,17 @@ export const useOrderStore = defineStore("order", () => {
     });
 
     // Update pagination totals
-    pagination.totalItems = result.length;
-    pagination.totalPages = Math.ceil(result.length / pagination.itemsPerPage);
+    // pagination.totalItems = result.length;
+    // pagination.totalPages = Math.ceil(result.length / pagination.itemsPerPage);
 
     return result;
   });
 
-  const paginatedOrders = computed(() => {
-    const start = (pagination.currentPage - 1) * pagination.itemsPerPage;
-    const end = start + pagination.itemsPerPage;
-    return filteredOrders.value.slice(start, end);
-  });
+  // const paginatedOrders = computed(() => {
+  //   const start = (pagination.currentPage - 1) * pagination.itemsPerPage;
+  //   const end = start + pagination.itemsPerPage;
+  //   return filteredOrders.value.slice(start, end);
+  // });
 
   // Actions
   const toggleLeftSideDisplay = () => {
@@ -189,41 +196,75 @@ export const useOrderStore = defineStore("order", () => {
   };
 
   const loadOrders = async () => {
-    loading.value = true;
-    try {
-      // Mock data for now - replace with actual API call
-      const mockOrders: Order[] = Array.from({ length: 100 }, (_, i) => ({
-        id: i + 1,
-        orderNumber: `ORD-${String(i + 1).padStart(4, "0")}`,
-        customerName: `Customer ${i + 1}`,
-        projectManager: `Manager ${(i % 5) + 1}`,
-        contactPerson: `Contact ${i + 1}`,
-        orderStatus: ["pending", "in-progress", "completed", "cancelled"][
-          i % 4
-        ],
-        orderCategory: ["development", "maintenance", "consulting", "support"][
-          i % 4
-        ],
-        startDate: new Date(2024, i % 12, (i % 28) + 1)
-          .toISOString()
-          .split("T")[0],
-        endDate: new Date(2024, (i % 12) + 1, (i % 28) + 1)
-          .toISOString()
-          .split("T")[0],
-        totalAmount: (i + 1) * 1000,
-        description: `Order description for ${i + 1}`,
-        location: `Location ${(i % 3) + 1}`,
-        priority: ["low", "medium", "high"][i % 3],
-        createdAt: new Date(2024, i % 12, (i % 28) + 1).toISOString(),
-        updatedAt: new Date().toISOString(),
-        assignedTeam: `Team ${(i % 4) + 1}`,
-        estimatedHours: (i + 1) * 10,
-        actualHours: (i + 1) * 8,
-        progress: Math.min(100, (i + 1) * 5),
-        isPinned: false,
-      }));
+    let queryProps = {
+      per_page: pagination.itemsPerPage,
+      page: pagination.currentPage,
+      search: filters.search,
+    };
+    if (filters.startDate && filters.endDate) {
+      queryProps["date_between"] = `${filters.startDate},${filters.endDate}`;
+    }
 
-      orders.value = mockOrders;
+    const queryString: string = createQueryString(queryProps);
+    try {
+      globalStore.setLoadingApi(true);
+      const res: ResponseType = await orderApi.getAll(queryString);
+      globalStore.setLoadingApi(false);
+      debugger;
+      orders.value = res.data.map((order) => {
+        tableColumns.value.forEach((col) => {
+          order[col.key] = order[col.key] || "NotSet";
+        });
+        return order;
+      });
+
+      pagination.currentPage = res.meta.current_page;
+      pagination.totalPages = res.meta.last_page;
+      pagination.totalItems = res.meta.total;
+      pagination.itemsPerPage = res.meta.per_page;
+    } catch (error) {
+      console.error("Error loading orders:", error);
+      globalStore.setLoadingApi(false);
+    } finally {
+      globalStore.setLoadingApi(false);
+      loading.value = false;
+    }
+  };
+  const loadOrdersHeader = async () => {
+    globalStore.setLoadingApi(true);
+    try {
+      const res = await orderApi.getHeaders();
+      tableColumns.value = null;
+      tableColumns.value = res.data.map((header) => {
+        return {
+          key: header.column_name,
+          label: header.column_label,
+          sortable: true,
+          visible: header.is_shown,
+        };
+      });
+      globalStore.setLoadingApi(false);
+    } catch (error) {
+      console.error("Error loading orders:", error);
+    } finally {
+      loading.value = false;
+    }
+  };
+  const loadDefaultData = async () => {
+    globalStore.setLoadingApi(true);
+    try {
+      const res = await orderApi.getCustomers();
+      debugger;
+      tableColumns.value = null;
+      tableColumns.value = res.data.map((header) => {
+        return {
+          key: header.column_name,
+          label: header.column_label,
+          sortable: true,
+          visible: header.is_shown,
+        };
+      });
+      globalStore.setLoadingApi(false);
     } catch (error) {
       console.error("Error loading orders:", error);
     } finally {
@@ -233,7 +274,18 @@ export const useOrderStore = defineStore("order", () => {
 
   const setFilter = (key: keyof OrderFilters, value: string) => {
     filters[key] = value;
-    pagination.currentPage = 1; // Reset to first page when filtering
+    debugger;
+    if (key === "startDate" || key === "endDate") {
+      if (filters.startDate && filters.endDate) {
+        pagination.currentPage = 1;
+        loadOrders();
+      } else {
+        return;
+      }
+    } else {
+      pagination.currentPage = 1;
+      loadOrders();
+    }
   };
 
   const clearFilters = () => {
@@ -241,6 +293,7 @@ export const useOrderStore = defineStore("order", () => {
       filters[key as keyof OrderFilters] = "";
     });
     pagination.currentPage = 1;
+    loadOrders();
   };
 
   const setSort = (field: keyof Order) => {
@@ -255,12 +308,14 @@ export const useOrderStore = defineStore("order", () => {
   const setPage = (page: number) => {
     if (page >= 1 && page <= pagination.totalPages) {
       pagination.currentPage = page;
+      loadOrders();
     }
   };
 
   const setItemsPerPage = (itemsPerPage: number) => {
     pagination.itemsPerPage = itemsPerPage;
     pagination.currentPage = 1; // Reset to first page when changing items per page
+    loadOrders();
   };
 
   const toggleColumnVisibility = (columnKey: keyof Order) => {
@@ -288,10 +343,11 @@ export const useOrderStore = defineStore("order", () => {
     tableColumns,
     visibleColumns,
     filteredOrders,
-    paginatedOrders,
+    // paginatedOrders,
     leftSideDisplay,
     toggleLeftSideDisplay,
     loadOrders,
+    loadOrdersHeader,
     setFilter,
     clearFilters,
     setSort,

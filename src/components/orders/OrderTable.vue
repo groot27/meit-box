@@ -12,7 +12,7 @@ const router = useRouter();
 const showColumnSelector = ref(false);
 const inquiryFilterSelected = ref(false);
 
-const orders = computed(() => orderStore.paginatedOrders);
+const orders = computed(() => orderStore.filteredOrders);
 const visibleColumns = computed(() => orderStore.visibleColumns);
 const pagination = computed(() => orderStore.pagination);
 const sort = computed(() => orderStore.sort);
@@ -133,9 +133,17 @@ const tableMinWidth = computed(() => {
   };
 
   let totalWidth = 0;
-  visibleColumns.value.forEach((column) => {
-    totalWidth += specialColumns[column.key] || baseWidth;
-  });
+  if (visibleColumns.value) {
+    console.log(
+      "🚀 ~ tableMinWidth ~ visibleColumns.value:",
+      visibleColumns.value
+    );
+    // visibleColumns.value.forEach((column) => {
+    //   console.log("🚀 ~ visibleColumns.value.forEach ~ column:", column.key);
+
+    //   totalWidth += specialColumns[column.key] || baseWidth;
+    // });
+  }
 
   return `${totalWidth}px`;
 });
@@ -317,35 +325,11 @@ const tableMinWidth = computed(() => {
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200" v-if="orders">
-            <tr
-              v-for="order in orders"
-              :key="order.orderNumber"
-              class="hover:bg-gray-50 transition-all"
-            >
+            <tr v-for="order in orders" class="hover:bg-gray-50 transition-all">
               <td
                 v-for="column in visibleColumns"
                 :key="column.key"
-                class="px-6 py-4 text-sm border-r border-gray-100 last:border-r-0"
-                :class="{
-                  'w-80': column.key === 'description',
-                  'w-48': column.key === 'progress',
-                  'w-32':
-                    column.key === 'totalAmount' ||
-                    column.key === 'orderNumber',
-                  'w-44':
-                    column.key === 'customerName' ||
-                    column.key === 'projectManager' ||
-                    column.key === 'contactPerson',
-                  'w-36': ![
-                    'description',
-                    'progress',
-                    'totalAmount',
-                    'orderNumber',
-                    'customerName',
-                    'projectManager',
-                    'contactPerson',
-                  ].includes(column.key),
-                }"
+                class="px-6 py-4 text-sm border-r border-gray-100 last:border-r-0 w-full"
               >
                 <!-- Order Number -->
                 <span

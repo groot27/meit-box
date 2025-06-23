@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderStore } from "@/stores/OrderStore";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
+import { format } from "date-fns";
 
 const { t } = useI18n();
 const orderStore = useOrderStore();
+const searchValue = ref("");
 
 const filters = computed(() => orderStore.filters);
 
@@ -51,7 +53,26 @@ const contactPersonOptions = [
 ];
 
 const handleFilterChange = (key: string, value: string) => {
-  orderStore.setFilter(key as any, value);
+  if (key === "startDate" || key === "endDate") {
+    orderStore.setFilter(key as any, format(new Date(value), "yyyy-MM-dd"));
+  } else if (key === "search") {
+    onChange(value);
+  } else {
+    orderStore.setFilter(key as any, value);
+  }
+};
+
+const onChange = (query: string) => {
+  searchValue.value = query;
+  setTimeout(() => {
+    onSearch(query);
+  }, 700);
+};
+
+const onSearch = (query: string) => {
+  if (query === searchValue.value) {
+    orderStore.setFilter("search", query);
+  }
 };
 
 const clearAllFilters = () => {
@@ -101,7 +122,7 @@ const clearAllFilters = () => {
         <input
           type="date"
           :value="filters.startDate"
-          @input="
+          @change="
             handleFilterChange(
               'startDate',
               ($event.target as HTMLInputElement).value
@@ -119,7 +140,7 @@ const clearAllFilters = () => {
         <input
           type="date"
           :value="filters.endDate"
-          @input="
+          @change="
             handleFilterChange(
               'endDate',
               ($event.target as HTMLInputElement).value

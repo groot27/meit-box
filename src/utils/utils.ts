@@ -14,10 +14,10 @@ export const truncateWords = (str: string, words: number) => {
 };
 
 export const createQueryString = (queryProps: Record<string, any>): string => {
-  const queryStringParts: string[] = ["per_page=50"];
+  const queryStringParts: string[] = [];
   Object.entries(queryProps).forEach(([key, value]) => {
-    if (key === "page") {
-      queryStringParts.push(`page=${value}`);
+    if (key === "page" || key === "per_page") {
+      queryStringParts.push(`${key}=${value}`);
     } else if (key === "field" || key === "order") {
       queryStringParts.push(`sort[${key}]=${value}`);
     } else if (Array.isArray(value)) {

@@ -8,7 +8,8 @@ import TopBarLoading from "@/components/widgets/TopBarLoading.vue";
 
 const orderStore = useOrderStore();
 const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
-onMounted(() => {
+onMounted(async () => {
+  await orderStore.loadOrdersHeader();
   orderStore.loadOrders();
 });
 </script>

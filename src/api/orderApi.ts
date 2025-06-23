@@ -8,7 +8,7 @@ type Callbacks<T = any> = {
 export const orderApi = {
   getAll: async (queryString: string = "", callbacks?: Callbacks) => {
     try {
-      const res = await api.get(`/v2/orders?${queryString}`);
+      const res = await api.get(`/v2/orders/search?${queryString}`);
       callbacks?.onSuccess?.(res);
       return res;
     } catch (err) {
@@ -19,6 +19,18 @@ export const orderApi = {
   getHeaders: async (queryString: string = "", callbacks?: Callbacks) => {
     try {
       const res = await api.get(`/v2/orders/headers?${queryString}`);
+      callbacks?.onSuccess?.(res);
+      return res;
+    } catch (err) {
+      callbacks?.onError?.(err);
+      throw err;
+    }
+  },
+  getCustomers: async (queryString: string = "", callbacks?: Callbacks) => {
+    try {
+      const res = await api.get(
+        `/edit-order-paginated-customers?term=&page=1?${queryString}`
+      );
       callbacks?.onSuccess?.(res);
       return res;
     } catch (err) {

@@ -62,9 +62,9 @@ module.exports = {
     new webpack.DefinePlugin(envKeys),
     new ModuleFederationPlugin({
       name: "remote",
-      filename: "remoteEntry.js",
+      filename: "remoteMonthlyView.js",
       exposes: {
-        "./CalendarDaily": "./src/components/calendar/Calendar.vue",
+        "./RemoteMonthlyView": "./src/components/calendar/Calendar.vue",
       },
       shared: {
         vue: {
