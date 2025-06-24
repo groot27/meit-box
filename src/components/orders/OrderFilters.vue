@@ -1,62 +1,30 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderStore } from "@/stores/OrderStore";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import { format } from "date-fns";
+import Multiselect from "vue-multiselect";
+import "vue-multiselect/dist/vue-multiselect.min.css";
 
 const { t } = useI18n();
 const orderStore = useOrderStore();
 const searchValue = ref("");
 
 const filters = computed(() => orderStore.filters);
+const filtersData = computed(() => orderStore.defaultData);
+const customerSearchLoading = ref(false);
 
-// Mock options for dropdowns
-const orderStatusOptions = [
-  { value: "", label: t("orders.filters.allOrderStatus") },
-  { value: "pending", label: t("orders.status.pending") },
-  { value: "in-progress", label: t("orders.status.inProgress") },
-  { value: "completed", label: t("orders.status.completed") },
-  { value: "cancelled", label: t("orders.status.cancelled") },
-];
-
-const orderCategoryOptions = [
-  { value: "", label: t("orders.filters.allCategories") },
-  { value: "development", label: t("orders.categories.development") },
-  { value: "maintenance", label: t("orders.categories.maintenance") },
-  { value: "consulting", label: t("orders.categories.consulting") },
-  { value: "support", label: t("orders.categories.support") },
-];
-
-const projectManagerOptions = [
-  "Manager 1",
-  "Manager 2",
-  "Manager 3",
-  "Manager 4",
-  "Manager 5",
-];
-
-const customerOptions = [
-  "Customer 1",
-  "Customer 2",
-  "Customer 3",
-  "Customer 4",
-  "Customer 5",
-];
-
-const contactPersonOptions = [
-  "Contact 1",
-  "Contact 2",
-  "Contact 3",
-  "Contact 4",
-  "Contact 5",
-];
-
-const handleFilterChange = (key: string, value: string) => {
+const handleFilterChange = (key: string, value: string | object) => {
   if (key === "startDate" || key === "endDate") {
-    orderStore.setFilter(key as any, format(new Date(value), "yyyy-MM-dd"));
+    orderStore.setFilter(
+      key as any,
+      format(new Date(value as string), "yyyy-MM-dd")
+    );
   } else if (key === "search") {
-    onChange(value);
+    onChange(value as string);
+  } else if (key === "contactPerson") {
+    orderStore.setFilter(key as any, value);
   } else {
     orderStore.setFilter(key as any, value);
   }
@@ -74,7 +42,11 @@ const onSearch = (query: string) => {
     orderStore.setFilter("search", query);
   }
 };
-
+const handleCustomerSearch = async (customer) => {
+  customerSearchLoading.value = true;
+  await orderStore.fetchCustomers(customer);
+  customerSearchLoading.value = false;
+};
 const clearAllFilters = () => {
   orderStore.clearFilters();
 };
@@ -151,11 +123,19 @@ const clearAllFilters = () => {
       </div>
 
       <!-- Order Status -->
-      <div>
+      <div v-if="filtersData && filtersData.statuses">
         <label class="block text-sm font-medium text-gray-700 mb-2">
           {{ t("orders.filters.orderStatus") }}
         </label>
-        <select
+        <async-select
+          :model-value="filters.orderStatus"
+          :options="filtersData.statuses"
+          :loading="false"
+          :isMultiple="true"
+          placeholder="Pick one or more"
+          @update:model-value="handleFilterChange('orderStatus', $event)"
+        />
+        <!-- <select
           :value="filters.orderStatus"
           @change="
             handleFilterChange(
@@ -166,17 +146,17 @@ const clearAllFilters = () => {
           class="input-field"
         >
           <option
-            v-for="option in orderStatusOptions"
-            :key="option.value"
+            v-for="option in filtersData.statuses"
+            :key="option.key"
             :value="option.value"
           >
-            {{ option.label }}
+            {{ option.value }}
           </option>
-        </select>
+        </select> -->
       </div>
 
       <!-- Order Category -->
-      <div>
+      <div v-if="filtersData && filtersData.categories">
         <label class="block text-sm font-medium text-gray-700 mb-2">
           {{ t("orders.filters.orderCategory") }}
         </label>
@@ -191,23 +171,23 @@ const clearAllFilters = () => {
           class="input-field"
         >
           <option
-            v-for="option in orderCategoryOptions"
-            :key="option.value"
-            :value="option.value"
+            v-for="option in filtersData.categories"
+            :key="option.key"
+            :value="option.key"
           >
-            {{ option.label }}
+            {{ option.value }}
           </option>
         </select>
       </div>
 
       <!-- Project Manager -->
-      <div>
+      <div v-if="filtersData && filtersData.managers">
         <label class="block text-sm font-medium text-gray-700 mb-2">
           {{ t("orders.filters.projectManager") }}
         </label>
-        <AsyncSelect
+        <async-select
           :model-value="filters.projectManager"
-          :options="projectManagerOptions"
+          :options="filtersData.managers"
           :placeholder="t('orders.filters.selectProjectManager')"
           :loading="false"
           @update:model-value="handleFilterChange('projectManager', $event)"
@@ -215,27 +195,28 @@ const clearAllFilters = () => {
       </div>
 
       <!-- Customer -->
-      <div>
+      <div v-if="filtersData && filtersData.customers">
         <label class="block text-sm font-medium text-gray-700 mb-2">
           {{ t("orders.filters.customer") }}
         </label>
-        <AsyncSelect
+        <async-select
           :model-value="filters.customer"
-          :options="customerOptions"
+          :options="filtersData.customers"
           :placeholder="t('orders.filters.selectCustomer')"
-          :loading="false"
+          :loading="customerSearchLoading"
+          @search="handleCustomerSearch"
           @update:model-value="handleFilterChange('customer', $event)"
         />
       </div>
 
       <!-- Contact Person -->
-      <div>
+      <div v-if="filtersData && filtersData.contactPersons">
         <label class="block text-sm font-medium text-gray-700 mb-2">
           {{ t("orders.filters.contactPerson") }}
         </label>
-        <AsyncSelect
+        <async-select
           :model-value="filters.contactPerson"
-          :options="contactPersonOptions"
+          :options="filtersData.contactPersons"
           :placeholder="t('orders.filters.selectContactPerson')"
           :loading="false"
           @update:model-value="handleFilterChange('contactPerson', $event)"

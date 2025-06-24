@@ -5,17 +5,25 @@ import OrderHeader from "./OrderHeader.vue";
 import OrderFilters from "./OrderFilters.vue";
 import OrderTable from "./OrderTable.vue";
 import TopBarLoading from "@/components/widgets/TopBarLoading.vue";
+import { useGlobalStore } from "@/stores/index";
 
 const orderStore = useOrderStore();
+const globalStore = useGlobalStore();
 const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
 onMounted(async () => {
   await orderStore.loadOrdersHeader();
+  await orderStore.loadDefaultData();
   orderStore.loadOrders();
 });
 </script>
 
 <template>
-  <div class="h-screen flex flex-col bg-gray-50">
+  <div
+    class="h-screen flex flex-col bg-gray-50"
+    :class="
+      globalStore.loadingApi ? 'pointer-events-none' : 'pointer-events-auto'
+    "
+  >
     <OrderHeader />
 
     <div class="flex-1 flex overflow-hidden relative">

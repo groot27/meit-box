@@ -9,12 +9,18 @@ defineOptions({
   name: "AsyncSelect",
 });
 
-const props = defineProps<{
-  modelValue: string | object | null;
-  options: Array<string | { key: any; value: string }>;
-  placeholder?: string | null | undefined;
-  loading: boolean | null | undefined;
-}>();
+const props = withDefaults(
+  defineProps<{
+    modelValue: string | object | null;
+    options: Array<string | { key: any; value: string }>;
+    placeholder?: string | null | undefined;
+    loading: boolean | null | undefined;
+    isMultiple?: boolean;
+  }>(),
+  {
+    isMultiple: false,
+  }
+);
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string | object | null): void;
@@ -107,6 +113,7 @@ watch(internalValue, (val) => {
     :internal-search="false"
     :clear-on-select="true"
     :preserve-search="true"
+    :multiple="isMultiple"
     :label="labelKey"
     :track-by="trackByKey"
     @search-change="onChange"

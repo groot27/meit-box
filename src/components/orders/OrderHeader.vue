@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 
 const { t } = useI18n();
 
 const notificationCount = ref(5);
+const router = useRouter();
 
 const handleMoreOptions = () => {
   console.log("More options clicked");
 };
 
 const handleCreateOrder = () => {
-  console.log("Create order clicked");
+  router.push(`/add-order/`);
 };
 
 const handleNotifications = () => {
@@ -30,7 +32,7 @@ const handleNotifications = () => {
       <!-- Right side - Actions -->
       <div class="flex items-center space-x-4">
         <!-- Notifications -->
-        <button
+        <!-- <button
           @click="handleNotifications"
           class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
         >
@@ -41,7 +43,7 @@ const handleNotifications = () => {
           >
             {{ notificationCount }}
           </span>
-        </button>
+        </button> -->
 
         <!-- More Options -->
         <button

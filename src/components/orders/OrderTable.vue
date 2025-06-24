@@ -10,7 +10,7 @@ const orderStore = useOrderStore();
 const router = useRouter();
 
 const showColumnSelector = ref(false);
-const inquiryFilterSelected = ref(false);
+const inquiryFilterSelected = computed(() => orderStore.inquiryFilterSelected);
 
 const orders = computed(() => orderStore.filteredOrders);
 const visibleColumns = computed(() => orderStore.visibleColumns);
@@ -46,12 +46,11 @@ const handleFilterDiplay = () => {
 };
 
 const handleInquiryFilter = () => {
-  inquiryFilterSelected.value = !inquiryFilterSelected.value;
-  // orderStore.setInquiryFilter()
+  orderStore.setInquiryFilter();
 };
 
-const handlePrintPlus = () => {
-  console.log("Print Plus clicked");
+const handleTaskOrdersClick = () => {
+  router.push(`/order-tasks/`);
 };
 
 const formatCurrency = (amount: number) => {
@@ -113,9 +112,11 @@ const visiblePages = computed(() => {
 const handlePin = (id) => {
   orderStore.togglePinOrder(id);
 };
-const handleCopy = () => {};
+const handleCopy = (id) => {
+  router.push(`/duplicate-order/${id}`);
+};
 const handleEdit = (id) => {
-  router.push(`new-edit-order/${id}`);
+  router.push(`/new-edit-order/${id}`);
 };
 const handleRemove = () => {};
 
@@ -183,7 +184,7 @@ const tableMinWidth = computed(() => {
             <font-awesome-icon icon="fa-solid fa-file-lines" class="w-4 h-4" />
           </button>
           <button
-            @click="handlePrintPlus"
+            @click="handleTaskOrdersClick"
             class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
             :title="t('orders.table.printPlus')"
           >
@@ -317,7 +318,7 @@ const tableMinWidth = computed(() => {
                 </div>
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 border-r border-gray-200 last:border-r-0"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 border-r border-gray-200 last:border-r-0 w-48"
                 key="actions"
               >
                 Actions
@@ -325,7 +326,10 @@ const tableMinWidth = computed(() => {
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200" v-if="orders">
-            <tr v-for="order in orders" class="hover:bg-gray-50 transition-all">
+            <tr
+              v-for="order in orders"
+              class="hover:bg-gray-50 transition-all w-80"
+            >
               <td
                 v-for="column in visibleColumns"
                 :key="column.key"
@@ -426,7 +430,7 @@ const tableMinWidth = computed(() => {
                   <font-awesome-icon :icon="['fas', 'thumb-tack']" />
                 </button>
                 <button
-                  @click="handleCopy"
+                  @click="handleCopy(order.id)"
                   class="p-2 rounded-lg bg-green-200 text-green-500"
                 >
                   <font-awesome-icon :icon="['fas', 'copy']" />

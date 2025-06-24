@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, reactive, computed } from "vue";
+import { ref, reactive, computed, registerRuntimeCompiler, watch } from "vue";
 import {
   Order,
   OrderFilters,
@@ -13,12 +13,17 @@ import { ResponseType } from "@/types/apiRequest";
 import { createQueryString } from "@/utils/utils";
 
 export const useOrderStore = defineStore("order", () => {
+  const globalStore = useGlobalStore();
   const orders = ref<Order[]>([]);
   const loading = ref(false);
   const leftSideDisplay = ref(true);
-  const globalStore = useGlobalStore();
-  const defaultData = reactive<any>({
+  const inquiryFilterSelected = ref(false);
+  const inquiryStatusFilters = ["inquiry", "offer_outstanding"];
+  const defaultData = ref({
     customers: null,
+    categories: null,
+    contactPersons: null,
+    statutes: null,
   });
   const filters = reactive<OrderFilters>({
     search: "",
@@ -43,56 +48,7 @@ export const useOrderStore = defineStore("order", () => {
     direction: "asc",
   });
 
-  const tableColumns = ref<OrderTableColumn[]>([
-    { key: "orderNumber", label: "Order #", sortable: true, visible: true },
-    { key: "customerName", label: "Customer", sortable: true, visible: true },
-    {
-      key: "projectManager",
-      label: "Project Manager",
-      sortable: true,
-      visible: true,
-    },
-    {
-      key: "contactPerson",
-      label: "Contact Person",
-      sortable: true,
-      visible: true,
-    },
-    { key: "orderStatus", label: "Status", sortable: true, visible: true },
-    { key: "orderCategory", label: "Category", sortable: true, visible: true },
-    { key: "startDate", label: "Start Date", sortable: true, visible: true },
-    { key: "endDate", label: "End Date", sortable: true, visible: true },
-    {
-      key: "totalAmount",
-      label: "Total Amount",
-      sortable: true,
-      visible: true,
-    },
-    {
-      key: "description",
-      label: "Description",
-      sortable: false,
-      visible: true,
-    },
-    { key: "location", label: "Location", sortable: true, visible: true },
-    { key: "priority", label: "Priority", sortable: true, visible: true },
-    { key: "createdAt", label: "Created", sortable: true, visible: false },
-    { key: "updatedAt", label: "Updated", sortable: true, visible: false },
-    { key: "assignedTeam", label: "Team", sortable: true, visible: false },
-    {
-      key: "estimatedHours",
-      label: "Est. Hours",
-      sortable: true,
-      visible: false,
-    },
-    {
-      key: "actualHours",
-      label: "Actual Hours",
-      sortable: true,
-      visible: false,
-    },
-    { key: "progress", label: "Progress", sortable: true, visible: false },
-  ]);
+  const tableColumns = ref<OrderTableColumn[]>([]);
 
   const visibleColumns = computed(() =>
     tableColumns.value.filter((col) => col.visible)
@@ -100,61 +56,6 @@ export const useOrderStore = defineStore("order", () => {
 
   const filteredOrders = computed(() => {
     let result = [...orders.value];
-
-    // Apply search filter
-    // if (filters.search) {
-    //   const searchTerm = filters.search.toLowerCase();
-    // result = result.filter(
-    //   (order) =>
-    //     order.orderNumber.toLowerCase().includes(searchTerm) ||
-    //     order.customerName.toLowerCase().includes(searchTerm) ||
-    //     order.description.toLowerCase().includes(searchTerm)
-    // );
-    // }
-
-    // Apply date filters
-    // if (filters.startDate) {
-    //   result = result.filter(
-    //     (order) => new Date(order.startDate) >= new Date(filters.startDate)
-    //   );
-    // }
-
-    // if (filters.endDate) {
-    //   result = result.filter(
-    //     (order) => new Date(order.endDate) <= new Date(filters.endDate)
-    //   );
-    // }
-
-    // Apply other filters
-    if (filters.orderStatus) {
-      result = result.filter(
-        (order) => order.orderStatus === filters.orderStatus
-      );
-    }
-
-    if (filters.orderCategory) {
-      result = result.filter(
-        (order) => order.orderCategory === filters.orderCategory
-      );
-    }
-
-    if (filters.projectManager) {
-      result = result.filter(
-        (order) => order.projectManager === filters.projectManager
-      );
-    }
-
-    if (filters.customer) {
-      result = result.filter(
-        (order) => order.customerName === filters.customer
-      );
-    }
-
-    if (filters.contactPerson) {
-      result = result.filter(
-        (order) => order.contactPerson === filters.contactPerson
-      );
-    }
 
     // Apply sorting
     result.sort((a, b) => {
@@ -177,18 +78,8 @@ export const useOrderStore = defineStore("order", () => {
       return (b.isPinned === true) - (a.isPinned === true);
     });
 
-    // Update pagination totals
-    // pagination.totalItems = result.length;
-    // pagination.totalPages = Math.ceil(result.length / pagination.itemsPerPage);
-
     return result;
   });
-
-  // const paginatedOrders = computed(() => {
-  //   const start = (pagination.currentPage - 1) * pagination.itemsPerPage;
-  //   const end = start + pagination.itemsPerPage;
-  //   return filteredOrders.value.slice(start, end);
-  // });
 
   // Actions
   const toggleLeftSideDisplay = () => {
@@ -204,13 +95,31 @@ export const useOrderStore = defineStore("order", () => {
     if (filters.startDate && filters.endDate) {
       queryProps["date_between"] = `${filters.startDate},${filters.endDate}`;
     }
+    if (filters.orderCategory) {
+      queryProps["category"] = filters.orderCategory;
+    }
+    if (filters.orderStatus) {
+      queryProps["status"] = "";
+      filters.orderStatus.forEach((status) => {
+        queryProps["status"] += `${status.key},`;
+      });
+    }
+    if (filters.contactPerson) {
+      queryProps["contact"] = filters.contactPerson.key;
+    }
+    if (filters.customer) {
+      queryProps["customer"] = filters.customer.key;
+    }
+    if (filters.projectManager) {
+      queryProps["manager"] = filters.projectManager.key;
+    }
 
     const queryString: string = createQueryString(queryProps);
+
     try {
       globalStore.setLoadingApi(true);
       const res: ResponseType = await orderApi.getAll(queryString);
       globalStore.setLoadingApi(false);
-      debugger;
       orders.value = res.data.map((order) => {
         tableColumns.value.forEach((col) => {
           order[col.key] = order[col.key] || "NotSet";
@@ -253,28 +162,46 @@ export const useOrderStore = defineStore("order", () => {
   const loadDefaultData = async () => {
     globalStore.setLoadingApi(true);
     try {
-      const res = await orderApi.getCustomers();
-      debugger;
-      tableColumns.value = null;
-      tableColumns.value = res.data.map((header) => {
-        return {
-          key: header.column_name,
-          label: header.column_label,
-          sortable: true,
-          visible: header.is_shown,
-        };
+      await fetchCustomers();
+      const res = await orderApi.getFiltersData();
+      defaultData.value.categories = res.data.categories.map((category) => {
+        return { key: category.id, value: category.name };
       });
+      defaultData.value.managers = res.data.managers.map((manager) => {
+        return { key: manager.id, value: manager.username };
+      });
+      // defaultData.value.contactPersons = res.data.contact_persons.map(
+      //   (contactPerson) => {
+      //     return {
+      //       key: contactPerson.id,
+      //       value: `${contactPerson.customer} | ${
+      //         contactPerson.name || "No Name"
+      //       }`,
+      //     };
+      //   }
+      // );
+      defaultData.value.statuses = Object.keys(res.data.statuses).map(
+        (status) => {
+          return { key: status, value: res.data.statuses[status] };
+        }
+      );
+
       globalStore.setLoadingApi(false);
     } catch (error) {
-      console.error("Error loading orders:", error);
+      console.error("Error loading default data:", error);
     } finally {
       loading.value = false;
     }
   };
+  const fetchCustomers = async (query: string = "") => {
+    const customers = await orderApi.getCustomers(query);
+    defaultData.value.customers = customers.results.map((customer) => {
+      return { key: customer.id, value: customer.text };
+    });
+  };
 
-  const setFilter = (key: keyof OrderFilters, value: string) => {
+  const setFilter = (key: keyof OrderFilters, value: string | object) => {
     filters[key] = value;
-    debugger;
     if (key === "startDate" || key === "endDate") {
       if (filters.startDate && filters.endDate) {
         pagination.currentPage = 1;
@@ -286,6 +213,20 @@ export const useOrderStore = defineStore("order", () => {
       pagination.currentPage = 1;
       loadOrders();
     }
+  };
+  const setInquiryFilter = () => {
+    if (inquiryFilterSelected.value) {
+      filters.orderStatus = [];
+      loadOrders();
+      return;
+    }
+    filters.orderStatus = [];
+    inquiryStatusFilters.forEach((status) => {
+      filters.orderStatus.push(
+        defaultData.value.statuses.find((stat) => stat.key === status)
+      );
+    });
+    loadOrders();
   };
 
   const clearFilters = () => {
@@ -314,7 +255,7 @@ export const useOrderStore = defineStore("order", () => {
 
   const setItemsPerPage = (itemsPerPage: number) => {
     pagination.itemsPerPage = itemsPerPage;
-    pagination.currentPage = 1; // Reset to first page when changing items per page
+    pagination.currentPage = 1;
     loadOrders();
   };
 
@@ -322,17 +263,36 @@ export const useOrderStore = defineStore("order", () => {
     const column = tableColumns.value.find((col) => col.key === columnKey);
     if (column) {
       column.visible = !column.visible;
+      orderApi.toggleOrderColumn({
+        column_name: columnKey,
+        is_shown: column.visible,
+      });
     }
   };
 
   const togglePinOrder = (orderID: number) => {
-    // orderApi.togglePin({ id: orderID, tabel: "orders" });
+    orderApi.togglePin({ id: orderID, table: "orders" });
     orders.value.forEach((order) => {
       if (order.id === orderID) {
         order.isPinned = !order.isPinned;
       }
     });
   };
+
+  watch(
+    () => filters.orderStatus,
+    (newStatuses) => {
+      if (newStatuses) {
+        const statusKeys = newStatuses.map((status) => status.key);
+        inquiryFilterSelected.value = inquiryStatusFilters.every((filter) =>
+          statusKeys.includes(filter)
+        );
+      } else {
+        inquiryFilterSelected.value = false;
+      }
+    },
+    { deep: true, immediate: true }
+  );
 
   return {
     orders,
@@ -343,8 +303,12 @@ export const useOrderStore = defineStore("order", () => {
     tableColumns,
     visibleColumns,
     filteredOrders,
+    defaultData,
+    inquiryFilterSelected,
     // paginatedOrders,
     leftSideDisplay,
+    setInquiryFilter,
+    loadDefaultData,
     toggleLeftSideDisplay,
     loadOrders,
     loadOrdersHeader,
@@ -355,5 +319,6 @@ export const useOrderStore = defineStore("order", () => {
     setItemsPerPage,
     toggleColumnVisibility,
     togglePinOrder,
+    fetchCustomers,
   };
 });

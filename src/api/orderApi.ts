@@ -26,11 +26,21 @@ export const orderApi = {
       throw err;
     }
   },
-  getCustomers: async (queryString: string = "", callbacks?: Callbacks) => {
+  getCustomers: async (keyword: string = "", callbacks?: Callbacks) => {
     try {
       const res = await api.get(
-        `/edit-order-paginated-customers?term=&page=1?${queryString}`
+        `/edit-order-paginated-customers?term=${keyword}`
       );
+      callbacks?.onSuccess?.(res);
+      return res;
+    } catch (err) {
+      callbacks?.onError?.(err);
+      throw err;
+    }
+  },
+  getFiltersData: async (queryString: string = "", callbacks?: Callbacks) => {
+    try {
+      const res = await api.get(`/v2/orders/data-sources${queryString}`);
       callbacks?.onSuccess?.(res);
       return res;
     } catch (err) {
@@ -41,6 +51,16 @@ export const orderApi = {
   togglePin: async (data: any, callbacks?: Callbacks) => {
     try {
       const res = await api.post(`/api/toggle_is_pinned`, data);
+      callbacks?.onSuccess?.(res);
+      return res;
+    } catch (err) {
+      callbacks?.onError?.(err);
+      throw err;
+    }
+  },
+  toggleOrderColumn: async (data: any, callbacks?: Callbacks) => {
+    try {
+      const res = await api.patch(`/v2/orders/toggle-order-column`, data);
       callbacks?.onSuccess?.(res);
       return res;
     } catch (err) {
