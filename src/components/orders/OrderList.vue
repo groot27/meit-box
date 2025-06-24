@@ -24,7 +24,7 @@ onMounted(async () => {
       globalStore.loadingApi ? 'pointer-events-none' : 'pointer-events-auto'
     "
   >
-    <OrderHeader />
+    <!-- <OrderHeader /> -->
 
     <div class="flex-1 flex overflow-hidden relative">
       <top-bar-loading />

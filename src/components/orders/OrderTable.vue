@@ -141,35 +141,6 @@ const handleShowMRemoveModal = (orderId = null) => {
   selectedOrderId.value = orderId;
   showRemoveModal.value = !showRemoveModal.value;
 };
-
-// Calculate minimum table width based on visible columns
-const tableMinWidth = computed(() => {
-  const baseWidth = 150; // Base width per column
-  const specialColumns = {
-    description: 300,
-    progress: 180,
-    totalAmount: 120,
-    orderNumber: 120,
-    customerName: 180,
-    projectManager: 160,
-    contactPerson: 160,
-  };
-
-  let totalWidth = 0;
-  if (visibleColumns.value) {
-    console.log(
-      "🚀 ~ tableMinWidth ~ visibleColumns.value:",
-      visibleColumns.value
-    );
-    // visibleColumns.value.forEach((column) => {
-    //   console.log("🚀 ~ visibleColumns.value.forEach ~ column:", column.key);
-
-    //   totalWidth += specialColumns[column.key] || baseWidth;
-    // });
-  }
-
-  return `${totalWidth}px`;
-});
 </script>
 
 <template>
@@ -265,7 +236,7 @@ const tableMinWidth = computed(() => {
                       class="rounded border-gray-300"
                     />
                     <span class="text-sm text-gray-700">{{
-                      column.label
+                      t(`orders.table.headers.${column.key}`)
                     }}</span>
                   </label>
                 </div>
@@ -279,10 +250,7 @@ const tableMinWidth = computed(() => {
     <!-- Table Container with Horizontal Scroll -->
     <div class="flex-1 max-w-full overflow-scroll">
       <div class="min-w-full">
-        <table
-          class="w-full divide-y divide-gray-200 table-fixed"
-          :style="{ minWidth: tableMinWidth }"
-        >
+        <table class="w-full divide-y divide-gray-200 table-fixed min-w-full">
           <thead class="bg-gray-50 sticky top-0 z-10">
             <tr>
               <th
@@ -292,7 +260,9 @@ const tableMinWidth = computed(() => {
                 @click="column.sortable && handleSort(column.key)"
               >
                 <div class="flex items-center space-x-1">
-                  <span class="truncate">{{ column.label }}</span>
+                  <span class="truncate">{{
+                    t(`orders.table.headers.${column.key}`)
+                  }}</span>
                   <div
                     v-if="column.sortable"
                     class="flex flex-col flex-shrink-0"
