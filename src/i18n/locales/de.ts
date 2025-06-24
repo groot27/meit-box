@@ -388,5 +388,6 @@ export default {
       notificationTemplate: "Benachrichtigungsvorlage auswählen",
       requiredSkill: "Erforderliche Fähigkeit auswählen",
     },
+    ordersEmpty: "No Order Found!",
   },
 };

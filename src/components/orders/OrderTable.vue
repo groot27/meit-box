@@ -421,6 +421,9 @@ const handleShowMRemoveModal = (orderId = null) => {
                 </button>
               </td>
             </tr>
+            <span class="text-center my-4" v-if="!orders.length">{{
+              t("common.ordersEmpty")
+            }}</span>
           </tbody>
         </table>
       </div>
@@ -443,7 +446,7 @@ const handleShowMRemoveModal = (orderId = null) => {
                   parseInt(($event.target as HTMLSelectElement).value)
                 )
               "
-              class="border border-gray-300 rounded px-2 py-1 text-sm"
+              class="border border-gray-300 rounded px-2 py-1 text-sm w-16"
             >
               <option
                 v-for="option in itemsPerPageOptions"

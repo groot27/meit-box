@@ -389,5 +389,6 @@ export default {
       notificationTemplate: "Select Notification Template",
       requiredSkill: "Select Required Skill",
     },
+    ordersEmpty: "Kein Auftrag gefunden",
   },
 };
