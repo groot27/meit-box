@@ -4,7 +4,7 @@ import { useI18n } from "vue-i18n";
 import { useOrderStore } from "@/stores/OrderStore";
 import { format } from "date-fns";
 import { useRouter } from "vue-router";
-import { VueFinalModal } from "vue-final-modal";
+import BaseModal from "@/components/widgets/BaseModal.vue";
 
 const { t } = useI18n();
 const orderStore = useOrderStore();
@@ -301,14 +301,11 @@ const handleShowMRemoveModal = (orderId = null) => {
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200" v-if="orders">
-            <tr
-              v-for="order in orders"
-              class="hover:bg-gray-50 transition-all w-80"
-            >
+            <tr v-for="order in orders" class="hover:bg-gray-50 transition-all">
               <td
                 v-for="column in visibleColumns"
                 :key="column.key"
-                class="px-6 py-4 text-sm border-r border-gray-100 last:border-r-0 w-full"
+                class="px-2 text-sm border-r border-gray-100 last:border-r-0 w-full"
               >
                 <!-- Order Number -->
                 <span
@@ -549,31 +546,22 @@ const handleShowMRemoveModal = (orderId = null) => {
       </div>
     </div>
   </div>
-  <VueFinalModal
-    v-model="showRemoveModal"
-    content-class="flex items-center justify-center min-h-screen"
-    overlay-class="fixed inset-0 bg-black bg-opacity-50"
-    :lock-scroll="true"
-    :hide-overlay="false"
-    :click-to-close="true"
-  >
-    <div class="p-4 bg-white rounded shadow-md flex flex-col w-96 relative">
-      <h2 class="text-xl font-bold mb-2 text-center text-gray-600">Warning</h2>
-      <p class="text-center m-4">Are You Sure ?</p>
-      <div class="flex w-full gap-4 items-center justify-center">
-        <button
-          class="w-1/3 text-center p-2 bg-blue-500 text-white rounded-lg"
-          @click="handleRemove"
-        >
-          Yes
-        </button>
-        <button
-          class="absolute top-2 right-2 text-center text-black rounded-lg"
-          @click="handleShowMRemoveModal"
-        >
-          X
-        </button>
-      </div>
+  <BaseModal v-model="showRemoveModal">
+    <h2 class="text-xl font-bold mb-2 text-center text-gray-600">Warning</h2>
+    <p class="text-center m-4">Are You Sure ?</p>
+    <div class="flex w-full gap-4 items-center justify-center">
+      <button
+        class="w-1/3 text-center p-2 bg-blue-500 text-white rounded-lg"
+        @click="handleRemove"
+      >
+        Yes
+      </button>
+      <button
+        class="absolute top-2 right-2 text-center text-black rounded-lg"
+        @click="handleShowMRemoveModal"
+      >
+        X
+      </button>
     </div>
-  </VueFinalModal>
+  </BaseModal>
 </template>

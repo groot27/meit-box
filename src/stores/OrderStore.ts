@@ -278,13 +278,15 @@ export const useOrderStore = defineStore("order", () => {
     });
   };
   const removeOrder = async (orderId) => {
+    globalStore.setLoadingApi(true);
     const res = await orderApi.canRemove({});
     if (res && res["can_delete"]) {
       router.push(`/delete-order/${orderId}`);
     }
-    debugger;
+    globalStore.setLoadingApi(false);
   };
   const exportTable = async () => {
+    globalStore.setLoadingApi(true);
     const res = await orderApi.getExport(
       `page=${pagination.currentPage}&per_page=${pagination.itemsPerPage}&search=${filters.search}&from_route=orders&creation_date=created_at&start_date=${filters.startDate}&end_date=${filters.endDate}&order_categories=${filters.orderCategory}&project_manager=${filters.projectManager.key}&order_by=ASC&all_order_status=&orderBy=id&orderDirec=DESC&export=true&customer=`
     );
@@ -301,6 +303,7 @@ export const useOrderStore = defineStore("order", () => {
     document.body.removeChild(link);
 
     URL.revokeObjectURL(url);
+    globalStore.setLoadingApi(false);
   };
 
   watch(

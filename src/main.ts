@@ -12,9 +12,6 @@ import { loadGoogleMaps } from "@/utils/loadGoogleMaps";
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 import Orders from "@/pages/Orders.vue";
-import { createVfm } from "vue-final-modal";
-import "vue-final-modal/style.css";
-const vfm = createVfm();
 
 const routes = [
   { path: "/monthly-view2", component: Calendar },
@@ -31,18 +28,17 @@ const pinia = createPinia();
 
 const GOOGLE_API_KEY = "AIzaSyD7fBBrfAmRTdLCO549jxZP3ofuw763zuQ";
 
-loadGoogleMaps(GOOGLE_API_KEY)
-  .then(() => {
-    createApp(App)
-      .use(router)
-      .use(pinia)
-      .use(VueQueryPlugin)
-      .use(i18n)
-      .use(Toast)
-      .use(vfm)
-      .component("font-awesome-icon", FontAwesomeIcon)
-      .mount("#app");
-  })
-  .catch((error) => {
-    console.error("Google Maps failed to load:", error);
-  });
+// loadGoogleMaps(GOOGLE_API_KEY)
+//   .then(() => {
+createApp(App)
+  .use(router)
+  .use(pinia)
+  .use(VueQueryPlugin)
+  .use(i18n)
+  .use(Toast)
+  .component("font-awesome-icon", FontAwesomeIcon)
+  .mount("#app");
+// })
+// .catch((error) => {
+//   console.error("Google Maps failed to load:", error);
+// });
