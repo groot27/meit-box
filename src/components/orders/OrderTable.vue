@@ -172,14 +172,12 @@ const handleShowMRemoveModal = (orderId = null) => {
                 ? 'text-green-500 border-green-500'
                 : 'text-gray-600 border-gray-600',
             ]"
-            :title="t('orders.table.print')"
           >
             <font-awesome-icon icon="fa-solid fa-file-lines" class="w-4 h-4" />
           </button>
           <button
             @click="handleTaskOrdersClick"
             class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
-            :title="t('orders.table.printPlus')"
           >
             <font-awesome-icon
               icon="fa-solid fa-file-circle-plus"
@@ -192,9 +190,11 @@ const handleShowMRemoveModal = (orderId = null) => {
         <div class="flex items-center space-x-4">
           <button
             @click="handleExport"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex gap-2 items-center"
           >
-            {{ t("orders.table.export") }}
+            <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" />{{
+              t("orders.table.export")
+            }}
           </button>
 
           <!-- Column Selector -->

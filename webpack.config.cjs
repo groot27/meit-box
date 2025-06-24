@@ -102,7 +102,7 @@ module.exports = [
   createBaseConfig({
     name: "remoteOrders",
     entryName: "remoteOrders",
-    entryPath: "./src/remotesEntries/ordersEntry.ts", // <-- new entry file
+    entryPath: "./src/remotesEntries/ordersEntry.ts",
     exposeName: "./RemoteOrders",
     exposePath: "./src/components/orders/OrderList.vue",
     remoteFileName: "remoteOrders.js",

@@ -35,6 +35,7 @@ import {
   faThumbTack,
   faCopy,
   faListCheck,
+  faCloudArrowDown,
 } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
@@ -73,5 +74,6 @@ library.add(
   faThumbTack,
   faCopy,
   faListCheck,
-  faFileLines
+  faFileLines,
+  faCloudArrowDown
 );
