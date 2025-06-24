@@ -12,6 +12,9 @@ import { loadGoogleMaps } from "@/utils/loadGoogleMaps";
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 import Orders from "@/pages/Orders.vue";
+import { createVfm } from "vue-final-modal";
+import "vue-final-modal/style.css";
+const vfm = createVfm();
 
 const routes = [
   { path: "/monthly-view2", component: Calendar },
@@ -36,6 +39,7 @@ loadGoogleMaps(GOOGLE_API_KEY)
       .use(VueQueryPlugin)
       .use(i18n)
       .use(Toast)
+      .use(vfm)
       .component("font-awesome-icon", FontAwesomeIcon)
       .mount("#app");
   })

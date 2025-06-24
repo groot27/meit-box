@@ -9,6 +9,9 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 import Orders from "@/pages/Orders.vue";
+import { createVfm } from "vue-final-modal";
+import "vue-final-modal/style.css";
+const vfm = createVfm();
 
 const routes = [{ path: "/order-list2", component: Orders }];
 
@@ -24,5 +27,6 @@ createApp(App)
   .use(pinia)
   .use(i18n)
   .use(Toast)
+  .use(vfm)
   .component("font-awesome-icon", FontAwesomeIcon)
   .mount("#app");
