@@ -4,12 +4,15 @@ import { useI18n } from "vue-i18n";
 import { useOrderStore } from "@/stores/OrderStore";
 import { format } from "date-fns";
 import { useRouter } from "vue-router";
+import { VueFinalModal } from "vue-final-modal";
 
 const { t } = useI18n();
 const orderStore = useOrderStore();
 const router = useRouter();
 
 const showColumnSelector = ref(false);
+const showRemoveModal = ref(false);
+const selectedOrderId = ref(null);
 const inquiryFilterSelected = computed(() => orderStore.inquiryFilterSelected);
 
 const orders = computed(() => orderStore.filteredOrders);
@@ -17,6 +20,17 @@ const visibleColumns = computed(() => orderStore.visibleColumns);
 const pagination = computed(() => orderStore.pagination);
 const sort = computed(() => orderStore.sort);
 const tableColumns = computed(() => orderStore.tableColumns);
+const tableColumnsCount = computed(() => {
+  let count = 0;
+  if (orderStore.tableColumns.length) {
+    orderStore.tableColumns.forEach((item) => {
+      if (item.visible) {
+        count++;
+      }
+    });
+  }
+  return count;
+});
 const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
 
 const itemsPerPageOptions = [10, 20, 30, 40, 50];
@@ -38,7 +52,7 @@ const toggleColumnVisibility = (columnKey: string) => {
 };
 
 const handleExport = () => {
-  console.log("Export clicked");
+  orderStore.exportTable();
 };
 
 const handleFilterDiplay = () => {
@@ -118,7 +132,15 @@ const handleCopy = (id) => {
 const handleEdit = (id) => {
   router.push(`/new-edit-order/${id}`);
 };
-const handleRemove = () => {};
+const handleRemove = () => {
+  showRemoveModal.value = !showRemoveModal.value;
+  orderStore.removeOrder(selectedOrderId.value);
+  selectedOrderId.value = null;
+};
+const handleShowMRemoveModal = (orderId = null) => {
+  selectedOrderId.value = orderId;
+  showRemoveModal.value = !showRemoveModal.value;
+};
 
 // Calculate minimum table width based on visible columns
 const tableMinWidth = computed(() => {
@@ -210,7 +232,10 @@ const tableMinWidth = computed(() => {
               @click="showColumnSelector = !showColumnSelector"
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2"
             >
-              <span>{{ t("orders.table.columns") }}</span>
+              <span
+                >{{ t("orders.table.columns") }}
+                {{ ` +${tableColumnsCount}` }}</span
+              >
               <font-awesome-icon
                 icon="fa-solid fa-chevron-down"
                 class="w-3 h-3 transition-transform"
@@ -263,27 +288,7 @@ const tableMinWidth = computed(() => {
               <th
                 v-for="column in visibleColumns"
                 :key="column.key"
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 border-r border-gray-200 last:border-r-0"
-                :class="{
-                  'w-80': column.key === 'description',
-                  'w-48': column.key === 'progress',
-                  'w-32':
-                    column.key === 'totalAmount' ||
-                    column.key === 'orderNumber',
-                  'w-44':
-                    column.key === 'customerName' ||
-                    column.key === 'projectManager' ||
-                    column.key === 'contactPerson',
-                  'w-36': ![
-                    'description',
-                    'progress',
-                    'totalAmount',
-                    'orderNumber',
-                    'customerName',
-                    'projectManager',
-                    'contactPerson',
-                  ].includes(column.key),
-                }"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 border-r border-gray-200 last:border-r-0 w-48"
                 @click="column.sortable && handleSort(column.key)"
               >
                 <div class="flex items-center space-x-1">
@@ -346,7 +351,7 @@ const tableMinWidth = computed(() => {
                 <!-- Status -->
                 <span
                   v-else-if="column.key === 'orderStatus'"
-                  class="inline-flex px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap"
+                  class="inline-flex px-2 py-1 text-sm font-semibold rounded-full whitespace-nowrap"
                   :class="getStatusColor(order[column.key])"
                 >
                   {{ t(`orders.status.${order[column.key]}`) }}
@@ -355,7 +360,7 @@ const tableMinWidth = computed(() => {
                 <!-- Priority -->
                 <span
                   v-else-if="column.key === 'priority'"
-                  class="inline-flex px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap"
+                  class="inline-flex px-2 py-1 text-sm font-semibold rounded-full whitespace-nowrap"
                   :class="getPriorityColor(order[column.key])"
                 >
                   {{ t(`orders.priority.${order[column.key]}`) }}
@@ -442,7 +447,7 @@ const tableMinWidth = computed(() => {
                   <font-awesome-icon :icon="['fas', 'pencil']" />
                 </button>
                 <button
-                  @click="handleRemove"
+                  @click="handleShowMRemoveModal(order.id)"
                   class="p-2 rounded-lg bg-red-200 text-red-500"
                 >
                   <font-awesome-icon :icon="['fas', 'trash']" />
@@ -574,4 +579,31 @@ const tableMinWidth = computed(() => {
       </div>
     </div>
   </div>
+  <VueFinalModal
+    v-model="showRemoveModal"
+    content-class="flex items-center justify-center min-h-screen"
+    overlay-class="fixed inset-0 bg-black bg-opacity-50"
+    :lock-scroll="true"
+    :hide-overlay="false"
+    :click-to-close="true"
+  >
+    <div class="p-4 bg-white rounded shadow-md flex flex-col w-96 relative">
+      <h2 class="text-xl font-bold mb-2 text-center text-gray-600">Warning</h2>
+      <p class="text-center m-4">Are You Sure ?</p>
+      <div class="flex w-full gap-4 items-center justify-center">
+        <button
+          class="w-1/3 text-center p-2 bg-blue-500 text-white rounded-lg"
+          @click="handleRemove"
+        >
+          Yes
+        </button>
+        <button
+          class="absolute top-2 right-2 text-center text-black rounded-lg"
+          @click="handleShowMRemoveModal"
+        >
+          X
+        </button>
+      </div>
+    </div>
+  </VueFinalModal>
 </template>

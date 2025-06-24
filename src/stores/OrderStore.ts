@@ -11,6 +11,8 @@ import { orderApi } from "@/api/orderApi";
 import { useGlobalStore } from ".";
 import { ResponseType } from "@/types/apiRequest";
 import { createQueryString } from "@/utils/utils";
+import { setOrderValue } from "@/utils/OrderUtils";
+import { useRouter } from "vue-router";
 
 export const useOrderStore = defineStore("order", () => {
   const globalStore = useGlobalStore();
@@ -18,6 +20,7 @@ export const useOrderStore = defineStore("order", () => {
   const loading = ref(false);
   const leftSideDisplay = ref(true);
   const inquiryFilterSelected = ref(false);
+  const router = useRouter();
   const inquiryStatusFilters = ["inquiry", "offer_outstanding"];
   const defaultData = ref({
     customers: null,
@@ -85,8 +88,7 @@ export const useOrderStore = defineStore("order", () => {
   const toggleLeftSideDisplay = () => {
     leftSideDisplay.value = !leftSideDisplay.value;
   };
-
-  const loadOrders = async () => {
+  const generateProps = () => {
     let queryProps = {
       per_page: pagination.itemsPerPage,
       page: pagination.currentPage,
@@ -113,19 +115,16 @@ export const useOrderStore = defineStore("order", () => {
     if (filters.projectManager) {
       queryProps["manager"] = filters.projectManager.key;
     }
-
-    const queryString: string = createQueryString(queryProps);
+    return queryProps;
+  };
+  const loadOrders = async () => {
+    const queryString: string = createQueryString(generateProps());
 
     try {
       globalStore.setLoadingApi(true);
       const res: ResponseType = await orderApi.getAll(queryString);
       globalStore.setLoadingApi(false);
-      orders.value = res.data.map((order) => {
-        tableColumns.value.forEach((col) => {
-          order[col.key] = order[col.key] || "NotSet";
-        });
-        return order;
-      });
+      orders.value = setOrderValue(res.data, tableColumns.value);
 
       pagination.currentPage = res.meta.current_page;
       pagination.totalPages = res.meta.last_page;
@@ -278,6 +277,31 @@ export const useOrderStore = defineStore("order", () => {
       }
     });
   };
+  const removeOrder = async (orderId) => {
+    const res = await orderApi.canRemove({});
+    if (res && res["can_delete"]) {
+      router.push(`/delete-order/${orderId}`);
+    }
+    debugger;
+  };
+  const exportTable = async () => {
+    const res = await orderApi.getExport(
+      `page=${pagination.currentPage}&per_page=${pagination.itemsPerPage}&search=${filters.search}&from_route=orders&creation_date=created_at&start_date=${filters.startDate}&end_date=${filters.endDate}&order_categories=${filters.orderCategory}&project_manager=${filters.projectManager.key}&order_by=ASC&all_order_status=&orderBy=id&orderDirec=DESC&export=true&customer=`
+    );
+    const blob = new Blob([res], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "report.xlsx");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  };
 
   watch(
     () => filters.orderStatus,
@@ -320,5 +344,7 @@ export const useOrderStore = defineStore("order", () => {
     toggleColumnVisibility,
     togglePinOrder,
     fetchCustomers,
+    removeOrder,
+    exportTable,
   };
 });
