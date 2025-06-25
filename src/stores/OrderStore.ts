@@ -103,7 +103,7 @@ export const useOrderStore = defineStore("order", () => {
     if (filters.orderStatus) {
       queryProps["status"] = "";
       filters.orderStatus.forEach((status) => {
-        queryProps["status"] += `${status.key},`;
+        queryProps["status"] += `${status.value},`;
       });
     }
     if (filters.contactPerson) {
@@ -179,11 +179,9 @@ export const useOrderStore = defineStore("order", () => {
       //     };
       //   }
       // );
-      defaultData.value.statuses = Object.keys(res.data.statuses).map(
-        (status) => {
-          return { key: status, value: res.data.statuses[status] };
-        }
-      );
+      defaultData.value.statuses = res.data.statuses.map((status) => {
+        return { key: status.id, value: status.name };
+      });
 
       globalStore.setLoadingApi(false);
     } catch (error) {

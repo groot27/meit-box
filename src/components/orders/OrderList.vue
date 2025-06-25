@@ -26,7 +26,7 @@ onMounted(async () => {
   >
     <!-- <OrderHeader /> -->
 
-    <div class="flex-1 flex overflow-hidden relative">
+    <div class="flex-1 flex overflow-hidden relative min-h-screen">
       <top-bar-loading />
       <div
         :class="[
