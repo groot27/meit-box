@@ -47,6 +47,6 @@ export interface OrderPagination {
 }
 
 export interface OrderSort {
-  field: keyof Order;
+  field: keyof Order | "";
   direction: "asc" | "desc";
 }

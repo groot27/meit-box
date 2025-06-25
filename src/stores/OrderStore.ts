@@ -47,7 +47,7 @@ export const useOrderStore = defineStore("order", () => {
   });
 
   const sort = reactive<OrderSort>({
-    field: "orderNumber",
+    field: "",
     direction: "asc",
   });
 
@@ -59,24 +59,6 @@ export const useOrderStore = defineStore("order", () => {
 
   const filteredOrders = computed(() => {
     let result = [...orders.value];
-
-    // Apply sorting
-    result.sort((a, b) => {
-      const aValue = a[sort.field];
-      const bValue = b[sort.field];
-
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sort.direction === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return sort.direction === "asc" ? aValue - bValue : bValue - aValue;
-      }
-
-      return 0;
-    });
     result.sort((a, b) => {
       return (b.isPinned === true) - (a.isPinned === true);
     });
@@ -114,6 +96,9 @@ export const useOrderStore = defineStore("order", () => {
     }
     if (filters.projectManager) {
       queryProps["manager"] = filters.projectManager.key;
+    }
+    if (sort.field) {
+      queryProps[`sort[${sort.field}]`] = sort.direction;
     }
     return queryProps;
   };
@@ -241,6 +226,7 @@ export const useOrderStore = defineStore("order", () => {
       sort.field = field;
       sort.direction = "asc";
     }
+    loadOrders();
   };
 
   const setPage = (page: number) => {
@@ -285,6 +271,7 @@ export const useOrderStore = defineStore("order", () => {
   };
   const exportTable = async () => {
     globalStore.setLoadingApi(true);
+    // page=1&per_page=10&search=&from_route=orders&creation_date=created_at&start_date=2025-06-01&end_date=2025-06-29&order_categories=3&project_manager=79&order_by=ASC&all_order_status=inquiry&orderBy=custom_order_number&orderDirec=DESC&export=true&customer=2010
     const res = await orderApi.getExport(
       `page=${pagination.currentPage}&per_page=${pagination.itemsPerPage}&search=${filters.search}&from_route=orders&creation_date=created_at&start_date=${filters.startDate}&end_date=${filters.endDate}&order_categories=${filters.orderCategory}&project_manager=${filters.projectManager.key}&order_by=ASC&all_order_status=&orderBy=id&orderDirec=DESC&export=true&customer=`
     );
