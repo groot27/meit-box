@@ -4,18 +4,21 @@ import DashboardHeader from "./DashboardHeader.vue";
 import MapFilters from "./MapFilters.vue";
 import TopBarLoading from "@/components/widgets/TopBarLoading.vue";
 import GoogleMap from "./GoogleMap.vue";
+import PinnedOrderTable from "./PinnedOrderTable.vue";
 import { useOrderStore } from "@/stores/OrderStore";
 import OrderFilters from "../orders/OrderFilters.vue";
 import { useGlobalStore } from "@/stores/index";
 
 const orderStore = useOrderStore();
 const globalStore = useGlobalStore();
-// const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
-const leftSideDisplay = ref(false);
+const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
+// const leftSideDisplay = ref(false);
 
 onMounted(async () => {
-  // await orderStore.loadDefaultData();
-  orderStore.loadOrders(true);
+  await orderStore.loadDefaultData();
+  orderStore.setOrderForMap(true);
+  await orderStore.loadPinnedOrders();
+  orderStore.loadOrders();
 });
 </script>
 
@@ -27,7 +30,6 @@ onMounted(async () => {
     "
   >
     <DashboardHeader />
-    <!-- <OrderHeader /> -->
 
     <div class="flex-1 flex overflow-hidden relative min-h-screen">
       <top-bar-loading />
@@ -37,13 +39,18 @@ onMounted(async () => {
           leftSideDisplay ? 'w-1/6' : 'w-0',
         ]"
       >
-        <!-- <OrderFilters /> -->
+        <OrderFilters />
       </div>
       <div
         :class="leftSideDisplay ? 'w-5/6' : 'w-full'"
-        class="flex overflow-hidden h-2/3"
+        class="flex flex-col verflow-hidden h-screen"
       >
-        <GoogleMap />
+        <div class="flex overflow-hidden h-screen">
+          <GoogleMap />
+        </div>
+        <div class="flex h-full">
+          <PinnedOrderTable />
+        </div>
       </div>
     </div>
   </div>

@@ -17,10 +17,12 @@ import { useRouter } from "vue-router";
 export const useOrderStore = defineStore("order", () => {
   const globalStore = useGlobalStore();
   const orders = ref<Order[]>([]);
+  const pinnedOrders = ref<Order[]>([]);
   const loading = ref(false);
   const leftSideDisplay = ref(true);
   const inquiryFilterSelected = ref(false);
   const router = useRouter();
+  const orderForMap = ref(false);
   const inquiryStatusFilters = ["inquiry", "offer_outstanding"];
   const defaultData = ref({
     customers: null,
@@ -70,15 +72,18 @@ export const useOrderStore = defineStore("order", () => {
   const toggleLeftSideDisplay = () => {
     leftSideDisplay.value = !leftSideDisplay.value;
   };
+  const setOrderForMap = (value: boolean) => {
+    orderForMap.value = value;
+  };
   const getStatusColor = (label) => {
     const status = defaultData.value.statuses.find(
       (status) => status.value === label
     );
     return status ? status.color : "#ff851b";
   };
-  const generateProps = (isMap: boolean) => {
+  const generateProps = () => {
     let queryProps = {
-      per_page: isMap ? 100 : pagination.itemsPerPage,
+      per_page: orderForMap.value ? 100 : pagination.itemsPerPage,
       page: pagination.currentPage,
     };
     if (filters.search) {
@@ -111,13 +116,13 @@ export const useOrderStore = defineStore("order", () => {
     }
     return queryProps;
   };
-  const loadOrders = async (isMap: boolean = false) => {
-    const queryString: string = createQueryString(generateProps(isMap));
+  const loadOrders = async () => {
+    const queryString: string = createQueryString(generateProps());
     try {
       globalStore.setLoadingApi(true);
       const res: ResponseType = await orderApi.getAll(queryString);
       globalStore.setLoadingApi(false);
-      if (isMap) {
+      if (orderForMap.value) {
         orders.value = res.data.map((order, index) => {
           return (order = {
             id: order.id,
@@ -139,6 +144,30 @@ export const useOrderStore = defineStore("order", () => {
         pagination.totalItems = res.meta.total;
         pagination.itemsPerPage = res.meta.per_page;
       }
+    } catch (error) {
+      console.error("Error loading orders:", error);
+      globalStore.setLoadingApi(false);
+    } finally {
+      globalStore.setLoadingApi(false);
+      loading.value = false;
+    }
+  };
+  const loadPinnedOrders = async () => {
+    try {
+      globalStore.setLoadingApi(true);
+      const res: ResponseType = await orderApi.getAll("filter[is_pinned]=1");
+      globalStore.setLoadingApi(false);
+      pinnedOrders.value = res.data.map((order, index) => {
+        return (order = {
+          id: order.id,
+          order_number: order.order_number,
+          order_location: order.order_location,
+          get_customer: order.customer_name,
+          start_date: order.start_date,
+          end_date: order.end_date,
+          isPinned: order.is_pinned,
+        });
+      });
     } catch (error) {
       console.error("Error loading orders:", error);
       globalStore.setLoadingApi(false);
@@ -343,6 +372,9 @@ export const useOrderStore = defineStore("order", () => {
     inquiryFilterSelected,
     // paginatedOrders,
     leftSideDisplay,
+    pinnedOrders,
+    setOrderForMap,
+    loadPinnedOrders,
     setInquiryFilter,
     loadDefaultData,
     toggleLeftSideDisplay,

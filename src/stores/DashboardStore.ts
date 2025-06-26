@@ -7,11 +7,9 @@ import { getLocation } from "@/utils/OrderUtils";
 
 export const useDashboardStore = defineStore("dashboard", () => {
   const globalStore = useGlobalStore();
-  const orders = ref<MapOrder[]>([]);
   const loading = ref(false);
   const selectedOrder = ref<MapOrder | null>(null);
   const mapBounds = ref<google.maps.LatLngBounds | null>(null);
-  const statuses = ref(null);
   const filters = reactive<MapFilters>({
     status: "",
     search: "",
@@ -55,11 +53,6 @@ export const useDashboardStore = defineStore("dashboard", () => {
     },
   });
 
-  const getStatusColor = (label) => {
-    const status = statuses.value.find((status) => status.name === label);
-    return status ? status.color : "#ff851b";
-  };
-
   const mapSettings = reactive<MapSettings>({
     zoom: 12,
     center: {
@@ -70,85 +63,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     clusterMarkers: true,
   });
 
-  const filteredOrders = computed(() => {
-    let result = [...orders.value];
-
-    // Apply status filter
-    if (filters.status) {
-      result = result.filter((order) => order.status === filters.status);
-    }
-
-    // Apply search filter
-    if (filters.search) {
-      const searchTerm = filters.search.toLowerCase();
-      result = result.filter(
-        (order) =>
-          order.title.toLowerCase().includes(searchTerm) ||
-          order.customerName.toLowerCase().includes(searchTerm) ||
-          order.orderNumber.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    // Apply date range filter
-    if (filters.dateRange.start) {
-      result = result.filter(
-        (order) =>
-          new Date(order.createdAt) >= new Date(filters.dateRange.start)
-      );
-    }
-
-    if (filters.dateRange.end) {
-      result = result.filter(
-        (order) => new Date(order.createdAt) <= new Date(filters.dateRange.end)
-      );
-    }
-
-    return result;
-  });
-
-  const ordersByStatus = computed(() => {
-    const statusCounts = {
-      pending: 0,
-      "in-progress": 0,
-      completed: 0,
-      cancelled: 0,
-    };
-
-    filteredOrders.value.forEach((order) => {
-      statusCounts[order.status]++;
-    });
-
-    return statusCounts;
-  });
-
   // Actions
-  const loadOrders = async () => {
-    globalStore.setLoadingApi(true);
-    try {
-      const defaultRes = await orderApi.getFiltersData();
-      statuses.value = defaultRes.data.statuses;
-      const res: ResponseType = await orderApi.getAll("per_page=100");
-
-      globalStore.setLoadingApi(false);
-      orders.value = res.data.map((order, index) => {
-        return (order = {
-          id: order.id,
-          locationAddress: order.order_location,
-          lat: order.latitude || getLocation(index).lat,
-          lng: order.longitude || getLocation(index).lng,
-          status: order.status,
-          statusColor: getStatusColor(order.status),
-          customerName: order.customer_name,
-          orderNumber: order.order_number,
-          createdAt: order.start_date,
-        });
-      });
-    } catch (error) {
-      console.error("Error loading orders:", error);
-    } finally {
-      loading.value = false;
-    }
-  };
 
   const setFilter = (key: keyof MapFilters, value: any) => {
     if (key === "dateRange") {
@@ -176,19 +91,16 @@ export const useDashboardStore = defineStore("dashboard", () => {
   const updateMapBounds = (bounds: google.maps.LatLngBounds) => {
     mapBounds.value = bounds;
   };
+  const loadWidgets = () => {};
 
   return {
-    orders,
     loading,
     selectedOrder,
     filters,
     mapSettings,
     mapBounds,
-    filteredOrders,
-    ordersByStatus,
-    statuses,
     dashboardWidgets,
-    loadOrders,
+    loadWidgets,
     setFilter,
     clearFilters,
     selectOrder,

@@ -12,6 +12,7 @@ const globalStore = useGlobalStore();
 const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
 onMounted(async () => {
   await orderStore.loadOrdersHeader();
+  orderStore.setOrderForMap(true);
   await orderStore.loadDefaultData();
   orderStore.loadOrders();
 });

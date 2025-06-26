@@ -16,7 +16,7 @@ const infoWindow = ref<google.maps.InfoWindow | null>(null);
 
 const filteredOrders = computed(() => orderStore.filteredOrders);
 const mapSettings = computed(() => dashboardStore.mapSettings);
-const statuses = computed(() => dashboardStore.statuses);
+const statuses = computed(() => orderStore.defaultData.statuses);
 
 // Computed property to safely check Google Maps API availability
 const isGoogleMapsApiAvailable = computed(() => {
@@ -32,13 +32,6 @@ const createCustomMarkerIcon = (color: string, isHovered = false) => {
     strokeWeight: 3,
     scale: isHovered ? 0.1 : 0.08, // Increased from 8/10 to 15/18
   };
-};
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
 };
 
 const createInfoWindowContent = (order: MapOrder) => {
@@ -88,18 +81,78 @@ const createInfoWindowContent = (order: MapOrder) => {
 };
 
 const clearMarkers = () => {
-  markers.value.forEach((marker) => {
-    marker.setMap(null);
-  });
+  console.log("🧹 CLEARING MARKERS - Current count:", markers.value.length);
+
+  // Close any open info windows first
+  if (infoWindow.value) {
+    infoWindow.value.close();
+    console.log("📝 Info window closed");
+  }
+
+  // Remove each marker from the map individually
+  for (let i = 0; i < markers.value.length; i++) {
+    const marker = markers.value[i];
+    if (marker) {
+      console.log(`  🗑️ Removing marker ${i + 1}/${markers.value.length}`);
+
+      // Remove all event listeners
+      google.maps.event.clearInstanceListeners(marker);
+
+      // Set map to null to remove from map
+      marker.setMap(null);
+
+      // Additional cleanup
+      marker.setVisible(false);
+    }
+  }
+
+  // Clear the markers array completely
+  markers.value.length = 0;
   markers.value = [];
+
+  console.log("✅ ALL MARKERS CLEARED - New count:", markers.value.length);
 };
 
 const addMarkersToMap = () => {
+  console.log("📍 ADDING MARKERS TO MAP");
+  console.log("📊 Filtered orders count:", filteredOrders.value.length);
+  console.log("🗺️ Map available:", !!map.value);
+
+  // CRITICAL: Always clear existing markers first
   clearMarkers();
 
-  if (!map.value) return;
+  if (!map.value) {
+    console.log("❌ Map not available - cannot add markers");
+    return;
+  }
 
-  filteredOrders.value.forEach((order) => {
+  if (filteredOrders.value.length === 0) {
+    console.log("ℹ️ No filtered orders to display - map will be empty");
+    return;
+  }
+
+  console.log(
+    "📋 Orders to add:",
+    filteredOrders.value.map((o) => ({
+      id: o.id,
+      orderNumber: o.orderNumber,
+      status: o.status,
+      title: o.title,
+    }))
+  );
+
+  // Add markers only for filtered orders
+  filteredOrders.value.forEach((order, index) => {
+    console.log(
+      `📍 Creating marker ${index + 1}/${filteredOrders.value.length}:`,
+      {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        status: order.status,
+        position: { lat: order.lat, lng: order.lng },
+      }
+    );
+
     const marker = new google.maps.Marker({
       position: { lat: order.lat, lng: order.lng },
       map: map.value,
@@ -130,10 +183,14 @@ const addMarkersToMap = () => {
       marker.setIcon(createCustomMarkerIcon(order.statusColor, false));
     });
 
+    // Add to markers array
     markers.value.push(marker);
+    console.log(`✅ Marker ${index + 1} added to array`);
   });
 
-  // Fit map to show all markers
+  console.log("✅ MARKERS ADDED TO MAP - Total count:", markers.value.length);
+
+  // Fit map to show all markers if there are any
   if (markers.value.length > 0) {
     const bounds = new google.maps.LatLngBounds();
     markers.value.forEach((marker) => {
@@ -164,17 +221,17 @@ const initializeMap = () => {
       lng: mapSettings.value.center.lng,
     },
     mapTypeId: google.maps.MapTypeId.ROADMAP,
-    styles: [
-      {
-        featureType: "poi",
-        elementType: "labels",
-        stylers: [{ visibility: mapSettings.value.showLabels ? "on" : "off" }],
-      },
-    ],
-    mapTypeControl: true,
+    // styles: [
+    //   {
+    //     featureType: "poi",
+    //     elementType: "labels",
+    //     stylers: [{ visibility: mapSettings.value.showLabels ? "on" : "off" }],
+    //   },
+    // ],
+    mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
-    zoomControl: true,
+    zoomControl: false,
     minZoom: 2,
     maxZoom: 18,
     // Restrict panning to prevent showing repeated world maps
@@ -200,7 +257,9 @@ const initializeMap = () => {
   });
 
   // Add markers after map is initialized
-  addMarkersToMap();
+  nextTick(() => {
+    addMarkersToMap();
+  });
 };
 
 const waitForGoogleMaps = () => {
@@ -214,40 +273,34 @@ const waitForGoogleMaps = () => {
 // Watch for filtered orders changes
 watch(
   filteredOrders,
-  () => {
+  (newOrders, oldOrders) => {
+    console.log("🔄 FILTERED ORDERS CHANGED!");
+    console.log("📊 Previous count:", oldOrders?.length || 0);
+    console.log("📊 New count:", newOrders.length);
+    console.log(
+      "📋 Previous orders:",
+      oldOrders?.map((o) => o.orderNumber) || []
+    );
+    console.log(
+      "📋 New orders:",
+      newOrders.map((o) => o.orderNumber)
+    );
+
     if (map.value) {
-      addMarkersToMap();
+      console.log("🔄 Map is ready - updating markers...");
+      // Use nextTick to ensure DOM updates are complete
+      nextTick(() => {
+        addMarkersToMap();
+      });
+    } else {
+      console.log("❌ Map not ready for marker update");
     }
   },
-  { deep: true }
-);
-
-// Watch for map settings changes
-watch(
-  mapSettings,
-  (newSettings) => {
-    if (map.value) {
-      // Ensure zoom level is within bounds
-      const constrainedZoom = Math.max(2, Math.min(18, newSettings.zoom));
-      map.value.setZoom(constrainedZoom);
-      map.value.setCenter({
-        lat: newSettings.center.lat,
-        lng: newSettings.center.lng,
-      });
-
-      // Update map styles for labels
-      map.value.setOptions({
-        styles: [
-          {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [{ visibility: newSettings.showLabels ? "on" : "off" }],
-          },
-        ],
-      });
-    }
-  },
-  { deep: true }
+  {
+    deep: true,
+    immediate: false,
+    flush: "post", // Ensure this runs after all other watchers
+  }
 );
 
 onMounted(() => {
@@ -276,14 +329,14 @@ onMounted(() => {
           <div class="space-y-1">
             <div
               v-for="status in statuses"
-              :key="status.label"
+              :key="status.key"
               class="flex items-center space-x-2"
             >
               <div
                 class="w-4 h-4 rounded-full border-2 border-white shadow-sm"
                 :style="{ backgroundColor: status.color }"
               ></div>
-              <span class="text-xs text-gray-600">{{ status.name }}</span>
+              <span class="text-xs text-gray-600">{{ status.value }}</span>
             </div>
           </div>
         </div>
