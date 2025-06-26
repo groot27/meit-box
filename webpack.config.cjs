@@ -100,6 +100,15 @@ const createBaseConfig = ({
 
 module.exports = [
   createBaseConfig({
+    name: "remoteMonthlyView",
+    entryName: "remoteMonthlyView",
+    entryPath: "./src/remotesEntries/monthlyViewEntry.ts",
+    exposeName: "./RemoteMonthlyView",
+    exposePath: "./src/components/calendar/Calendar.vue",
+    remoteFileName: "remoteMonthlyView.js",
+    port: 5001,
+  }),
+  createBaseConfig({
     name: "remoteOrders",
     entryName: "remoteOrders",
     entryPath: "./src/remotesEntries/ordersEntry.ts",
@@ -109,12 +118,12 @@ module.exports = [
     port: 5002,
   }),
   createBaseConfig({
-    name: "remoteMonthlyView",
-    entryName: "remoteMonthlyView",
-    entryPath: "./src/remotesEntries/monthlyViewEntry.ts",
-    exposeName: "./RemoteMonthlyView",
-    exposePath: "./src/components/calendar/Calendar.vue",
-    remoteFileName: "remoteMonthlyView.js",
-    port: 5001,
+    name: "remoteOrdersMap",
+    entryName: "remoteOrdersMap",
+    entryPath: "./src/remotesEntries/ordersMapEntry.ts",
+    exposeName: "./RemoteOrdersMap",
+    exposePath: "./src/components/dashboard/OrdersMap.vue",
+    remoteFileName: "remoteOrdersMap.js",
+    port: 5003,
   }),
 ];

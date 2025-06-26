@@ -11,7 +11,7 @@ import { orderApi } from "@/api/orderApi";
 import { useGlobalStore } from ".";
 import { ResponseType } from "@/types/apiRequest";
 import { createQueryString } from "@/utils/utils";
-import { setOrderValue } from "@/utils/OrderUtils";
+import { getLocation, getOrderField, setOrderValue } from "@/utils/OrderUtils";
 import { useRouter } from "vue-router";
 
 export const useOrderStore = defineStore("order", () => {
@@ -70,12 +70,20 @@ export const useOrderStore = defineStore("order", () => {
   const toggleLeftSideDisplay = () => {
     leftSideDisplay.value = !leftSideDisplay.value;
   };
-  const generateProps = () => {
+  const getStatusColor = (label) => {
+    const status = defaultData.value.statuses.find(
+      (status) => status.value === label
+    );
+    return status ? status.color : "#ff851b";
+  };
+  const generateProps = (isMap: boolean) => {
     let queryProps = {
-      per_page: pagination.itemsPerPage,
+      per_page: isMap ? 100 : pagination.itemsPerPage,
       page: pagination.currentPage,
-      search: filters.search,
     };
+    if (filters.search) {
+      queryProps["search"] = filters.search;
+    }
     if (filters.startDate && filters.endDate) {
       queryProps["date_between"] = `${filters.startDate},${filters.endDate}`;
     }
@@ -98,23 +106,39 @@ export const useOrderStore = defineStore("order", () => {
       queryProps["manager"] = filters.projectManager.key;
     }
     if (sort.field) {
-      queryProps[`sort[${sort.field}]`] = sort.direction;
+      queryProps["field"] = getOrderField(sort.field);
+      queryProps["order"] = sort.direction;
     }
     return queryProps;
   };
-  const loadOrders = async () => {
-    const queryString: string = createQueryString(generateProps());
-
+  const loadOrders = async (isMap: boolean = false) => {
+    const queryString: string = createQueryString(generateProps(isMap));
     try {
       globalStore.setLoadingApi(true);
       const res: ResponseType = await orderApi.getAll(queryString);
       globalStore.setLoadingApi(false);
-      orders.value = setOrderValue(res.data, tableColumns.value);
+      if (isMap) {
+        orders.value = res.data.map((order, index) => {
+          return (order = {
+            id: order.id,
+            locationAddress: order.order_location,
+            lat: order.latitude || getLocation(index).lat,
+            lng: order.longitude || getLocation(index).lng,
+            status: order.status,
+            statusColor: getStatusColor(order.status),
+            customerName: order.customer_name,
+            orderNumber: order.order_number,
+            createdAt: order.start_date,
+          });
+        });
+      } else {
+        orders.value = setOrderValue(res.data, tableColumns.value);
 
-      pagination.currentPage = res.meta.current_page;
-      pagination.totalPages = res.meta.last_page;
-      pagination.totalItems = res.meta.total;
-      pagination.itemsPerPage = res.meta.per_page;
+        pagination.currentPage = res.meta.current_page;
+        pagination.totalPages = res.meta.last_page;
+        pagination.totalItems = res.meta.total;
+        pagination.itemsPerPage = res.meta.per_page;
+      }
     } catch (error) {
       console.error("Error loading orders:", error);
       globalStore.setLoadingApi(false);
@@ -165,7 +189,7 @@ export const useOrderStore = defineStore("order", () => {
       //   }
       // );
       defaultData.value.statuses = res.data.statuses.map((status) => {
-        return { key: status.id, value: status.name };
+        return { key: status.id, value: status.name, color: status.color };
       });
 
       globalStore.setLoadingApi(false);

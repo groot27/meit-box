@@ -1,25 +1,17 @@
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { createPinia } from "pinia";
-import { VueQueryPlugin } from "@tanstack/vue-query";
 import { i18n } from "@/i18n";
 import "@/style.css";
 import App from "@/App.vue";
-import Calendar from "@/pages/Calendar.vue";
 import "@/fontawesome";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { loadGoogleMaps } from "@/utils/loadGoogleMaps";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
-import Orders from "@/pages/Orders.vue";
 import Dashboard from "@/pages/Dashboard.vue";
 
-const routes = [
-  { path: "/monthly-view2", component: Calendar },
-  { path: "/monthly-view2/:taskId", component: Calendar },
-  { path: "/order-list2", component: Orders },
-  { path: "/dashboard", component: Dashboard },
-];
+const routes = [{ path: "/dashboard", component: Dashboard }];
 
 const router = createRouter({
   history: createWebHistory(),
@@ -35,7 +27,6 @@ loadGoogleMaps(GOOGLE_API_KEY)
     createApp(App)
       .use(router)
       .use(pinia)
-      .use(VueQueryPlugin)
       .use(i18n)
       .use(Toast)
       .component("font-awesome-icon", FontAwesomeIcon)
