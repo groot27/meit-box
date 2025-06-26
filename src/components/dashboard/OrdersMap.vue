@@ -8,13 +8,16 @@ import PinnedOrderTable from "./PinnedOrderTable.vue";
 import { useOrderStore } from "@/stores/OrderStore";
 import OrderFilters from "../orders/OrderFilters.vue";
 import { useGlobalStore } from "@/stores/index";
+import { useDashboardStore } from "@/stores/DashboardStore";
 
 const orderStore = useOrderStore();
+const dashboardStore = useDashboardStore();
 const globalStore = useGlobalStore();
 const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
 // const leftSideDisplay = ref(false);
 
 onMounted(async () => {
+  await dashboardStore.loadWidgets();
   await orderStore.loadDefaultData();
   orderStore.setOrderForMap(true);
   await orderStore.loadPinnedOrders();

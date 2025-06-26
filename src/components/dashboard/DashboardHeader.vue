@@ -79,7 +79,12 @@ const getStatusColor = (status: string) => {
                 :icon="['fas', `${widget.icon}`]"
                 class="text-gray-200 w-1/6 h-auto mt-4"
               />
-              <p class="text-2xl font-bold text-blue-500">{{ widget.count }}</p>
+              <p
+                :class="widget.count === 0 ? 'text-gray-200' : 'text-blue-500'"
+                class="text-2xl font-bold"
+              >
+                {{ widget.count }}
+              </p>
             </div>
           </div>
         </router-link>

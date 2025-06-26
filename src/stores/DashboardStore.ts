@@ -4,6 +4,7 @@ import { MapOrder, MapFilters, MapSettings } from "@/types/DashboardTypes";
 import { useGlobalStore } from ".";
 import { orderApi } from "@/api/orderApi";
 import { getLocation } from "@/utils/OrderUtils";
+import { dashboardApi } from "@/api/dashboardApi";
 
 export const useDashboardStore = defineStore("dashboard", () => {
   const globalStore = useGlobalStore();
@@ -21,7 +22,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
   const dashboardWidgets = reactive<any>({
     tasks: {
       title: "My Tasks",
-      count: 10,
+      count: 0,
       plusIcon: false,
       icon: "rectangle-list",
       url: "/task-new?date_filter=upcoming_tasks&filter=my_users&has_done=0",
@@ -29,7 +30,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     },
     notification: {
       title: "notification",
-      count: 10,
+      count: 0,
       plusIcon: false,
       icon: "comment",
       url: "/communication",
@@ -37,7 +38,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     },
     newUser: {
       title: "New User",
-      count: 10,
+      count: 0,
       plusIcon: true,
       icon: "user",
       url: "/users",
@@ -45,7 +46,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     },
     customers: {
       title: "Customers",
-      count: 10,
+      count: 0,
       plusIcon: true,
       icon: "building",
       url: "/customer-list",
@@ -91,7 +92,27 @@ export const useDashboardStore = defineStore("dashboard", () => {
   const updateMapBounds = (bounds: google.maps.LatLngBounds) => {
     mapBounds.value = bounds;
   };
-  const loadWidgets = () => {};
+  const loadWidgets = async () => {
+    try {
+      globalStore.setLoadingApi(true);
+      const res = await dashboardApi.getWidgets();
+      dashboardWidgets.tasks.count = res.data.pending_task_count;
+      dashboardWidgets.customers.count = res.data.customer_count;
+      dashboardWidgets.newUser.count = res.data.recent_user_count;
+      dashboardWidgets.notification.count =
+        res.data.unread_message_thread_count;
+
+      // "pending_skill_request_count": 0,
+
+      globalStore.setLoadingApi(false);
+    } catch (error) {
+      console.error("Error loading default data:", error);
+      globalStore.setLoadingApi(false);
+    } finally {
+      globalStore.setLoadingApi(false);
+      loading.value = false;
+    }
+  };
 
   return {
     loading,

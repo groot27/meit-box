@@ -81,20 +81,15 @@ const createInfoWindowContent = (order: MapOrder) => {
 };
 
 const clearMarkers = () => {
-  console.log("🧹 CLEARING MARKERS - Current count:", markers.value.length);
-
   // Close any open info windows first
   if (infoWindow.value) {
     infoWindow.value.close();
-    console.log("📝 Info window closed");
   }
 
   // Remove each marker from the map individually
   for (let i = 0; i < markers.value.length; i++) {
     const marker = markers.value[i];
     if (marker) {
-      console.log(`  🗑️ Removing marker ${i + 1}/${markers.value.length}`);
-
       // Remove all event listeners
       google.maps.event.clearInstanceListeners(marker);
 
@@ -109,50 +104,22 @@ const clearMarkers = () => {
   // Clear the markers array completely
   markers.value.length = 0;
   markers.value = [];
-
-  console.log("✅ ALL MARKERS CLEARED - New count:", markers.value.length);
 };
 
 const addMarkersToMap = () => {
-  console.log("📍 ADDING MARKERS TO MAP");
-  console.log("📊 Filtered orders count:", filteredOrders.value.length);
-  console.log("🗺️ Map available:", !!map.value);
-
   // CRITICAL: Always clear existing markers first
   clearMarkers();
 
   if (!map.value) {
-    console.log("❌ Map not available - cannot add markers");
     return;
   }
 
   if (filteredOrders.value.length === 0) {
-    console.log("ℹ️ No filtered orders to display - map will be empty");
     return;
   }
 
-  console.log(
-    "📋 Orders to add:",
-    filteredOrders.value.map((o) => ({
-      id: o.id,
-      orderNumber: o.orderNumber,
-      status: o.status,
-      title: o.title,
-    }))
-  );
-
   // Add markers only for filtered orders
   filteredOrders.value.forEach((order, index) => {
-    console.log(
-      `📍 Creating marker ${index + 1}/${filteredOrders.value.length}:`,
-      {
-        id: order.id,
-        orderNumber: order.orderNumber,
-        status: order.status,
-        position: { lat: order.lat, lng: order.lng },
-      }
-    );
-
     const marker = new google.maps.Marker({
       position: { lat: order.lat, lng: order.lng },
       map: map.value,
@@ -185,10 +152,7 @@ const addMarkersToMap = () => {
 
     // Add to markers array
     markers.value.push(marker);
-    console.log(`✅ Marker ${index + 1} added to array`);
   });
-
-  console.log("✅ MARKERS ADDED TO MAP - Total count:", markers.value.length);
 
   // Fit map to show all markers if there are any
   if (markers.value.length > 0) {
@@ -274,20 +238,7 @@ const waitForGoogleMaps = () => {
 watch(
   filteredOrders,
   (newOrders, oldOrders) => {
-    console.log("🔄 FILTERED ORDERS CHANGED!");
-    console.log("📊 Previous count:", oldOrders?.length || 0);
-    console.log("📊 New count:", newOrders.length);
-    console.log(
-      "📋 Previous orders:",
-      oldOrders?.map((o) => o.orderNumber) || []
-    );
-    console.log(
-      "📋 New orders:",
-      newOrders.map((o) => o.orderNumber)
-    );
-
     if (map.value) {
-      console.log("🔄 Map is ready - updating markers...");
       // Use nextTick to ensure DOM updates are complete
       nextTick(() => {
         addMarkersToMap();
