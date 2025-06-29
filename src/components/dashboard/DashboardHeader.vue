@@ -1,56 +1,147 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useDashboardStore } from "@/stores/DashboardStore";
+import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
+import NotificationButton from "../buttons/NotificationButton.vue";
 
 const { t } = useI18n();
 const dashboardStore = useDashboardStore();
+const searchType = ref("Order");
+const searchValue = ref("");
+const searchLoading = ref(false);
 
-const ordersByStatus = computed(() => dashboardStore.ordersByStatus);
-const totalOrderValue = computed(() => dashboardStore.totalOrderValue);
-const dashboardWidgets = computed(() => dashboardStore.dashboardWidgets);
+const searchTypeOptions = ["Order", "Offer", "Invoice", "User"];
+const searchOptions = ref<string[]>([]);
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
+// Mock search options based on type
+const mockSearchData = {
+  Order: ["ORD-001", "ORD-002", "ORD-003", "ORD-004", "ORD-005"],
+  Offer: ["OFF-001", "OFF-002", "OFF-003", "OFF-004", "OFF-005"],
+  Invoice: ["INV-001", "INV-002", "INV-003", "INV-004", "INV-005"],
+  User: [
+    "John Doe",
+    "Jane Smith",
+    "Mike Johnson",
+    "Sarah Wilson",
+    "David Brown",
+  ],
 };
 
-const getStatusColor = (status: string) => {
-  const colors = {
-    pending: "bg-yellow-100 text-yellow-800",
-    "in-progress": "bg-blue-100 text-blue-800",
-    completed: "bg-green-100 text-green-800",
-    cancelled: "bg-red-100 text-red-800",
-  };
-  return colors[status] || "bg-gray-100 text-gray-800";
+const dashboardWidgets = computed(() => dashboardStore.dashboardWidgets);
+
+// Search functionality
+const handleSearchTypeChange = (newType: string) => {
+  searchType.value = newType;
+  searchValue.value = "";
+  searchOptions.value = mockSearchData[newType] || [];
+};
+
+const handleSearch = (query: string) => {
+  searchLoading.value = true;
+
+  // Simulate API call
+  setTimeout(() => {
+    const allOptions = mockSearchData[searchType.value] || [];
+    searchOptions.value = allOptions.filter((option) =>
+      option.toLowerCase().includes(query.toLowerCase())
+    );
+    searchLoading.value = false;
+  }, 300);
 };
 </script>
 
 <template>
-  <header class="bg-white border-b border-gray-200 px-6 py-4">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-semibold text-gray-900">
-        {{ t("dashboard.header.title") }}
-      </h1>
+  <header class="bg-white border-b border-gray-200">
+    <div class="flex items-center justify-between mb-6 bg-[#1c3f52] p-4">
+      <!-- Left side - Title, Icon Buttons, and Search -->
+      <div class="flex items-center space-x-4">
+        <h1 class="text-2xl font-semibold text-white">
+          {{ t("dashboard.header.title") }}
+        </h1>
 
-      <!-- <div class="flex items-center space-x-4">
-        <button
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-        >
-          {{ t("dashboard.header.export") }}
-        </button>
-        <button
+        <!-- Icon Buttons -->
+        <div class="flex items-center space-x-1">
+          <router-link
+            :to="`/order-list2`"
+            class="py-2 px-3 text-white bg-white bg-opacity-10 hover:bg-opacity-50 rounded-md transition-colors"
+            title="Order List"
+          >
+            <font-awesome-icon
+              :icon="['fas', 'rectangle-list']"
+              class="text-white"
+            />
+          </router-link>
+
+          <router-link
+            :to="'/monthly-view2'"
+            class="py-2 px-3 text-white bg-white bg-opacity-10 hover:bg-opacity-50 rounded-md transition-colors"
+            title="Monthly View"
+          >
+            <font-awesome-icon :icon="['fas', 'calendar']" class="text-white" />
+          </router-link>
+
+          <router-link
+            :to="`/finance-dashboard`"
+            class="py-2 px-3 text-white bg-white bg-opacity-10 hover:bg-opacity-50 rounded-md transition-colors"
+            title="Finance Dashboard"
+          >
+            <font-awesome-icon
+              :icon="['fas', 'calculator']"
+              class="text-white"
+            />
+          </router-link>
+
+          <router-link
+            :to="'/users'"
+            class="py-2 px-3 text-white bg-white bg-opacity-10 hover:bg-opacity-50 rounded-md transition-colors"
+            title="User List"
+          >
+            <font-awesome-icon :icon="['fas', 'user']" class="text-white" />
+          </router-link>
+        </div>
+
+        <!-- Search with Dropdown - Right next to icons -->
+        <div class="flex items-center space-x-0 ml-2">
+          <!-- Search Type Dropdown -->
+          <select
+            v-model="searchType"
+            @change="handleSearchTypeChange(searchType)"
+            class="px-3 py-2 text-sm font-medium bg-white bg-opacity-10 hover:bg-opacity-50 rounded-l-md transition-colors min-w-[100px] border-r-0 text-white h-full"
+          >
+            <option v-for="type in searchTypeOptions" :key="type" :value="type">
+              {{ type }}
+            </option>
+          </select>
+
+          <!-- Search Input -->
+          <div class="w-64">
+            <AsyncSelect
+              v-model="searchValue"
+              :options="searchOptions"
+              :placeholder="`Search ${searchType.toLowerCase()}...`"
+              :loading="searchLoading"
+              @search="handleSearch"
+              class="bg-black bg-opacity-10 hover:bg-opacity-50"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Right side - Create Order Button -->
+      <div class="flex items-center">
+        <NotificationButton />
+        <router-link
+          :to="`/add-order/`"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
         >
-          {{ t("dashboard.header.refresh") }}
-        </button>
-      </div> -->
+          {{ t("orders.header.createOrder") }}
+        </router-link>
+      </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="w-full flex flex-wrap gap-4">
+    <div class="w-full flex flex-wrap gap-4 p-4">
       <!-- Total Value Card -->
 
       <!-- Status Cards -->

@@ -39,6 +39,8 @@ import {
   faCalculator,
   faCirclePlus,
   faBuilding,
+  faUserGraduate,
+  faCalendar,
 } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
@@ -81,5 +83,7 @@ library.add(
   faCloudArrowDown,
   faCalculator,
   faCirclePlus,
-  faBuilding
+  faBuilding,
+  faUserGraduate,
+  faCalendar
 );

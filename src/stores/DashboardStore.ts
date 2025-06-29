@@ -44,6 +44,14 @@ export const useDashboardStore = defineStore("dashboard", () => {
       url: "/users",
       plusUrl: "?createUser=true",
     },
+    skillRequests: {
+      title: "Skill Requests",
+      count: 0,
+      plusIcon: false,
+      icon: "user-graduate",
+      url: "/price-and-salary?skillRequest=true",
+      plusUrl: "?",
+    },
     customers: {
       title: "Customers",
       count: 0,
@@ -101,8 +109,8 @@ export const useDashboardStore = defineStore("dashboard", () => {
       dashboardWidgets.newUser.count = res.data.recent_user_count;
       dashboardWidgets.notification.count =
         res.data.unread_message_thread_count;
-
-      // "pending_skill_request_count": 0,
+      dashboardWidgets.skillRequests.count =
+        res.data.pending_skill_request_count;
 
       globalStore.setLoadingApi(false);
     } catch (error) {

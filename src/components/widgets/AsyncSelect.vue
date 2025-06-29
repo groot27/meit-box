@@ -117,6 +117,6 @@ watch(internalValue, (val) => {
     :label="labelKey"
     :track-by="trackByKey"
     @search-change="onChange"
-    class="w-full"
+    class="class"
   />
 </template>
