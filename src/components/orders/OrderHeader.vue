@@ -1,24 +1,7 @@
 <script setup lang="ts">
-import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
 
 const { t } = useI18n();
-
-const notificationCount = ref(5);
-const router = useRouter();
-
-const handleMoreOptions = () => {
-  console.log("More options clicked");
-};
-
-const handleCreateOrder = () => {
-  router.push(`/add-order/`);
-};
-
-const handleNotifications = () => {
-  console.log("Notifications clicked");
-};
 </script>
 
 <template>
@@ -46,20 +29,20 @@ const handleNotifications = () => {
         </button> -->
 
         <!-- More Options -->
-        <button
-          @click="handleMoreOptions"
-          class="px-4 py-2 text-sm font-medium text-white bg-opacity-10 bg-black rounded-md hover:bg-gray-50 transition-colors"
+        <router-link
+          :to="`/import-orders/`"
+          class="px-4 py-2 text-sm font-medium text-white bg-opacity-10 bg-black rounded-md hover:bg-opacity-50 transition-colors"
         >
           {{ t("orders.header.moreOptions") }}
-        </button>
+        </router-link>
 
         <!-- Create Order -->
-        <button
-          @click="handleCreateOrder"
+        <router-link
+          :to="`/add-order/`"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
         >
           {{ t("orders.header.createOrder") }}
-        </button>
+        </router-link>
       </div>
     </div>
   </header>
