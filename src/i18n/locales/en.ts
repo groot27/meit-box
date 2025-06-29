@@ -390,10 +390,22 @@ export default {
       requiredSkill: "Select Required Skill",
     },
     ordersEmpty: "No Order Found!",
+    notifications: {
+      title: "Notifications",
+      markAllRead: "Mark all as read",
+      empty: "No Notifications",
+    },
   },
   dashboard: {
     header: {
       title: "Dashboard",
+      search: {
+        title: "Search",
+        order: "Order",
+        user: "Users",
+        invoice: "Invoice",
+        offer: "Offer",
+      },
       export: "Export Data",
       refresh: "Refresh",
     },

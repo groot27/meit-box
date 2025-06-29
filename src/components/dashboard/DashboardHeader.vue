@@ -111,7 +111,7 @@ const handleSearch = async (query: string | object) => {
             class="px-3 py-2 text-sm font-medium bg-white bg-opacity-10 hover:bg-opacity-50 rounded-l-md transition-colors min-w-[100px] border-r-0 text-white h-full"
           >
             <option v-for="type in searchTypeOptions" :key="type" :value="type">
-              {{ type }}
+              {{ t(`dashboard.header.search.${type}`) }}
             </option>
           </select>
 
@@ -120,7 +120,9 @@ const handleSearch = async (query: string | object) => {
             <AsyncSelect
               v-model="searchValue"
               :options="searchOptions"
-              :placeholder="`Search ${searchType.toLowerCase()}...`"
+              :placeholder="`${t(`dashboard.header.search.title`)} ${t(
+                `dashboard.header.search.${searchType}`
+              )}...`"
               :loading="searchLoading"
               @search="handleSearch"
               @update:model-value="handleRedirect($event)"

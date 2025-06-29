@@ -32,14 +32,4 @@ export const dashboardApi = {
       throw err;
     }
   },
-  getNotifications: async (callbacks?: Callbacks) => {
-    try {
-      const res = await api.get(`/get-offer-status-notifications/`);
-      callbacks?.onSuccess?.(res);
-      return res;
-    } catch (err) {
-      callbacks?.onError?.(err);
-      throw err;
-    }
-  },
 };

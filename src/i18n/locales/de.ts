@@ -389,10 +389,22 @@ export default {
       requiredSkill: "Erforderliche Fähigkeit auswählen",
     },
     ordersEmpty: "Kein Auftrag gefunden",
+    notifications: {
+      title: "Benachrichtigungen",
+      markAllRead: "Alle als gelesen",
+      empty: "Keine Benachrichtigungen",
+    },
   },
   dashboard: {
     header: {
       title: "Dashboard",
+      search: {
+        title: "Suchen",
+        order: "Projekt",
+        user: "Benutzerliste",
+        invoice: "Rechnung",
+        offer: "Angebot",
+      },
       export: "Daten exportieren",
       refresh: "Aktualisieren",
     },

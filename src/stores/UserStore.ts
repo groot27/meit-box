@@ -3,7 +3,7 @@ import { ref } from "vue";
 import { useGlobalStore } from ".";
 import { userApi } from "@/api/userApi";
 
-export const useUserStore = defineStore("dashboard", () => {
+export const useUserStore = defineStore("user", () => {
   const globalStore = useGlobalStore();
   const userRole = ref("");
   const userData = ref(null);
