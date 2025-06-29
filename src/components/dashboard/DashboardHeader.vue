@@ -35,7 +35,7 @@ const getStatusColor = (status: string) => {
         {{ t("dashboard.header.title") }}
       </h1>
 
-      <div class="flex items-center space-x-4">
+      <!-- <div class="flex items-center space-x-4">
         <button
           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
         >
@@ -46,7 +46,7 @@ const getStatusColor = (status: string) => {
         >
           {{ t("dashboard.header.refresh") }}
         </button>
-      </div>
+      </div> -->
     </div>
 
     <!-- Statistics Cards -->

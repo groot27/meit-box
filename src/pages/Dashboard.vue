@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import OrdersMap from "@/components/dashboard/OrdersMap.vue";
+import Dashboard from "@/components/dashboard/Dashboard.vue";
 </script>
 
 <template>
-  <OrdersMap />
+  <Dashboard />
 </template>

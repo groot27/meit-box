@@ -393,7 +393,7 @@ export default {
   },
   dashboard: {
     header: {
-      title: "Global Dashboard",
+      title: "Dashboard",
       export: "Export Data",
       refresh: "Refresh",
     },

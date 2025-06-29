@@ -8,8 +8,8 @@
     "build": "vue-tsc -b && vite build",
     "build:monthly": "webpack --config webpack.config.cjs --config-name remoteMonthlyView",
     "build:orders": "webpack --config webpack.config.cjs --config-name remoteOrders",
-    "build:map": "webpack --config webpack.config.cjs --config-name remoteOrdersMap",
-    "buildwebpack": "concurrently \"npm run build:monthly\" \"npm run build:orders\" \"npm run build:orders\"",
+    "build:dashboard": "webpack --config webpack.config.cjs --config-name remoteDashboard",
+    "buildwebpack": "concurrently \"npm run build:monthly\" \"npm run build:orders\" \"npm run build:dashboard\"",
     "preview": "vite preview"
   },
   "dependencies": {

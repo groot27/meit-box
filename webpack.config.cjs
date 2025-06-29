@@ -118,12 +118,12 @@ module.exports = [
     port: 5002,
   }),
   createBaseConfig({
-    name: "remoteOrdersMap",
-    entryName: "remoteOrdersMap",
-    entryPath: "./src/remotesEntries/ordersMapEntry.ts",
-    exposeName: "./RemoteOrdersMap",
-    exposePath: "./src/components/dashboard/OrdersMap.vue",
-    remoteFileName: "remoteOrdersMap.js",
+    name: "remoteDashboard",
+    entryName: "remoteDashboard",
+    entryPath: "./src/remotesEntries/dashboardEntry.ts",
+    exposeName: "./RemoteDashboard",
+    exposePath: "./src/components/dashboard/Dashboard.vue",
+    remoteFileName: "remoteDashboard.js",
     port: 5003,
   }),
 ];
