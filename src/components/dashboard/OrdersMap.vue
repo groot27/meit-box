@@ -44,14 +44,11 @@ onMounted(async () => {
       >
         <OrderFilters />
       </div>
-      <div
-        :class="leftSideDisplay ? 'w-5/6' : 'w-full'"
-        class="flex flex-col verflow-hidden h-screen"
-      >
+      <div :class="leftSideDisplay ? 'w-5/6' : 'w-full'" class="flex flex-col">
         <div class="flex overflow-hidden h-screen">
           <GoogleMap />
         </div>
-        <div class="flex h-full">
+        <div class="flex h-auto flex-col">
           <PinnedOrderTable />
         </div>
       </div>

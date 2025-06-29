@@ -38,7 +38,7 @@ const handleShowMRemoveModal = (orderId = null) => {
 </script>
 
 <template>
-  <h3 class="font-semibold text-2xl">Pinned Order</h3>
+  <h3 class="font-semibold text-2xl mt-4 ml-4">Pinned Order</h3>
   <div class="flex-1 flex flex-col h-full w-full">
     <!-- Table Container with Horizontal Scroll -->
     <div class="flex-1 max-w-full overflow-scroll">
