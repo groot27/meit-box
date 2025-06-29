@@ -19,7 +19,7 @@ export const useOrderStore = defineStore("order", () => {
   const orders = ref<Order[]>([]);
   const pinnedOrders = ref<Order[]>([]);
   const loading = ref(false);
-  const leftSideDisplay = ref(true);
+  const leftSideDisplay = ref(false);
   const inquiryFilterSelected = ref(false);
   const router = useRouter();
   const orderForMap = ref(false);

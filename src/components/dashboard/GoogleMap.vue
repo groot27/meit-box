@@ -37,18 +37,21 @@ const createCustomMarkerIcon = (color: string, isHovered = false) => {
 const createInfoWindowContent = (order: MapOrder) => {
   return `
     <div class="p-3 max-w-xs">
-      <div class="flex w-full gap-2">
-      <a href="/new-edit-order/${
+      <div class="flex w-full gap-2 absolute top-3 left-2">
+      <a title="Order Detail" href="/new-edit-order/${
         order.id
-      }" class="cursor-pointer font-semibold bg-blue-300 rounded-lg p-2 text-lg ">${
-    order.orderNumber
-  }</a>
-      <a href="/finance-dashboard?order_id=${
+      }" class="cursor-pointer font-semibold border border-gray-600 rounded-lg p-1 text-lg ">
+      <svg class="w-5 h-5  fill-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM192 40c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm144 418c0 3.3-2.7 6-6 6H54c-3.3 0-6-2.7-6-6V118c0-3.3 2.7-6 6-6h42v36c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-36h42c3.3 0 6 2.7 6 6z"/></svg>
+      </a>
+      <a title="Finance Dashboard" href="/finance-dashboard?order_id=${
         order.id
-      }&activeTab=rental" class="flex w-8 cursor-pointer font-semibold bg-purple-400 rounded-lg p-2 text-lg ">
-      <svg class="w-6 h-6  fill-purple-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-384c0-35.3-28.7-64-64-64L64 0zM96 64l192 0c17.7 0 32 14.3 32 32l0 32c0 17.7-14.3 32-32 32L96 160c-17.7 0-32-14.3-32-32l0-32c0-17.7 14.3-32 32-32zm32 160a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zM96 352a32 32 0 1 1 0-64 32 32 0 1 1 0 64zM64 416c0-17.7 14.3-32 32-32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-96 0c-17.7 0-32-14.3-32-32zM192 256a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm32 64a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zm64-64a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm32 64a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zM288 448a32 32 0 1 1 0-64 32 32 0 1 1 0 64z"/></svg></a>
+      }&activeTab=rental" class="flex w-8 cursor-pointer font-semibold border border-gray-600  rounded-lg p-1 text-lg ">
+      <svg class="w-5 h-5  fill-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-384c0-35.3-28.7-64-64-64L64 0zM96 64l192 0c17.7 0 32 14.3 32 32l0 32c0 17.7-14.3 32-32 32L96 160c-17.7 0-32-14.3-32-32l0-32c0-17.7 14.3-32 32-32zm32 160a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zM96 352a32 32 0 1 1 0-64 32 32 0 1 1 0 64zM64 416c0-17.7 14.3-32 32-32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-96 0c-17.7 0-32-14.3-32-32zM192 256a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm32 64a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zm64-64a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm32 64a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zM288 448a32 32 0 1 1 0-64 32 32 0 1 1 0 64z"/></svg></a>
       </div>
-      <div class="space-y-2 text-sm mt-4">
+      <div class="space-y-2 text-sm  mt-4">
+        <div class= "text-lg font-semibold ">
+          <span class="text-gray-900 ">${order.orderNumber}</span>
+        </div>
         <div>
           <span class="font-medium text-gray-700">${t(
             "dashboard.map.customer"
@@ -271,7 +274,7 @@ onMounted(() => {
         <div ref="mapContainer" class="w-full h-full"></div>
 
         <!-- Map Legend -->
-        <div
+        <!-- <div
           class="absolute bottom-4 left-4 bg-white rounded-lg shadow-md p-3 z-10"
         >
           <h4 class="text-sm font-medium text-gray-700 mb-2">
@@ -290,7 +293,7 @@ onMounted(() => {
               <span class="text-xs text-gray-600">{{ status.value }}</span>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- Map Controls -->
         <div

@@ -4,29 +4,19 @@ import { useI18n } from "vue-i18n";
 import { useDashboardStore } from "@/stores/DashboardStore";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import NotificationButton from "../buttons/NotificationButton.vue";
+import { useRouter } from "vue-router";
 
 const { t } = useI18n();
 const dashboardStore = useDashboardStore();
-const searchType = ref("Order");
+const searchType = ref("order");
 const searchValue = ref("");
 const searchLoading = ref(false);
+const router = useRouter();
 
-const searchTypeOptions = ["Order", "Offer", "Invoice", "User"];
-const searchOptions = ref<string[]>([]);
-
-// Mock search options based on type
-const mockSearchData = {
-  Order: ["ORD-001", "ORD-002", "ORD-003", "ORD-004", "ORD-005"],
-  Offer: ["OFF-001", "OFF-002", "OFF-003", "OFF-004", "OFF-005"],
-  Invoice: ["INV-001", "INV-002", "INV-003", "INV-004", "INV-005"],
-  User: [
-    "John Doe",
-    "Jane Smith",
-    "Mike Johnson",
-    "Sarah Wilson",
-    "David Brown",
-  ],
-};
+const searchTypeOptions = ["order", "offer", "invoice", "user"];
+const searchOptions = computed(
+  () => dashboardStore.headerSearch[searchType.value].data
+);
 
 const dashboardWidgets = computed(() => dashboardStore.dashboardWidgets);
 
@@ -34,20 +24,31 @@ const dashboardWidgets = computed(() => dashboardStore.dashboardWidgets);
 const handleSearchTypeChange = (newType: string) => {
   searchType.value = newType;
   searchValue.value = "";
-  searchOptions.value = mockSearchData[newType] || [];
+  searchOptions.value = [];
 };
+const handleRedirect = (option) => {
+  switch (searchType.value) {
+    case "offer":
+      router.push(`/create-offer/${option.key}`);
+      break;
+    case "user":
+      router.push(`/users/${option.key}`);
+      break;
+    case "invoice":
+      router.push(`/new-invoice/${option.key}`);
+      break;
 
-const handleSearch = (query: string) => {
+    default:
+      router.push(`/new-edit-order/${option.key}`);
+      break;
+  }
+  debugger;
+};
+const handleSearch = async (query: string | object) => {
   searchLoading.value = true;
-
   // Simulate API call
-  setTimeout(() => {
-    const allOptions = mockSearchData[searchType.value] || [];
-    searchOptions.value = allOptions.filter((option) =>
-      option.toLowerCase().includes(query.toLowerCase())
-    );
-    searchLoading.value = false;
-  }, 300);
+  await dashboardStore.fetchHeaderSearch(searchType.value, query);
+  searchLoading.value = false;
 };
 </script>
 
@@ -55,7 +56,7 @@ const handleSearch = (query: string) => {
   <header class="bg-white border-b border-gray-200">
     <div class="flex items-center justify-between mb-6 bg-[#1c3f52] p-4">
       <!-- Left side - Title, Icon Buttons, and Search -->
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-4 flex-wrap">
         <h1 class="text-2xl font-semibold text-white">
           {{ t("dashboard.header.title") }}
         </h1>
@@ -122,6 +123,7 @@ const handleSearch = (query: string) => {
               :placeholder="`Search ${searchType.toLowerCase()}...`"
               :loading="searchLoading"
               @search="handleSearch"
+              @update:model-value="handleRedirect($event)"
               class="bg-black bg-opacity-10 hover:bg-opacity-50"
             />
           </div>

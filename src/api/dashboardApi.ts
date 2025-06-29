@@ -16,4 +16,30 @@ export const dashboardApi = {
       throw err;
     }
   },
+  fetchHeaderSearch: async (
+    searchType: string,
+    keyword: string = "",
+    callbacks?: Callbacks
+  ) => {
+    try {
+      const res = await api.get(
+        `/dashboard-fast-landing/${searchType}/${keyword}`
+      );
+      callbacks?.onSuccess?.(res);
+      return res;
+    } catch (err) {
+      callbacks?.onError?.(err);
+      throw err;
+    }
+  },
+  getNotifications: async (callbacks?: Callbacks) => {
+    try {
+      const res = await api.get(`/get-offer-status-notifications/`);
+      callbacks?.onSuccess?.(res);
+      return res;
+    } catch (err) {
+      callbacks?.onError?.(err);
+      throw err;
+    }
+  },
 };

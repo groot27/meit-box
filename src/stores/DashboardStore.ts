@@ -44,14 +44,6 @@ export const useDashboardStore = defineStore("dashboard", () => {
       url: "/users",
       plusUrl: "?createUser=true",
     },
-    skillRequests: {
-      title: "Skill Requests",
-      count: 0,
-      plusIcon: false,
-      icon: "user-graduate",
-      url: "/price-and-salary?skillRequest=true",
-      plusUrl: "?",
-    },
     customers: {
       title: "Customers",
       count: 0,
@@ -61,6 +53,14 @@ export const useDashboardStore = defineStore("dashboard", () => {
       plusUrl: "?createCustomer=true",
     },
   });
+  // skillRequests: {
+  //     title: "Skill Requests",
+  //     count: 0,
+  //     plusIcon: false,
+  //     icon: "user-graduate",
+  //     url: "/price-and-salary?skillRequest=true",
+  //     plusUrl: "?",
+  //   },
 
   const mapSettings = reactive<MapSettings>({
     zoom: 12,
@@ -70,6 +70,24 @@ export const useDashboardStore = defineStore("dashboard", () => {
     },
     showLabels: true,
     clusterMarkers: true,
+  });
+  const headerSearch = reactive<any>({
+    order: {
+      label: "Order",
+      data: [],
+    },
+    offer: {
+      label: "Offer",
+      data: [],
+    },
+    invoice: {
+      label: "Invoice",
+      data: [],
+    },
+    user: {
+      label: "User",
+      data: [],
+    },
   });
 
   // Actions
@@ -109,8 +127,25 @@ export const useDashboardStore = defineStore("dashboard", () => {
       dashboardWidgets.newUser.count = res.data.recent_user_count;
       dashboardWidgets.notification.count =
         res.data.unread_message_thread_count;
-      dashboardWidgets.skillRequests.count =
-        res.data.pending_skill_request_count;
+      // dashboardWidgets.skillRequests.count =
+      //   res.data.pending_skill_request_count;
+
+      globalStore.setLoadingApi(false);
+    } catch (error) {
+      console.error("Error loading default data:", error);
+      globalStore.setLoadingApi(false);
+    } finally {
+      globalStore.setLoadingApi(false);
+      loading.value = false;
+    }
+  };
+  const fetchHeaderSearch = async (searchType: string, searchValue: string) => {
+    try {
+      globalStore.setLoadingApi(true);
+      const res = await dashboardApi.fetchHeaderSearch(searchType, searchValue);
+      headerSearch[searchType].data = res.list.map((item) => {
+        return { key: item.id, value: item.name };
+      });
 
       globalStore.setLoadingApi(false);
     } catch (error) {
@@ -129,6 +164,8 @@ export const useDashboardStore = defineStore("dashboard", () => {
     mapSettings,
     mapBounds,
     dashboardWidgets,
+    headerSearch,
+    fetchHeaderSearch,
     loadWidgets,
     setFilter,
     clearFilters,

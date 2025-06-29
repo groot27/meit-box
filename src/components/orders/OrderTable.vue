@@ -460,11 +460,10 @@ const handleShowMRemoveModal = (orderId = null) => {
 
           <!-- Showing info -->
           <div class="text-sm text-gray-700 whitespace-nowrap">
-            {{ t("orders.table.showing") }}
             <span class="font-medium">{{
               (pagination.currentPage - 1) * pagination.itemsPerPage + 1
             }}</span>
-            {{ t("orders.table.to") }}
+            -
             <span class="font-medium">{{
               Math.min(
                 pagination.currentPage * pagination.itemsPerPage,
@@ -473,7 +472,6 @@ const handleShowMRemoveModal = (orderId = null) => {
             }}</span>
             {{ t("orders.table.of") }}
             <span class="font-medium">{{ pagination.totalItems }}</span>
-            {{ t("orders.table.results") }}
           </div>
         </div>
 
@@ -484,7 +482,7 @@ const handleShowMRemoveModal = (orderId = null) => {
             :disabled="pagination.currentPage === 1"
             class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ t("orders.table.previous") }}
+            <
           </button>
 
           <!-- First page -->
@@ -505,7 +503,7 @@ const handleShowMRemoveModal = (orderId = null) => {
           </span>
 
           <!-- Visible page numbers -->
-          <button
+          <!-- <button
             v-for="page in visiblePages"
             :key="page"
             @click="handlePageChange(page)"
@@ -517,33 +515,39 @@ const handleShowMRemoveModal = (orderId = null) => {
             }"
           >
             {{ page }}
+          </button> -->
+          <button
+            :key="pagination.currentPage"
+            class="px-3 py-1 text-sm font-medium rounded-md bg-blue-600 text-white"
+          >
+            {{ pagination.currentPage }}
           </button>
 
           <!-- Ellipsis after -->
-          <span
+          <!-- <span
             v-if="
               visiblePages[visiblePages.length - 1] < pagination.totalPages - 1
             "
             class="px-2 py-1 text-sm text-gray-500"
           >
             ...
-          </span>
+          </span> -->
 
           <!-- Last page -->
-          <button
+          <!-- <button
             v-if="visiblePages[visiblePages.length - 1] < pagination.totalPages"
             @click="handlePageChange(pagination.totalPages)"
             class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
           >
             {{ pagination.totalPages }}
-          </button>
+          </button> -->
 
           <button
             @click="handlePageChange(pagination.currentPage + 1)"
             :disabled="pagination.currentPage === pagination.totalPages"
             class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ t("orders.table.next") }}
+            >
           </button>
         </div>
       </div>
