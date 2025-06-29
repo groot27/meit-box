@@ -48,6 +48,18 @@ export const orderApi = {
       throw err;
     }
   },
+  getContactPersons: async (keyword: string = "", callbacks?: Callbacks) => {
+    try {
+      const res = await api.get(
+        `/v2/contact-persons?filter[keyword]=${keyword}`
+      );
+      callbacks?.onSuccess?.(res);
+      return res;
+    } catch (err) {
+      callbacks?.onError?.(err);
+      throw err;
+    }
+  },
   getFiltersData: async (queryString: string = "", callbacks?: Callbacks) => {
     try {
       const res = await api.get(`/v2/orders/data-sources${queryString}`);

@@ -14,6 +14,7 @@ const searchValue = ref("");
 const filters = computed(() => orderStore.filters);
 const filtersData = computed(() => orderStore.defaultData);
 const customerSearchLoading = ref(false);
+const contactPersonSearchLoading = ref(false);
 
 const handleFilterChange = (key: string, value: string | object) => {
   if (key === "startDate" || key === "endDate") {
@@ -46,6 +47,11 @@ const handleCustomerSearch = async (customer) => {
   customerSearchLoading.value = true;
   await orderStore.fetchCustomers(customer);
   customerSearchLoading.value = false;
+};
+const handleContactPersonsSearch = async (contactPerson) => {
+  contactPersonSearchLoading.value = true;
+  await orderStore.fetchContactPersons(contactPerson);
+  contactPersonSearchLoading.value = false;
 };
 const clearAllFilters = () => {
   orderStore.clearFilters();
@@ -218,7 +224,8 @@ const clearAllFilters = () => {
           :model-value="filters.contactPerson"
           :options="filtersData.contactPersons"
           :placeholder="t('orders.filters.selectContactPerson')"
-          :loading="false"
+          :loading="contactPersonSearchLoading"
+          @search="handleContactPersonsSearch"
           @update:model-value="handleFilterChange('contactPerson', $event)"
         />
       </div>

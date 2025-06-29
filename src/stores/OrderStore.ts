@@ -200,6 +200,7 @@ export const useOrderStore = defineStore("order", () => {
     globalStore.setLoadingApi(true);
     try {
       await fetchCustomers();
+      await fetchContactPersons();
       const res = await orderApi.getFiltersData();
       defaultData.value.categories = res.data.categories.map((category) => {
         return { key: category.id, value: category.name };
@@ -207,16 +208,6 @@ export const useOrderStore = defineStore("order", () => {
       defaultData.value.managers = res.data.managers.map((manager) => {
         return { key: manager.id, value: manager.username };
       });
-      // defaultData.value.contactPersons = res.data.contact_persons.map(
-      //   (contactPerson) => {
-      //     return {
-      //       key: contactPerson.id,
-      //       value: `${contactPerson.customer} | ${
-      //         contactPerson.name || "No Name"
-      //       }`,
-      //     };
-      //   }
-      // );
       defaultData.value.statuses = res.data.statuses.map((status) => {
         return { key: status.id, value: status.name, color: status.color };
       });
@@ -233,6 +224,14 @@ export const useOrderStore = defineStore("order", () => {
     defaultData.value.customers = customers.results.map((customer) => {
       return { key: customer.id, value: customer.text };
     });
+  };
+  const fetchContactPersons = async (query: string = "") => {
+    const contactPersons = await orderApi.getContactPersons(query);
+    defaultData.value.contactPersons = contactPersons.data.map(
+      (contactPerson) => {
+        return { key: contactPerson.id, value: contactPerson.name };
+      }
+    );
   };
 
   const setFilter = (key: keyof OrderFilters, value: string | object) => {
@@ -388,6 +387,7 @@ export const useOrderStore = defineStore("order", () => {
     toggleColumnVisibility,
     togglePinOrder,
     fetchCustomers,
+    fetchContactPersons,
     removeOrder,
     exportTable,
   };
