@@ -18,7 +18,6 @@ export const useNotificationStore = defineStore("notifications", () => {
         orderNumber: notif.data.order_number,
       };
     });
-    debugger;
   };
   const markAsRead = async (id) => {
     const res = await notificationsApi.markAsRead(id);

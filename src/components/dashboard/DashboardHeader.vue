@@ -62,7 +62,7 @@ const handleSearch = async (query: string | object) => {
         </h1>
 
         <!-- Icon Buttons -->
-        <div class="flex items-center space-x-1">
+        <div class="items-center space-x-1 sm:hidden md:flex">
           <router-link
             :to="`/order-list2`"
             class="py-2 px-3 text-white bg-white bg-opacity-10 hover:bg-opacity-50 rounded-md transition-colors"
@@ -103,12 +103,12 @@ const handleSearch = async (query: string | object) => {
         </div>
 
         <!-- Search with Dropdown - Right next to icons -->
-        <div class="flex items-center space-x-0 ml-2">
+        <div class="items-center space-x-0 ml-2 sm:hidden md:flex">
           <!-- Search Type Dropdown -->
           <select
             v-model="searchType"
             @change="handleSearchTypeChange(searchType)"
-            class="px-3 py-2 text-sm font-medium bg-white bg-opacity-10 hover:bg-opacity-50 rounded-l-md transition-colors min-w-[100px] border-r-0 text-white h-full"
+            class="px-3 py-3 text-sm font-medium bg-white bg-opacity-10 hover:bg-opacity-50 rounded-l-md transition-colors min-w-[100px] border-r-0 text-white h-full"
           >
             <option v-for="type in searchTypeOptions" :key="type" :value="type">
               {{ t(`dashboard.header.search.${type}`) }}
@@ -144,15 +144,44 @@ const handleSearch = async (query: string | object) => {
       </div>
     </div>
 
+    <!-- Search with Dropdown - Right next to icons -->
+    <div class="items-center space-x-0 sm:flex md:hidden w-full m-2">
+      <!-- Search Type Dropdown -->
+      <select
+        v-model="searchType"
+        @change="handleSearchTypeChange(searchType)"
+        class="px-3 py-2 text-sm font-medium bg-white bg-opacity-10 hover:bg-opacity-50 rounded-l-md transition-colors border-r-0 text-black h-full border border-gray-400 w-2/5"
+      >
+        <option v-for="type in searchTypeOptions" :key="type" :value="type">
+          {{ t(`dashboard.header.search.${type}`) }}
+        </option>
+      </select>
+
+      <!-- Search Input -->
+      <div class="w-3/5">
+        <AsyncSelect
+          v-model="searchValue"
+          :options="searchOptions"
+          :placeholder="`${t(`dashboard.header.search.title`)} ${t(
+            `dashboard.header.search.${searchType}`
+          )}...`"
+          :loading="searchLoading"
+          @search="handleSearch"
+          @update:model-value="handleRedirect($event)"
+          class="bg-black bg-opacity-10 hover:bg-opacity-50"
+        />
+      </div>
+    </div>
+
     <!-- Statistics Cards -->
-    <div class="w-full flex flex-wrap gap-4 p-4">
+    <div class="w-full flex sm:flex-wrap lg:flex-nowrap gap-4 p-4">
       <!-- Total Value Card -->
 
       <!-- Status Cards -->
       <div
         v-for="widget in dashboardWidgets"
         :key="widget"
-        class="bg-white rounded-lg p-2 shadow-lg border border-gray-100 flex-auto"
+        class="bg-white rounded-lg p-2 shadow-lg border border-gray-100 flex-1"
       >
         <router-link :to="widget.url">
           <div class="flex flex-col items-center justify-between h-full">

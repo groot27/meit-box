@@ -43,6 +43,13 @@ export default {
         "loading-bar": "loading-bar 1.2s linear infinite",
       },
     },
+    screens: {
+      sm: "374px", // Small devices (phones)
+      md: "768px", // Medium devices (tablets)
+      lg: "1024px", // Large devices (laptops)
+      xl: "1280px", // Extra large devices (desktops)
+      "2xl": "1536px", // Extra extra large screens
+    },
   },
   plugins: [],
 };

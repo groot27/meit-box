@@ -22,6 +22,9 @@ onMounted(async () => {
   orderStore.setOrderForMap(true);
   await orderStore.loadPinnedOrders();
   orderStore.loadOrders();
+  if (!leftSideDisplay.value) {
+    orderStore.toggleLeftSideDisplay();
+  }
 });
 </script>
 
@@ -38,7 +41,7 @@ onMounted(async () => {
       <top-bar-loading />
       <div
         :class="[
-          'transition-all duration-300 ease-in-out overflow-hidden',
+          'transition-all duration-300 ease-in-out overflow-hidden sm:hidden md:block',
           leftSideDisplay ? 'w-1/6' : 'w-0',
         ]"
       >
