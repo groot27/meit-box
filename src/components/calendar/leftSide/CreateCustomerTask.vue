@@ -32,9 +32,7 @@ const fetchCustomers = async (query) => {
 };
 
 const handleCreateOrder = async () => {
-  debugger;
   await taskStore.createOrder(customer.value.key);
-
   emit("openSideBar");
 
   showModal.value = false;
