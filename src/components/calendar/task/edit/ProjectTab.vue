@@ -350,6 +350,7 @@ watch(
           v-model="content"
           :buttons="modules.toolbar"
           :config="modules.config"
+          @update:model-value="emit('update:description', $event)"
         />
       </div>
     </div>

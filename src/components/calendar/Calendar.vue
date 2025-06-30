@@ -173,6 +173,9 @@ const handleQuickTaskCreate = async () => {
     closeTaskEditSidebar();
   }
 };
+const handleOpenSideBar = () => {
+  isTaskEditSidebarOpen.value = true;
+};
 
 const handleTaskShare = (task: Task) => {
   // Implement share functionality
@@ -290,11 +293,12 @@ onMounted(async () => {
             isSidebarCollapsed ? 'w-0 p-0' : 'w-[400px] p-4',
           ]"
         >
-          <LeftSidebar v-if="!isSidebarCollapsed" />
+          <LeftSidebar
+            @openSideBar="handleOpenSideBar"
+            v-if="!isSidebarCollapsed"
+          />
         </div>
       </div>
-
-      <!-- Main Calendar -->
       <div class="flex-1 overflow-auto bg-white relative">
         <KeepAlive>
           <component

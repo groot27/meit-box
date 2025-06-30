@@ -169,6 +169,7 @@ const updateRelatedTask = () => {
       task.details.date = singleTask.value.details.date;
       task.details.startTime = singleTask.value.details.startTime;
       task.details.endTime = singleTask.value.details.endTime;
+      task.details.description = singleTask.value.details.description;
     }
   });
 };
@@ -279,6 +280,7 @@ const updateRelatedTask = () => {
         v-model:taskId="singleTask.details.id"
         @update:resourcesIds="updateResourcesIdsTask"
         @update:repeatTask="updateRepeatTask"
+        @update:description="updateRepeatTask"
       />
       <!-- Other Details Tab -->
       <OtherDetailsTab

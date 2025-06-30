@@ -22,6 +22,7 @@ import {
   generateTaskForDisplay,
   generateUpdateTaskBody,
 } from "@/utils/TaskUtils";
+import { orderApi } from "@/api/orderApi";
 
 type TaskIndicatorKey = keyof TaskIndicatorType;
 
@@ -261,7 +262,7 @@ export const useTaskStore = defineStore("task", () => {
       allVehiclesCount: selectedTask.value.details.allVehiclesCount,
       orderId: selectedTask.value.orderDetails.id,
       users: selectedTask.value.resources.users || [],
-      address: selectedTask.value.taskTemplate.location,
+      address: selectedTask.value.details.location || "",
       customer: selectedTask.value.orderDetails.customerName || "No Customer",
     };
     addTask(tempTask);
@@ -729,6 +730,143 @@ export const useTaskStore = defineStore("task", () => {
     addTask(tempTask);
     setSelectedTask(newTask);
   }
+  async function createOrder(customerId) {
+    globalStore.setLoadingApi(true);
+    const res = await orderApi.create({ type: "json", customer: customerId });
+    globalStore.setLoadingApi(false);
+    const id = generateMinusId();
+
+    const newTask: TaskEditType = {
+      orderDetails: {
+        latitude: "",
+        longitude: "",
+        id: Number(res.order.splited_number),
+        orderNumber: res.order.order_number,
+        customerName: res.customer.name,
+      },
+      otherDetails: {
+        requiredSkills: "",
+        dress: [],
+        language: [],
+        teamLeadDescription: "",
+        teamLeadContactPerson: "",
+        notificationTemplate: "",
+      },
+      details: {
+        title: "",
+        description: "",
+        date: "",
+        startTime: "00:00",
+        endTime: "00:00",
+        color: "#e5e7eb",
+        id,
+        employeesCount: 0,
+        allEmployeesCount: 0,
+        vehiclesCount: 0,
+        allVehiclesCount: 0,
+        devicesCount: 0,
+        allDevicesCount: 0,
+        permission: "",
+        resourceLocationCategory: "",
+        location: "",
+        locationDescription: "",
+        status: "",
+        endDate: "",
+        employeesIds: [],
+        vehiclesIds: [],
+        devicesIds: [],
+        updateTasks: "",
+      },
+      activities: {
+        comments: [],
+        histories: [],
+      },
+      resources: {
+        devices: [],
+        users: [],
+        vehicles: [],
+      },
+      mappedResources: generateDefaultResources(
+        {
+          devices: [],
+          users: [],
+          vehicles: [],
+        },
+        {
+          employees: 0,
+          vehicle: 0,
+          devices: 0,
+        }
+      ),
+      attachments: [],
+      relatedTasks: [
+        {
+          details: {
+            title: "",
+            description: "",
+            date: "",
+            startTime: "00:00",
+            endTime: "00:00",
+            color: "#e5e7eb",
+            id,
+            employeesCount: 0,
+            allEmployeesCount: 0,
+            vehiclesCount: 0,
+            allVehiclesCount: 0,
+            devicesCount: 0,
+            allDevicesCount: 0,
+            permission: "",
+            resourceLocationCategory: "",
+            location: "",
+            locationDescription: "",
+            status: "",
+            endDate: "",
+            customerName: res.customer.name,
+            users: [],
+            orderId: Number(res.order.splited_number),
+          },
+          resources: {
+            devices: [],
+            users: [],
+            vehicles: [],
+          },
+          mappedResources: generateDefaultResources(
+            {
+              devices: [],
+              users: [],
+              vehicles: [],
+            },
+            {
+              employees: 0,
+              vehicle: 0,
+              devices: 0,
+            }
+          ),
+        },
+      ],
+    };
+    const tempTask: TaskDisplayType = {
+      id,
+      title: "",
+      description: "",
+      startTime: "00:00",
+      endTime: "00:00",
+      date: "",
+      color: "#f00",
+      employeesCount: 0,
+      allEmployeesCount: 0,
+      vehiclesCount: 0,
+      allVehiclesCount: 0,
+      devicesCount: 0,
+      allDevicesCount: 0,
+      orderId: Number(res.order.splited_number),
+      users: "",
+      address: res.order.location || "",
+      customer: res.customer.name || "No Customer",
+    };
+    addTask(tempTask);
+    setSelectedTask(newTask);
+  }
 
   function loadTasks(props: any = null) {
     try {
@@ -818,6 +956,7 @@ export const useTaskStore = defineStore("task", () => {
     loadTasks,
     getTask,
     continueToCreate,
+    createOrder,
     setTaskTemplate,
     setOrderDetails,
     filterRelatedResources,

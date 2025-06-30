@@ -110,4 +110,14 @@ export const orderApi = {
       throw err;
     }
   },
+  create: async (data: any, callbacks?: Callbacks) => {
+    try {
+      const res = await api.post(`/add-order`, data);
+      callbacks?.onSuccess?.(res);
+      return res;
+    } catch (err) {
+      callbacks?.onError?.(err);
+      throw err;
+    }
+  },
 };
