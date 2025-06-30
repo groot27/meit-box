@@ -26,12 +26,15 @@ const createBaseConfig = ({
 }) => ({
   name,
   entry: { [entryName]: entryPath },
-  mode: "development",
+  mode: "production",
   output: {
     publicPath: `http://localhost:${port}/`,
     path: path.resolve(__dirname, `dist/${name}`),
     filename: `${entryName}.js`,
     clean: true,
+  },
+  optimization: {
+    minimize: true, // <-- Optional; true by default in production
   },
   resolve: {
     alias: {
@@ -88,14 +91,6 @@ const createBaseConfig = ({
       },
     }),
   ],
-  devServer: {
-    port,
-    static: path.join(__dirname, "dist"),
-    hot: true,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
-  },
 });
 
 module.exports = [
