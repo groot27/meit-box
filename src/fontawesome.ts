@@ -42,6 +42,7 @@ import {
   faUserGraduate,
   faCalendar,
   faSliders,
+  faEllipsis,
 } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
@@ -87,5 +88,6 @@ library.add(
   faBuilding,
   faUserGraduate,
   faCalendar,
-  faSliders
+  faSliders,
+  faEllipsis
 );

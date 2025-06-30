@@ -14,6 +14,7 @@ const orderStore = useOrderStore();
 const dashboardStore = useDashboardStore();
 const globalStore = useGlobalStore();
 const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
+const moreOptions = computed(() => dashboardStore.moreOptions);
 // const leftSideDisplay = ref(false);
 
 onMounted(async () => {
@@ -40,6 +41,7 @@ onMounted(async () => {
     <div class="flex-1 flex overflow-hidden relative min-h-screen">
       <top-bar-loading />
       <div
+        v-show="moreOptions['map'].visible"
         :class="[
           'transition-all duration-300 ease-in-out overflow-hidden sm:hidden md:block',
           leftSideDisplay ? 'w-1/6' : 'w-0',
@@ -48,10 +50,16 @@ onMounted(async () => {
         <OrderFilters />
       </div>
       <div :class="leftSideDisplay ? 'w-5/6' : 'w-full'" class="flex flex-col">
-        <div class="flex overflow-hidden h-screen">
+        <div
+          class="flex overflow-hidden h-screen"
+          v-show="moreOptions['map'].visible"
+        >
           <GoogleMap />
         </div>
-        <div class="flex h-auto flex-col">
+        <div
+          class="flex h-auto flex-col"
+          v-show="moreOptions['pinnedOrders'].visible"
+        >
           <PinnedOrderTable />
         </div>
       </div>

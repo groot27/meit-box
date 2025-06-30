@@ -19,6 +19,38 @@ export const useDashboardStore = defineStore("dashboard", () => {
       end: "",
     },
   });
+  const moreOptions = reactive<any>(
+    JSON.parse(localStorage.getItem("moreOptions")) || {
+      tasks: {
+        title: "My Tasks",
+        visible: true,
+      },
+      notification: {
+        title: "notification",
+        visible: true,
+      },
+      skillRequests: {
+        title: "Skill Requests",
+        visible: true,
+      },
+      newUser: {
+        title: "New User",
+        visible: true,
+      },
+      customers: {
+        title: "Customers",
+        visible: true,
+      },
+      pinnedOrders: {
+        title: "Pinned Order",
+        visible: true,
+      },
+      map: {
+        title: "Map",
+        visible: true,
+      },
+    }
+  );
   const dashboardWidgets = reactive<any>({
     tasks: {
       title: "My Tasks",
@@ -44,6 +76,14 @@ export const useDashboardStore = defineStore("dashboard", () => {
       url: "/users",
       plusUrl: "?createUser=true",
     },
+    skillRequests: {
+      title: "Skill Requests",
+      count: 0,
+      plusIcon: false,
+      icon: "user-graduate",
+      url: "/price-and-salary?skillRequest=true",
+      plusUrl: "?",
+    },
     customers: {
       title: "Customers",
       count: 0,
@@ -53,14 +93,6 @@ export const useDashboardStore = defineStore("dashboard", () => {
       plusUrl: "?createCustomer=true",
     },
   });
-  // skillRequests: {
-  //     title: "Skill Requests",
-  //     count: 0,
-  //     plusIcon: false,
-  //     icon: "user-graduate",
-  //     url: "/price-and-salary?skillRequest=true",
-  //     plusUrl: "?",
-  //   },
 
   const mapSettings = reactive<MapSettings>({
     zoom: 12,
@@ -91,7 +123,11 @@ export const useDashboardStore = defineStore("dashboard", () => {
   });
 
   // Actions
-
+  const toggleMoreOptionVisiblity = (optionKey: string) => {
+    moreOptions[optionKey].visible = !moreOptions[optionKey].visible;
+    debugger;
+    localStorage.setItem("moreOptions", JSON.stringify(moreOptions));
+  };
   const setFilter = (key: keyof MapFilters, value: any) => {
     if (key === "dateRange") {
       Object.assign(filters.dateRange, value);
@@ -165,6 +201,8 @@ export const useDashboardStore = defineStore("dashboard", () => {
     mapBounds,
     dashboardWidgets,
     headerSearch,
+    moreOptions,
+    toggleMoreOptionVisiblity,
     fetchHeaderSearch,
     loadWidgets,
     setFilter,

@@ -6,6 +6,7 @@ import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import NotificationButton from "../buttons/NotificationButton.vue";
 import { useRouter } from "vue-router";
 import CreateOrderButton from "../buttons/CreateOrderButton.vue";
+import MoreOptionsButton from "../buttons/MoreOptionsButton.vue";
 
 const { t } = useI18n();
 const dashboardStore = useDashboardStore();
@@ -18,6 +19,7 @@ const searchTypeOptions = ["order", "offer", "invoice", "user"];
 const searchOptions = computed(
   () => dashboardStore.headerSearch[searchType.value].data
 );
+const moreOptions = computed(() => dashboardStore.moreOptions);
 
 const dashboardWidgets = computed(() => dashboardStore.dashboardWidgets);
 
@@ -144,6 +146,7 @@ const handleSearch = async (query: string | object) => {
       <div class="flex items-center">
         <NotificationButton />
         <CreateOrderButton />
+        <MoreOptionsButton />
       </div>
     </div>
 
@@ -182,8 +185,9 @@ const handleSearch = async (query: string | object) => {
 
       <!-- Status Cards -->
       <div
-        v-for="widget in dashboardWidgets"
+        v-for="(widget, key) in dashboardWidgets"
         :key="widget"
+        v-show="moreOptions[key].visible"
         class="bg-white rounded-lg p-2 shadow-lg border border-gray-100 flex-1"
       >
         <router-link :to="widget.url">
