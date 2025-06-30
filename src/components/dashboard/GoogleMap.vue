@@ -37,7 +37,7 @@ const createCustomMarkerIcon = (color: string, isHovered = false) => {
 const createInfoWindowContent = (order: MapOrder) => {
   return `
     <div class="p-3 max-w-xs">
-      <div class="flex w-full gap-2 absolute top-3 left-2">
+      <div class="flex  gap-2 absolute top-3 left-2">
       <a title="Order Detail" href="/new-edit-order/${
         order.id
       }" class="cursor-pointer font-semibold border border-gray-600 rounded-lg p-1 text-lg ">

@@ -110,7 +110,12 @@ const handleSearch = async (query: string | object) => {
             @change="handleSearchTypeChange(searchType)"
             class="px-3 py-3 text-sm font-medium bg-white bg-opacity-10 hover:bg-opacity-50 rounded-l-md transition-colors min-w-[100px] border-r-0 text-white h-full"
           >
-            <option v-for="type in searchTypeOptions" :key="type" :value="type">
+            <option
+              v-for="type in searchTypeOptions"
+              :key="type"
+              :value="type"
+              class="text-black"
+            >
               {{ t(`dashboard.header.search.${type}`) }}
             </option>
           </select>
@@ -174,7 +179,7 @@ const handleSearch = async (query: string | object) => {
     </div>
 
     <!-- Statistics Cards -->
-    <div class="w-full flex sm:flex-wrap lg:flex-nowrap gap-4 p-4">
+    <div class="w-full flex sm:flex-col lg:flex-row gap-4 p-4">
       <!-- Total Value Card -->
 
       <!-- Status Cards -->

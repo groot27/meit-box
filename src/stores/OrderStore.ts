@@ -108,6 +108,7 @@ export const useOrderStore = defineStore("order", () => {
   const generateProps = () => {
     let queryProps = {
       per_page: orderForMap.value ? 100 : pagination.itemsPerPage,
+      has_location: orderForMap.value,
       page: pagination.currentPage,
     };
     if (filters.search) {
@@ -151,8 +152,8 @@ export const useOrderStore = defineStore("order", () => {
           return (order = {
             id: order.id,
             locationAddress: order.order_location,
-            lat: order.latitude || getLocation(index).lat,
-            lng: order.longitude || getLocation(index).lng,
+            lat: Number(order.latitude),
+            lng: Number(order.longitude),
             status: order.status,
             statusColor: getStatusColor(order.status),
             customerName: order.customer_name,

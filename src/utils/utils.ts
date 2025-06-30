@@ -16,7 +16,12 @@ export const truncateWords = (str: string, words: number) => {
 export const createQueryString = (queryProps: Record<string, any>): string => {
   const queryStringParts: string[] = [];
   Object.entries(queryProps).forEach(([key, value]) => {
-    if (key === "page" || key === "per_page" || key.includes("sort")) {
+    if (
+      key === "page" ||
+      key === "has_location" ||
+      key === "per_page" ||
+      key.includes("sort")
+    ) {
       queryStringParts.push(`${key}=${value}`);
     } else if (key === "field" || key === "order") {
       queryStringParts.push(`sort[${key}]=${value}`);
