@@ -29,9 +29,9 @@ const { t } = useI18n();
         <!-- Create Order -->
         <router-link
           :to="`/add-order/`"
-          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex"
         >
-          +
+          <span>+</span>
           <span class="sm:hidden md:block">{{
             t("orders.header.createOrder")
           }}</span>

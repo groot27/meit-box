@@ -136,7 +136,7 @@ const handleShowMRemoveModal = (orderId = null) => {
             ]"
             :title="t('orders.table.filter')"
           >
-            <font-awesome-icon icon="fa-solid fa-list-check" class="w-4 h-4" />
+            <font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4" />
           </button>
           <button
             @click="handleInquiryFilter"
@@ -292,7 +292,7 @@ const handleShowMRemoveModal = (orderId = null) => {
 
                 <!-- Status -->
                 <span
-                  v-else-if="column.key === 'order_status_id'"
+                  v-else-if="column.key === 'order_status_id' && order.status"
                   :class="`inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-[${order.statusColor}]`"
                 >
                   {{ order[column.key] }}

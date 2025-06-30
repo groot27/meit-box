@@ -444,5 +444,6 @@ export default {
       productList: "Product List",
       noDate: "No Date",
     },
+    pinnedOrders: "Pinned Orders",
   },
 };

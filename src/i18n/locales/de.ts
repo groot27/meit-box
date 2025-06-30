@@ -397,7 +397,7 @@ export default {
   },
   dashboard: {
     header: {
-      title: "Dashboard",
+      title: "Startseite",
       search: {
         title: "Suchen",
         order: "Projekt",
@@ -443,5 +443,6 @@ export default {
       productList: "Produktliste",
       noDate: "Kein Datum",
     },
+    pinnedOrders: "Angepinnte Aufträge",
   },
 };

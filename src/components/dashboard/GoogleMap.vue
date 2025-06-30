@@ -199,6 +199,7 @@ const initializeMap = () => {
     streetViewControl: false,
     fullscreenControl: false,
     zoomControl: false,
+    gestureHandling: "cooperative",
     minZoom: 2,
     maxZoom: 18,
     // Restrict panning to prevent showing repeated world maps
