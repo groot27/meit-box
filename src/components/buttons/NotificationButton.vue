@@ -62,7 +62,7 @@ onMounted(() => {
     <!-- Notifications Dropdown -->
     <div
       v-if="showNotifications"
-      class="notifications-dropdown absolute right-0 mt-2 w-96 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-hidden"
+      class="notifications-dropdown absolute sm:translate-x-[-40%] md:translate-x-0 right-0 mt-2 w-96 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-hidden"
     >
       <!-- Dropdown Header -->
       <div
