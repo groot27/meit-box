@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import NotificationButton from "@/components/buttons/NotificationButton.vue";
+import CreateOrderButton from "@/components/buttons/CreateOrderButton.vue";
 
 const { t } = useI18n();
 </script>
@@ -27,15 +28,7 @@ const { t } = useI18n();
         </router-link>
 
         <!-- Create Order -->
-        <router-link
-          :to="`/add-order/`"
-          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex"
-        >
-          <span>+</span>
-          <span class="sm:hidden md:block">{{
-            t("orders.header.createOrder")
-          }}</span>
-        </router-link>
+        <CreateOrderButton />
       </div>
     </div>
   </header>

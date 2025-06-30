@@ -367,6 +367,12 @@ export const useOrderStore = defineStore("order", () => {
     URL.revokeObjectURL(url);
     globalStore.setLoadingApi(false);
   };
+  const create = async () => {
+    globalStore.setLoadingApi(true);
+    const res = await orderApi.create({ type: "json" });
+    globalStore.setLoadingApi(false);
+    return res.order.splited_number;
+  };
 
   watch(
     () => filters.orderStatus,
@@ -416,5 +422,6 @@ export const useOrderStore = defineStore("order", () => {
     removeOrder,
     exportTable,
     getStatusColor,
+    create,
   };
 });

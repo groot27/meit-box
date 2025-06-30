@@ -5,6 +5,7 @@ import { useDashboardStore } from "@/stores/DashboardStore";
 import AsyncSelect from "@/components/widgets/AsyncSelect.vue";
 import NotificationButton from "../buttons/NotificationButton.vue";
 import { useRouter } from "vue-router";
+import CreateOrderButton from "../buttons/CreateOrderButton.vue";
 
 const { t } = useI18n();
 const dashboardStore = useDashboardStore();
@@ -140,12 +141,7 @@ const handleSearch = async (query: string | object) => {
       <!-- Right side - Create Order Button -->
       <div class="flex items-center">
         <NotificationButton />
-        <router-link
-          :to="`/add-order/`"
-          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-        >
-          {{ t("orders.header.createOrder") }}
-        </router-link>
+        <CreateOrderButton />
       </div>
     </div>
 
