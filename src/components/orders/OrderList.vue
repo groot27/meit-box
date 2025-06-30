@@ -27,17 +27,17 @@ onMounted(async () => {
   >
     <OrderHeader />
 
-    <div class="flex-1 flex overflow-hidden relative min-h-screen">
+    <div class="flex-1 flex overflow-hidden relative h-screen">
       <top-bar-loading />
       <div
         :class="[
           'transition-all duration-300 ease-in-out overflow-hidden',
-          leftSideDisplay ? 'w-1/6' : 'w-0',
+          leftSideDisplay ? 'sm:w-full md:w-1/6' : 'w-0',
         ]"
       >
         <OrderFilters />
       </div>
-      <div :class="leftSideDisplay ? 'w-5/6' : 'w-full'">
+      <div :class="leftSideDisplay ? 'sm:w-0 md:w-5/6' : 'w-full'">
         <OrderTable />
       </div>
     </div>

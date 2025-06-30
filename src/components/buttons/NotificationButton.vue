@@ -153,7 +153,7 @@ onMounted(() => {
               d="M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 0 0-15 0v5h5l-5 5-5-5h5V7a9.5 9.5 0 0 1 19 0v10z"
             />
           </svg>
-          <p class="text-sm">{{ t("orders.notifications.empty") }}</p>
+          <p class="text-sm">{{ t("comon.notifications.empty") }}</p>
         </div>
       </div>
 

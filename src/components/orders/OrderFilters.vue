@@ -56,19 +56,22 @@ const handleContactPersonsSearch = async (contactPerson) => {
 const clearAllFilters = () => {
   orderStore.clearFilters();
 };
+const handleClose = () => {
+  orderStore.toggleLeftSideDisplay();
+};
 </script>
 
 <template>
   <div class="bg-white border-r border-gray-200 p-6 w-full h-full">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center justify-between mb-6 relative">
       <h2 class="text-lg font-medium text-gray-900">
         {{ t("orders.filters.title") }}
       </h2>
       <button
-        @click="clearAllFilters"
-        class="text-sm text-blue-600 hover:text-blue-800"
+        @click="handleClose"
+        class="absolute top-2 -right-2 sm:block md:hidden"
       >
-        {{ t("orders.filters.clear") }}
+        X
       </button>
     </div>
 
@@ -141,24 +144,6 @@ const clearAllFilters = () => {
           placeholder="Pick one or more"
           @update:model-value="handleFilterChange('orderStatus', $event)"
         />
-        <!-- <select
-          :value="filters.orderStatus"
-          @change="
-            handleFilterChange(
-              'orderStatus',
-              ($event.target as HTMLSelectElement).value
-            )
-          "
-          class="input-field"
-        >
-          <option
-            v-for="option in filtersData.statuses"
-            :key="option.key"
-            :value="option.value"
-          >
-            {{ option.value }}
-          </option>
-        </select> -->
       </div>
 
       <!-- Order Category -->
@@ -230,5 +215,11 @@ const clearAllFilters = () => {
         />
       </div>
     </div>
+    <button
+      @click="clearAllFilters"
+      class="text-sm text-black hover:bg-gray-400 w-full bg-gray-200 rounded-lg mt-4 py-2"
+    >
+      {{ t("orders.filters.clear") }}
+    </button>
   </div>
 </template>

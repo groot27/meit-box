@@ -31,7 +31,10 @@ const { t } = useI18n();
           :to="`/add-order/`"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
         >
-          {{ t("orders.header.createOrder") }}
+          +
+          <span class="sm:hidden md:block">{{
+            t("orders.header.createOrder")
+          }}</span>
         </router-link>
       </div>
     </div>

@@ -67,34 +67,8 @@ const handleTaskOrdersClick = () => {
   router.push(`/order-tasks/`);
 };
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-};
-
 const formatDate = (dateString: string) => {
   return format(new Date(dateString), "MMM d, yyyy");
-};
-
-const getStatusColor = (status: string) => {
-  const colors = {
-    pending: "bg-yellow-100 text-yellow-800",
-    "in-progress": "bg-blue-100 text-blue-800",
-    completed: "bg-green-100 text-green-800",
-    cancelled: "bg-red-100 text-red-800",
-  };
-  return colors[status] || "bg-gray-100 text-gray-800";
-};
-
-const getPriorityColor = (priority: string) => {
-  const colors = {
-    low: "bg-gray-100 text-gray-800",
-    medium: "bg-yellow-100 text-yellow-800",
-    high: "bg-red-100 text-red-800",
-  };
-  return colors[priority] || "bg-gray-100 text-gray-800";
 };
 
 // Calculate visible page numbers for pagination
@@ -192,9 +166,10 @@ const handleShowMRemoveModal = (orderId = null) => {
             @click="handleExport"
             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex gap-2 items-center"
           >
-            <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" />{{
+            <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" />
+            <span class="sm:hidden md:block">{{
               t("orders.table.export")
-            }}
+            }}</span>
           </button>
 
           <!-- Column Selector -->
@@ -309,7 +284,7 @@ const handleShowMRemoveModal = (orderId = null) => {
               >
                 <!-- Order Number -->
                 <span
-                  v-if="column.key === 'orderNumber'"
+                  v-if="column.key === 'order_number'"
                   class="font-medium text-blue-600 hover:text-blue-800 cursor-pointer truncate block"
                 >
                   {{ order[column.key] }}
@@ -317,69 +292,11 @@ const handleShowMRemoveModal = (orderId = null) => {
 
                 <!-- Status -->
                 <span
-                  v-else-if="column.key === 'orderStatus'"
-                  class="inline-flex px-2 py-1 text-sm font-semibold rounded-full whitespace-nowrap"
-                  :class="getStatusColor(order[column.key])"
+                  v-else-if="column.key === 'order_status_id'"
+                  :class="`inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-[${order.statusColor}]`"
                 >
-                  {{ t(`orders.status.${order[column.key]}`) }}
+                  {{ order[column.key] }}
                 </span>
-
-                <!-- Priority -->
-                <span
-                  v-else-if="column.key === 'priority'"
-                  class="inline-flex px-2 py-1 text-sm font-semibold rounded-full whitespace-nowrap"
-                  :class="getPriorityColor(order[column.key])"
-                >
-                  {{ t(`orders.priority.${order[column.key]}`) }}
-                </span>
-
-                <!-- Total Amount -->
-                <span
-                  v-else-if="column.key === 'totalAmount'"
-                  class="font-medium text-gray-900 whitespace-nowrap"
-                >
-                  {{ formatCurrency(order[column.key]) }}
-                </span>
-
-                <!-- Dates -->
-                <span
-                  v-else-if="
-                    column.key === 'startDate' ||
-                    column.key === 'endDate' ||
-                    column.key === 'createdAt' ||
-                    column.key === 'updatedAt'
-                  "
-                  class="text-gray-500 whitespace-nowrap"
-                >
-                  {{ formatDate(order[column.key]) }}
-                </span>
-
-                <!-- Progress -->
-                <div
-                  v-else-if="column.key === 'progress'"
-                  class="flex items-center space-x-2"
-                >
-                  <div class="flex-1 bg-gray-200 rounded-full h-2 min-w-0">
-                    <div
-                      class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      :style="{ width: `${order[column.key]}%` }"
-                    ></div>
-                  </div>
-                  <span
-                    class="text-xs text-gray-500 whitespace-nowrap flex-shrink-0"
-                    >{{ order[column.key] }}%</span
-                  >
-                </div>
-
-                <!-- Description -->
-                <div
-                  v-else-if="column.key === 'description'"
-                  class="text-gray-900"
-                >
-                  <span class="block truncate" :title="order[column.key]">
-                    {{ order[column.key] }}
-                  </span>
-                </div>
 
                 <!-- Default -->
                 <span
