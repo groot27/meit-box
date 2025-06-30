@@ -46,10 +46,12 @@ const handleRedirect = (option) => {
   debugger;
 };
 const handleSearch = async (query: string | object) => {
-  searchLoading.value = true;
-  // Simulate API call
-  await dashboardStore.fetchHeaderSearch(searchType.value, query);
-  searchLoading.value = false;
+  if (query) {
+    searchLoading.value = true;
+    // Simulate API call
+    await dashboardStore.fetchHeaderSearch(searchType.value, query);
+    searchLoading.value = false;
+  }
 };
 </script>
 
