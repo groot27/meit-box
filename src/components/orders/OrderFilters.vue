@@ -62,7 +62,9 @@ const handleClose = () => {
 </script>
 
 <template>
-  <div class="bg-white border-r border-gray-200 p-6 w-full h-full">
+  <div
+    class="bg-white border-r border-gray-200 p-6 w-full h-full overflow-y-auto"
+  >
     <div class="flex items-center justify-between mb-6 relative">
       <h2 class="text-lg font-medium text-gray-900">
         {{ t("orders.filters.title") }}
@@ -141,7 +143,7 @@ const handleClose = () => {
           :options="filtersData.statuses"
           :loading="false"
           :isMultiple="true"
-          placeholder="Pick one or more"
+          :placeholder="t('orders.filters.orderStatus')"
           @update:model-value="handleFilterChange('orderStatus', $event)"
         />
       </div>
@@ -151,24 +153,13 @@ const handleClose = () => {
         <label class="block text-sm font-medium text-gray-700 mb-2">
           {{ t("orders.filters.orderCategory") }}
         </label>
-        <select
-          :value="filters.orderCategory"
-          @change="
-            handleFilterChange(
-              'orderCategory',
-              ($event.target as HTMLSelectElement).value
-            )
-          "
-          class="input-field"
-        >
-          <option
-            v-for="option in filtersData.categories"
-            :key="option.key"
-            :value="option.key"
-          >
-            {{ option.value }}
-          </option>
-        </select>
+        <async-select
+          :model-value="filters.orderCategory"
+          :options="filtersData.categories"
+          :placeholder="t('orders.filters.orderCategory')"
+          :loading="false"
+          @update:model-value="handleFilterChange('orderCategory', $event)"
+        />
       </div>
 
       <!-- Project Manager -->

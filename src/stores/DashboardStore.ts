@@ -125,7 +125,6 @@ export const useDashboardStore = defineStore("dashboard", () => {
   // Actions
   const toggleMoreOptionVisiblity = (optionKey: string) => {
     moreOptions[optionKey].visible = !moreOptions[optionKey].visible;
-    debugger;
     localStorage.setItem("moreOptions", JSON.stringify(moreOptions));
   };
   const setFilter = (key: keyof MapFilters, value: any) => {

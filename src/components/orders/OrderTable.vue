@@ -67,9 +67,25 @@ const handleTaskOrdersClick = () => {
   router.push(`/order-tasks/`);
 };
 
-const formatDate = (dateString: string) => {
-  return format(new Date(dateString), "MMM d, yyyy");
+const handleClickOutside = (event: Event) => {
+  const target = event.target as HTMLElement;
+  const dropdown = document.querySelector(".culomn-selector-dropdown");
+  const button = document.querySelector(".culomn-selector-button");
+
+  if (
+    dropdown &&
+    button &&
+    !dropdown.contains(target) &&
+    !button.contains(target)
+  ) {
+    showColumnSelector.value = false;
+  }
 };
+
+// Add event listener for clicking outside
+if (typeof window !== "undefined") {
+  document.addEventListener("click", handleClickOutside);
+}
 
 // Calculate visible page numbers for pagination
 const visiblePages = computed(() => {
@@ -146,12 +162,14 @@ const handleShowMRemoveModal = (orderId = null) => {
                 ? 'text-green-500 border-green-500'
                 : 'text-gray-600 border-gray-600',
             ]"
+            title="inquiry +offer outstanding"
           >
             <font-awesome-icon icon="fa-solid fa-file-lines" class="w-4 h-4" />
           </button>
           <button
             @click="handleTaskOrdersClick"
             class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+            title="Offer Request"
           >
             <font-awesome-icon
               icon="fa-solid fa-file-circle-plus"
@@ -176,7 +194,7 @@ const handleShowMRemoveModal = (orderId = null) => {
           <div class="relative">
             <button
               @click="showColumnSelector = !showColumnSelector"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2"
+              class="culomn-selector-button px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2"
             >
               <span
                 >{{ t("orders.table.columns") }}
@@ -192,7 +210,7 @@ const handleShowMRemoveModal = (orderId = null) => {
             <!-- Column Selector Dropdown -->
             <div
               v-if="showColumnSelector"
-              class="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-80 overflow-y-auto"
+              class="culomn-selector-dropdown absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-80 overflow-y-auto"
             >
               <div class="p-4">
                 <h3 class="text-sm font-medium text-gray-900 mb-3">

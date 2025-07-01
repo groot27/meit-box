@@ -13,6 +13,7 @@ import { ResponseType } from "@/types/apiRequest";
 import { createQueryString } from "@/utils/utils";
 import { getLocation, getOrderField } from "@/utils/OrderUtils";
 import { useRouter } from "vue-router";
+import { format } from "date-fns";
 
 export const useOrderStore = defineStore("order", () => {
   const globalStore = useGlobalStore();
@@ -114,8 +115,10 @@ export const useOrderStore = defineStore("order", () => {
     if (filters.search) {
       queryProps["search"] = filters.search;
     }
-    if (filters.startDate && filters.endDate) {
-      queryProps["date_between"] = `${filters.startDate},${filters.endDate}`;
+    if (filters.startDate || filters.endDate) {
+      queryProps["date_between"] = `${
+        filters.startDate || format(new Date(1970), "yyyy-MM-dd")
+      },${filters.endDate || format(new Date(), "yyyy-MM-dd")}`;
     }
     if (filters.orderCategory) {
       queryProps["category"] = filters.orderCategory;
