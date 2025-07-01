@@ -34,6 +34,8 @@ const tableColumnsCount = computed(() => {
 const leftSideDisplay = computed(() => orderStore.leftSideDisplay);
 
 const itemsPerPageOptions = [10, 20, 30, 40, 50];
+const selectedOrderIds = ref([]);
+const selectAll = ref(false);
 
 const handleSort = (field: string) => {
   orderStore.setSort(field as any);
@@ -122,14 +124,50 @@ const handleCopy = (id) => {
 const handleEdit = (id) => {
   router.push(`/new-edit-order/${id}`);
 };
+const handleSingleRemove = (orderId: number) => {
+  selectedOrderIds.value.push(orderId);
+  handleShowMRemoveModal();
+};
 const handleRemove = () => {
   showRemoveModal.value = !showRemoveModal.value;
-  orderStore.removeOrder(selectedOrderId.value);
-  selectedOrderId.value = null;
+  if (selectedOrderIds.value) {
+    orderStore.removeMultiOrder(selectedOrderIds.value);
+    selectedOrderIds.value = [];
+  }
 };
-const handleShowMRemoveModal = (orderId = null) => {
-  selectedOrderId.value = orderId;
+const handleShowMRemoveModal = () => {
   showRemoveModal.value = !showRemoveModal.value;
+};
+
+watch(
+  () => orders,
+  () => {
+    selectedOrderIds.value = [];
+    selectAll.value = false;
+  }
+);
+
+// Handle individual selection
+const toggleOrderSelection = (orderId: number) => {
+  const index = selectedOrderIds.value.indexOf(orderId);
+  if (index === -1) {
+    selectedOrderIds.value.push(orderId);
+  } else {
+    selectedOrderIds.value.splice(index, 1);
+  }
+  // Adjust selectAll if needed
+  selectAll.value = selectedOrderIds.value.length === orders.length;
+};
+
+// Handle select all
+const toggleSelectAll = () => {
+  if (selectAll.value) {
+    selectedOrderIds.value = [];
+    selectAll.value = false;
+  } else {
+    selectedOrderIds.value = orders.value.map((order) => order.id);
+    selectAll.value = true;
+  }
 };
 </script>
 
@@ -180,6 +218,16 @@ const handleShowMRemoveModal = (orderId = null) => {
 
         <!-- Right side - Export and Column selector -->
         <div class="flex items-center space-x-4">
+          <button
+            v-show="selectedOrderIds.length"
+            @click="handleShowMRemoveModal"
+            class="px-4 py-2 text-sm font-medium text-red-500 bg-red-100 rounded-md hover:bg-red-200 transition-colors flex gap-2 items-center"
+          >
+            <font-awesome-icon icon="fa-solid fa-trash" />
+            <span class="sm:hidden md:block">{{
+              t("orders.table.delete")
+            }}</span>
+          </button>
           <button
             @click="handleExport"
             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex gap-2 items-center"
@@ -246,6 +294,15 @@ const handleShowMRemoveModal = (orderId = null) => {
         <table class="w-full divide-y divide-gray-200 table-fixed min-w-full">
           <thead class="bg-gray-50 sticky top-0 z-10">
             <tr>
+              <th class="w-12 p-2 border-r border-gray-200" key="select">
+                <input
+                  class="mx-2"
+                  type="checkbox"
+                  title="Select All"
+                  :checked="selectAll"
+                  @change="toggleSelectAll"
+                />
+              </th>
               <th
                 v-for="column in visibleColumns"
                 :key="column.key"
@@ -295,6 +352,15 @@ const handleShowMRemoveModal = (orderId = null) => {
           </thead>
           <tbody class="bg-white divide-y divide-gray-200" v-if="orders">
             <tr v-for="order in orders" class="hover:bg-gray-50 transition-all">
+              <td class="w-12 p-2 border-r border-gray-200">
+                <input
+                  class="mx-2"
+                  type="checkbox"
+                  title="Select"
+                  :checked="selectedOrderIds.includes(order.id)"
+                  @change="() => toggleOrderSelection(order.id)"
+                />
+              </td>
               <td
                 v-for="column in visibleColumns"
                 :key="column.key"
@@ -349,7 +415,7 @@ const handleShowMRemoveModal = (orderId = null) => {
                   <font-awesome-icon :icon="['fas', 'pencil']" />
                 </button>
                 <button
-                  @click="handleShowMRemoveModal(order.id)"
+                  @click="handleSingleRemove(order.id)"
                   class="p-2 rounded-lg bg-red-200 text-red-500"
                 >
                   <font-awesome-icon :icon="['fas', 'trash']" />

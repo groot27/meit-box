@@ -85,6 +85,7 @@ export default {
       print: "Print",
       printPlus: "Print Plus",
       export: "Export",
+      delete: "Delete",
       columns: "Order#",
       selectColumns: "Select Columns",
       showing: "Showing",

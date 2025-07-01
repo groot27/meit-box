@@ -85,6 +85,7 @@ export default {
       print: "Drucken",
       printPlus: "Drucken Plus",
       export: "Exportieren",
+      delete: "löschen",
       columns: "Auftrag#",
       selectColumns: "Spalten auswählen",
       showing: "Zeige",

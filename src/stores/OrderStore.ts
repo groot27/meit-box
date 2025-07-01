@@ -341,11 +341,14 @@ export const useOrderStore = defineStore("order", () => {
       }
     });
   };
-  const removeOrder = async (orderId) => {
+  const removeMultiOrder = async (orderIds: any) => {
     globalStore.setLoadingApi(true);
     const res = await orderApi.canRemove({});
     if (res && res["can_delete"]) {
-      router.push(`/delete-order/${orderId}`);
+      const onSuccess = () => {
+        loadOrders();
+      };
+      await orderApi.multiRemove({ ids: orderIds }, { onSuccess });
     }
     globalStore.setLoadingApi(false);
   };
@@ -422,7 +425,7 @@ export const useOrderStore = defineStore("order", () => {
     togglePinOrder,
     fetchCustomers,
     fetchContactPersons,
-    removeOrder,
+    removeMultiOrder,
     exportTable,
     getStatusColor,
     create,

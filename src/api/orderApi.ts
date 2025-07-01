@@ -80,9 +80,9 @@ export const orderApi = {
       throw err;
     }
   },
-  removeOne: async (data: any, callbacks?: Callbacks) => {
+  multiRemove: async (data: any, callbacks?: Callbacks) => {
     try {
-      const res = await api.post(`/api/toggle_is_pinned`, data);
+      const res = await api.post(`/api/delete-order-bulk`, data);
       callbacks?.onSuccess?.(res);
       return res;
     } catch (err) {
