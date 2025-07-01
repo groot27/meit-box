@@ -17,10 +17,11 @@ const customerSearchLoading = ref(false);
 const contactPersonSearchLoading = ref(false);
 
 const handleFilterChange = (key: string, value: string | object) => {
+  debugger;
   if (key === "startDate" || key === "endDate") {
     orderStore.setFilter(
       key as any,
-      format(new Date(value as string), "yyyy-MM-dd")
+      value ? format(new Date(value as string), "yyyy-MM-dd") : ""
     );
   } else if (key === "search") {
     onChange(value as string);

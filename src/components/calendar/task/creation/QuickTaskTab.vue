@@ -47,6 +47,7 @@ const handleContinue = () => {
   if (isValid.value) {
     emit("continueToEdit", {
       date: format(porps.date, "yyyy-MM-dd"),
+      description: description.value,
     });
   }
 };

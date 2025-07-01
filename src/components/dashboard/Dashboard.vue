@@ -9,6 +9,7 @@ import { useOrderStore } from "@/stores/OrderStore";
 import OrderFilters from "../orders/OrderFilters.vue";
 import { useGlobalStore } from "@/stores/index";
 import { useDashboardStore } from "@/stores/DashboardStore";
+import HelpBox from "../widgets/HelpBox.vue";
 
 const orderStore = useOrderStore();
 const dashboardStore = useDashboardStore();
@@ -64,5 +65,6 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+    <HelpBox />
   </div>
 </template>

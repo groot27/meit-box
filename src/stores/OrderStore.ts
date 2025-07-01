@@ -264,17 +264,8 @@ export const useOrderStore = defineStore("order", () => {
 
   const setFilter = (key: keyof OrderFilters, value: string | object) => {
     filters[key] = value;
-    if (key === "startDate" || key === "endDate") {
-      if (filters.startDate && filters.endDate) {
-        pagination.currentPage = 1;
-        loadOrders();
-      } else {
-        return;
-      }
-    } else {
-      pagination.currentPage = 1;
-      loadOrders();
-    }
+    pagination.currentPage = 1;
+    loadOrders();
   };
   const setInquiryFilter = () => {
     if (inquiryFilterSelected.value) {

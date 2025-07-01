@@ -123,7 +123,6 @@ export const useTaskStore = defineStore("task", () => {
     }
   }
   function addAssignedResource(taskId: number, type: string, rowIndex: number) {
-    debugger;
     let updatedTask = tasks.value.find((task) => {
       if (task.id == taskId) {
         return task;
@@ -529,7 +528,8 @@ export const useTaskStore = defineStore("task", () => {
       },
       details: {
         title: selectedTaskTemplate.value.task_title,
-        description: selectedTaskTemplate.value.task_description,
+        description:
+          taskData.description || selectedTaskTemplate.value.task_description,
         date: taskData.date,
         startTime: "00:00",
         endTime: "00:00",
@@ -617,7 +617,9 @@ export const useTaskStore = defineStore("task", () => {
         {
           details: {
             title: selectedTaskTemplate.value.task_title,
-            description: selectedTaskTemplate.value.task_description,
+            description:
+              taskData.description ||
+              selectedTaskTemplate.value.task_description,
             date: taskData.date,
             startTime: "00:00",
             endTime: "00:00",
@@ -704,7 +706,8 @@ export const useTaskStore = defineStore("task", () => {
     const tempTask: TaskDisplayType = {
       id,
       title: selectedTaskTemplate.value.task_title,
-      description: selectedTaskTemplate.value.task_description,
+      description:
+        taskData.description || selectedTaskTemplate.value.task_description,
       startTime: "00:00",
       endTime: "00:00",
       date: taskData.date,

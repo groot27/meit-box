@@ -447,4 +447,11 @@ export default {
     },
     pinnedOrders: "Pinned Orders",
   },
+  help: {
+    title: "Get Help",
+    call: "Get a call",
+    chat: "Chat",
+    bug: "Report Bog",
+    support: "Support call",
+  },
 };

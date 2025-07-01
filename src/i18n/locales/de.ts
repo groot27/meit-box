@@ -446,4 +446,11 @@ export default {
     },
     pinnedOrders: "Angepinnte Aufträge",
   },
+  help: {
+    title: "Hilfe erhalten",
+    call: "Anruf erhalten",
+    chat: "Chat",
+    bug: "Fehler melden",
+    support: "Support anrufen",
+  },
 };

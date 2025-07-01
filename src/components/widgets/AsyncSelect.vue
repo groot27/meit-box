@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
-import Multiselect from "vue-multiselect";
+import Multiselect, { multiselectMixin } from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 
 const searchValue = ref("");
@@ -16,6 +16,7 @@ const props = withDefaults(
     placeholder?: string | null | undefined;
     loading: boolean | null | undefined;
     isMultiple?: boolean;
+    headerStyle?: boolean;
   }>(),
   {
     isMultiple: false,
@@ -102,6 +103,10 @@ watch(internalValue, (val) => {
 .multiselect__option--highlight::after {
   content: none !important;
 }
+
+.my-multiselect--header .multiselect__tags {
+  border-radius: 0 5px 5px 0;
+}
 </style>
 <template>
   <Multiselect
@@ -117,6 +122,6 @@ watch(internalValue, (val) => {
     :label="labelKey"
     :track-by="trackByKey"
     @search-change="onChange"
-    class="class"
+    :class="headerStyle ? 'my-multiselect--header' : 'w-full'"
   />
 </template>

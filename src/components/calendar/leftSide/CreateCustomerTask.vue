@@ -24,7 +24,11 @@ const fetchCustomers = async (query) => {
   customers.value = res.results.map((customer) => {
     return {
       key: customer.id,
-      value: `${customer.text}, ${customer.address}, ${customer.house_number}, ${customer.zip_code}`,
+      value: `${customer.text ? customer.text + ", " : ""} ${
+        customer.address ? customer.address + ", " : ""
+      } ${customer.house_number ? customer.house_number + ", " : ""} ${
+        customer.zip_code ? customer.zip_code : ""
+      }`,
     };
   });
 

@@ -45,7 +45,6 @@ const handleRedirect = (option) => {
       router.push(`/new-edit-order/${option.key}`);
       break;
   }
-  debugger;
 };
 const handleSearch = async (query: string | object) => {
   if (query) {
@@ -136,7 +135,7 @@ const handleSearch = async (query: string | object) => {
               :loading="searchLoading"
               @search="handleSearch"
               @update:model-value="handleRedirect($event)"
-              class="bg-black bg-opacity-10 hover:bg-opacity-50"
+              :headerStyle="true"
             />
           </div>
         </div>
@@ -174,7 +173,7 @@ const handleSearch = async (query: string | object) => {
           :loading="searchLoading"
           @search="handleSearch"
           @update:model-value="handleRedirect($event)"
-          class="bg-black bg-opacity-10 hover:bg-opacity-50"
+          :headerStyle="true"
         />
       </div>
     </div>

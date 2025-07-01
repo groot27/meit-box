@@ -49,6 +49,10 @@ export const useDashboardStore = defineStore("dashboard", () => {
         title: "Map",
         visible: true,
       },
+      help: {
+        title: "Help",
+        visible: true,
+      },
     }
   );
   const dashboardWidgets = reactive<any>({
@@ -124,8 +128,12 @@ export const useDashboardStore = defineStore("dashboard", () => {
 
   // Actions
   const toggleMoreOptionVisiblity = (optionKey: string) => {
-    moreOptions[optionKey].visible = !moreOptions[optionKey].visible;
-    localStorage.setItem("moreOptions", JSON.stringify(moreOptions));
+    if (optionKey === "help") {
+      globalStore.setDisplayHelper(true);
+    } else {
+      moreOptions[optionKey].visible = !moreOptions[optionKey].visible;
+      localStorage.setItem("moreOptions", JSON.stringify(moreOptions));
+    }
   };
   const setFilter = (key: keyof MapFilters, value: any) => {
     if (key === "dateRange") {
