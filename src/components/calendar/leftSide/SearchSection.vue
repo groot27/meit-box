@@ -34,7 +34,7 @@ const searchOptions = [
   <div class="flex items-center my-2">
     <select
       v-model="selectedKey"
-      class="h-10 rounded-l border-r-0 border-gray-300 bg-gray-50 text-sm"
+      class="w-28 h-10 rounded-l border-r-0 border-gray-300 bg-gray-50 text-sm"
     >
       <option
         v-for="option in searchOptions"

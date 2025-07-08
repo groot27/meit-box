@@ -152,23 +152,16 @@ const closeTaskEditSidebar = () => {
 };
 
 const handleTaskCreate = (taskData: any) => {
-  if (selectedDate.value) {
-    taskStore.createTask({
-      ...taskData,
-      date: selectedDate.value,
-    });
-    closeTaskModal();
-    closeTaskEditSidebar();
-  }
+  taskStore.createTask();
+  closeTaskModal();
+  closeTaskEditSidebar();
 };
 const handleQuickTaskCreate = async () => {
   if (selectedDate.value) {
     await taskStore.continueToCreate({
       date: format(selectedDate.value, "yyyy-MM-dd"),
     });
-    taskStore.createTask({
-      date: selectedDate.value,
-    });
+    taskStore.createTask();
     closeTaskModal();
     closeTaskEditSidebar();
   }
@@ -201,8 +194,8 @@ const handleTaskEdit = async (task: Task) => {
   }
 };
 
-const handleTaskUpdate = async (updatedTask: Task) => {
-  await taskStore.updateTask(String(route.params.taskId), updatedTask);
+const handleTaskUpdate = async () => {
+  await taskStore.updateTask(Number(route.params.taskId));
   closeTaskEditSidebar();
 };
 

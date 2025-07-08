@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "types": ["vue3-toastify/global"],
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./src/*"],

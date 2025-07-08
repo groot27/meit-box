@@ -14,11 +14,13 @@ import { useRoute, useRouter } from "vue-router";
 import { taskApi } from "@/api/taskApi";
 import { useGlobalStore } from "@/stores/index";
 import { addDays, format } from "date-fns";
+import { useToast } from "vue-toastification";
 const taskStore = useTaskStore();
 const globalStore = useGlobalStore();
 const calendarStore = useCalendarStore();
 
 const { t } = useI18n();
+const toast = useToast();
 
 const props = defineProps<{
   show: boolean;
@@ -26,8 +28,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "close"): void;
-  (e: "update", task: Task): void;
-  (e: "create", task: Task): void;
+  (e: "update"): void;
+  (e: "create"): void;
 }>();
 
 const activeTab = ref("project");
@@ -43,10 +45,14 @@ const handleSubmit = () => {
   if (!singleTask) return;
   if (route.params.taskId) {
     console.log("🚀 ~ handleSubmit ~ update");
-    emit("update", singleTask);
+    emit("update");
   } else {
     console.log("🚀 ~ handleSubmit ~ create");
-    emit("create", singleTask);
+    if (!singleTask.value.details.title) {
+      toast.warning("please fill task title");
+    } else {
+      emit("create");
+    }
   }
 };
 const addRelatedTasks = () => {

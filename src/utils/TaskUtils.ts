@@ -29,9 +29,15 @@ export const generateTaskCreateBody = (
   selectedOrderDetails
 ) => {
   return {
-    task_template_value: selectedTaskTemplate.value.task_title,
-    task_template_id: selectedTaskTemplate.value.id,
-    order_id: selectedOrderDetails.value.id,
+    task_template_value: selectedTaskTemplate.value
+      ? selectedTaskTemplate.value.task_title
+      : "",
+    task_template_id: selectedTaskTemplate.value
+      ? selectedTaskTemplate.value.id
+      : "",
+    order_id: selectedOrderDetails.value
+      ? selectedOrderDetails.value.id
+      : selectedTask.value.orderDetails.id,
     task_title: selectedTask.value.details.title,
     permission: selectedTask.value.details.permission,
     date_type: "date",

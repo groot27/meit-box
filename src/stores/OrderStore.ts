@@ -368,7 +368,7 @@ export const useOrderStore = defineStore("order", () => {
     globalStore.setLoadingApi(true);
     const res = await orderApi.create({ type: "json" });
     globalStore.setLoadingApi(false);
-    return res.order.splited_number;
+    return res.id;
   };
 
   watch(

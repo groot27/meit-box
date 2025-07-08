@@ -13,7 +13,7 @@ const envKeys = Object.keys(env || {}).reduce((prev, next) => {
   prev[`process.env.${next}`] = JSON.stringify(env[next]);
   return prev;
 }, {});
-
+const TerserPlugin = require("terser-webpack-plugin");
 // Base shared config
 const createBaseConfig = ({
   name,
@@ -35,6 +35,21 @@ const createBaseConfig = ({
   },
   optimization: {
     minimize: true, // <-- Optional; true by default in production
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          mangle: {
+            // keep function names to avoid breaking named exports
+            keep_fnames: true,
+          },
+          format: {
+            // avoid arrow functions for compatibility
+            comments: false,
+          },
+        },
+        extractComments: false,
+      }),
+    ],
   },
   resolve: {
     alias: {
